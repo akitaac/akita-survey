@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Akita — Site Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#1a2e4a; --navy2:#142238; --sky:#2e7fbf; --orange:#E8612A;
+  --light:#C5E8F5; --white:#fff; --grey:#f2f5f9; --mid:#7a8fa8; --border:#dde3ec;
+  --gbg:#E8F5E9; --gtc:#1B5E20; --abg:#FFF8E1; --atc:#BF6000;
+  --bbg:#E3F2FD; --btc:#0D47A1; --yin:#FFFDE7; --olt:#FDE9DF;
+  --purple:#6A1B9A; --pbg:#F3E5F5;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Barlow',sans-serif;background:var(--grey);color:var(--navy);min-height:100vh;padding-bottom:40px}
+
+/* Header */
+.hdr{background:var(--navy);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.hdr img{height:40px;width:40px;object-fit:contain;border-radius:8px}
+.hdr h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fff;line-height:1}
+.hdr p{font-size:11px;color:var(--light);margin-top:2px}
+.hdr-badge{margin-left:auto;background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:4px 10px;border-radius:20px;white-space:nowrap}
+
+/* Progress */
+.prog{background:var(--navy2);padding:10px 16px 12px}
+.prog-dots{display:flex;gap:6px;justify-content:center}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .25s}
+.dot.done{background:var(--sky)}.dot.active{background:var(--orange);transform:scale(1.4)}
+.prog-lbl{font-size:11px;color:rgba(255,255,255,.45);text-align:center;margin-top:6px}
+.prog-lbl b{color:var(--light)}
+
+/* Pages */
+.page{display:none;padding:18px 14px 32px;animation:fu .28s ease}
+.page.on{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Cards */
+.card{background:#fff;border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 2px 16px rgba(26,46,74,.09)}
+.card-hdr{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ci{width:28px;height:28px;background:var(--navy);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+/* Fields */
+.field{margin-bottom:13px}.field:last-child{margin-bottom:0}
+label.lbl{display:block;font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+input,select,textarea{width:100%;padding:12px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:16px;color:var(--navy);background:#fff;outline:none;transition:border-color .18s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--sky)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9bb0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.err input,.err select{border-color:#e74c3c}
+.errmsg{color:#e74c3c;font-size:11px;margin-top:4px;display:none}
+.err .errmsg{display:block}
+.hint{font-size:11px;color:var(--mid);margin-top:5px;line-height:1.4}
+
+/* Pill selectors */
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.pill{padding:7px 12px;border:1.5px solid var(--border);border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--mid);background:#fff;user-select:none;transition:all .15s}
+.pill.on{border-color:var(--sky);background:#e8f4fb;color:var(--navy);font-weight:600}
+.pill.on::before{content:'✓ ';font-size:11px;color:var(--sky)}
+
+/* Room card */
+.room-card{background:var(--grey);border:1.5px solid var(--border);border-radius:10px;padding:15px;margin-bottom:12px}
+.room-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.room-num{background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;padding:3px 11px;border-radius:20px}
+.rm-btn{background:none;border:1.5px solid #ddd;border-radius:6px;padding:4px 10px;font-size:12px;color:#999;cursor:pointer}
+.install-section{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+.install-lbl{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+
+/* kW result */
+.kw-result{display:flex;align-items:center;gap:8px;background:#e8f4fb;border:1px solid var(--sky);border-radius:8px;padding:9px 13px;margin-top:10px}
+.kw-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--sky)}
+.kw-info{font-size:12px;color:var(--navy);line-height:1.4}
+.kw-info span{color:var(--mid);font-size:11px;display:block;margin-top:1px}
+
+/* Pipe row */
+.pipe-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pipe-row .lbl2{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.pipe-row input{width:72px;text-align:center;font-size:15px;padding:9px 10px}
+.pipe-note{font-size:12px;color:var(--orange);font-weight:600}
+
+/* Add item button */
+.btn-add{width:100%;padding:13px;border:2px dashed var(--border);border-radius:10px;background:#fff;color:var(--sky);font-family:'Barlow',sans-serif;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;transition:all .18s}
+
+/* Addon row */
+.addon-row{display:grid;grid-template-columns:1fr 100px 38px;gap:8px;align-items:center;margin-bottom:9px}
+.addon-row input{font-size:14px;padding:10px 12px}
+.pw{position:relative}.pw::before{content:'£';position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--mid);font-size:14px;pointer-events:none}
+.pw input{padding-left:22px}
+.del-btn{background:none;border:1.5px solid #e0e0e0;border-radius:6px;width:36px;height:36px;cursor:pointer;color:#bbb;font-size:16px;display:flex;align-items:center;justify-content:center}
+
+/* Tier display */
+.tier-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.tier-card{border:2px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;background:#fff}
+.tier-badge{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.tb-basic{background:var(--gbg);color:var(--gtc)}.tc-basic{border-color:#c8e6c9}
+.tb-mid{background:var(--abg);color:var(--atc)}.tc-mid{border-color:#ffe082}
+.tb-prem{background:var(--bbg);color:var(--btc)}.tc-prem{border-color:#90caf9}
+.tier-price{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;color:var(--navy)}
+.tier-sub{font-size:10px;color:var(--mid);margin-top:3px;line-height:1.3}
+
+/* Finance */
+.fin-pill{display:flex;align-items:center;justify-content:space-between;background:var(--grey);border-radius:8px;padding:9px 12px;margin-top:7px}
+.fin-pill span:first-child{font-size:12px;color:var(--mid)}
+.fin-pill span:last-child{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--orange)}
+
+/* Total bar */
+.total-bar{background:var(--navy);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.tb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;color:rgba(255,255,255,.65)}
+.tb-row b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:#fff}
+
+/* Buttons */
+.btn{width:100%;padding:15px;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:active{background:#d04e1f}
+.btn-ghost{background:transparent;color:var(--navy);border:2px solid var(--border);font-size:15px;margin-top:10px}
+
+/* Review */
+.q-hdr{background:var(--navy);border-radius:12px 12px 0 0;padding:20px;margin:-18px -18px 18px}
+.q-hdr h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;color:#fff}
+.q-hdr p{font-size:12px;color:var(--light);margin-top:3px}
+.q-ref{display:inline-block;background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:8px;font-family:'Barlow Condensed',sans-serif}
+.rv-room{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.rv-room:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.rv-room-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.rv-room-hdr strong{font-size:14px}.rv-room-hdr span{font-size:11px;color:var(--mid)}
+.tline{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;align-items:center}
+.grand-total{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;padding-top:12px;border-top:2px solid var(--navy);margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.grand-line{display:flex;justify-content:space-between;align-items:center}
+.grand-line span:last-child{color:var(--orange)}
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* Survey summary box */
+.survey-box{background:var(--grey);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.8}
+.survey-box strong{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
+.survey-box span{color:var(--mid)}
+
+/* Status */
+.status-sending{text-align:center;padding:28px;color:var(--mid)}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-ok{text-align:center;padding:28px}
+.tick{width:60px;height:60px;background:#1B8A4A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.status-ok h3{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:6px}
+.status-ok p{font-size:13px;color:var(--mid);line-height:1.5}
+
+.page-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:var(--navy);margin-bottom:3px}
+.page-sub{font-size:13px;color:var(--mid);margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <img src="https://cdn.shopify.com/s/files/1/0906/1780/7181/files/akita-logo-cartoon-husky-sunglasses-coat.png?v=1773353080" alt="Akita">
+  <div><h1>AKITA AIR CONDITIONING</h1><p>Site Survey Quote Tool</p></div>
+  <span class="hdr-badge">On-Site</span>
+</header>
+
+<div class="prog">
+  <div class="prog-dots">
+    <div class="dot active" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
+  <div class="prog-lbl" id="plbl"><b>Customer Details</b></div>
+</div>
+
+<!-- PAGE 0 — Customer Details -->
+<div class="page on" id="pjt">
+  <div style="text-align:center;padding:40px 20px 20px">
+    <div style="font-size:48px;margin-bottom:12px">❄️</div>
+    <p class="page-title" style="margin-bottom:6px">New Quote</p>
+    <p class="page-sub" style="margin-bottom:32px">What type of installation?</p>
+
+    <div onclick="setJobType('single')" style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 18px;margin-bottom:12px;text-align:left;cursor:pointer;transition:border-color .2s" id="jt-single-card">
+      <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">SINGLE SPLIT</div>
+      <div style="font-size:13px;color:var(--mid);margin-top:3px">One outdoor unit per room</div>
+      <div style="font-size:11px;color:var(--sky);margin-top:6px;font-weight:600">75mm trunking · per-room pricing</div>
+    </div>
+
+    <div onclick="setJobType('multi')" style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 18px;text-align:left;cursor:pointer;transition:border-color .2s" id="jt-multi-card">
+      <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">MULTI-SPLIT</div>
+      <div style="font-size:13px;color:var(--mid);margin-top:3px">One outdoor unit, multiple indoor heads</div>
+      <div style="font-size:11px;color:var(--sky);margin-top:6px;font-weight:600">100mm trunking · system pricing</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="p0">
+  <p class="page-title">Customer Details</p>
+  <p class="page-sub">Enter details before the survey</p>
+  <div class="card">
+    <div class="card-hdr"><span class="ci">👤</span> Contact</div>
+    <div class="row2">
+      <div class="field" id="f-fn">
+        <label class="lbl">First Name</label>
+        <input type="text" id="fn" placeholder="John" autocomplete="given-name">
+        <div class="errmsg">Required</div>
+      </div>
+      <div class="field" id="f-ln">
+        <label class="lbl">Last Name</label>
+        <input type="text" id="ln" placeholder="Smith" autocomplete="family-name">
+        <div class="errmsg">Required</div>
+      </div>
+    </div>
+    <div class="field" id="f-em">
+      <label class="lbl">Email Address</label>
+      <input type="email" id="em" placeholder="john@example.com" autocomplete="email">
+      <div class="errmsg">Valid email required</div>
+    </div>
+    <div class="field" id="f-ph">
+      <label class="lbl">Phone Number</label>
+      <input type="tel" id="ph" placeholder="07700 900000" autocomplete="tel">
+      <div class="errmsg">Required</div>
+    </div>
+    <div class="field" id="f-ad">
+      <label class="lbl">Property Address</label>
+      <input type="text" id="ad" placeholder="12 High Street, Lavenham, Suffolk">
+      <div class="errmsg">Required</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="goPage(1)">Continue to Survey →</button>
+</div>
+
+<!-- PAGE 1 — Survey -->
+<div class="page" id="p1">
+  <p class="page-title">Site Survey</p>
+  <p class="page-sub">Property details then measure each room</p>
+
+  <!-- Property questions -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">🏠</span> Property Details</div>
+
+    <div class="field">
+      <label class="lbl">Install type <span style="text-transform:none;font-weight:400;color:var(--mid)">(sets trunking size)</span></label>
+      <div class="pills" id="pills-installType">
+        <div class="pill on" onclick="pickPill('installType','single',this)">Single split(s) — 75mm</div>
+        <div class="pill" onclick="pickPill('installType','multi',this)">Multi-split — 100mm</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Power supply / fused spur near outdoor location?</label>
+      <div class="pills" id="pills-power">
+        <div class="pill on" onclick="pickPill('power','Yes — existing spur',this)">Yes — existing spur</div>
+        <div class="pill" onclick="pickPill('power','No — new circuit needed',this)">No — new circuit</div>
+        <div class="pill" onclick="pickPill('power','Unknown',this)">Unknown</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Existing unit to decommission?</label>
+      <div class="pills" id="pills-existing">
+        <div class="pill on" onclick="pickPill('existing','No',this)">No</div>
+        <div class="pill" onclick="pickPill('existing','Yes — 1 unit',this)">Yes — 1 unit</div>
+        <div class="pill" onclick="pickPill('existing','Yes — multiple',this)">Yes — multiple</div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lbl">Consumer unit location</label>
+        <select id="sv-consumer">
+          <option>Under stairs</option><option>Garage</option><option>Kitchen</option>
+          <option>Hallway</option><option>Utility room</option><option>Other — see notes</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">Wall construction</label>
+        <select id="sv-wall">
+          <option>Cavity brick</option><option>Solid brick</option><option>Timber frame</option>
+          <option>Rendered / block</option><option>Stone</option><option>Other — see notes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="rooms-wrap"></div>
+  <button class="btn-add" onclick="addRoom()"><span style="font-size:20px">＋</span> Add Another Room</button>
+  <button class="btn btn-primary" onclick="goPage(2)">View Quote Options →</button>
+  <button class="btn btn-ghost" onclick="goPage(0)">← Back</button>
+</div>
+
+<!-- PAGE 2 — Quote -->
+<div class="page" id="p2">
+  <p class="page-title">Quote Options</p>
+  <p class="page-sub">All three options shown — add extras and finance below</p>
+
+  <!-- VAT toggle -->
+  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;margin-bottom:14px">
+    <div>
+      <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px">COMMERCIAL JOB</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:1px">Toggle to add 20% VAT to all prices</div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+      <div id="vat-track" onclick="toggleVat()" style="width:44px;height:26px;background:rgba(255,255,255,.2);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
+        <div id="vat-knob" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+      </div>
+      <span id="vat-lbl" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Ex VAT</span>
+    </label>
+  </div>
+
+  <div id="quote-wrap"></div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="ci">🔧</span> Add-ons & Extras</div>
+    <div id="addons-wrap"></div>
+    <button class="btn-add" style="margin-bottom:0" onclick="addAddon()">
+      <span style="font-size:18px">＋</span> Add Extra Item
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="ci">💳</span> Finance</div>
+    <p class="hint" style="margin-bottom:10px">Optional — subsidy added to customer total automatically</p>
+    <div class="field">
+      <label class="lbl">Finance Product</label>
+      <select id="fin-sel" onchange="updateFin()">
+        <option value="">No finance — cash / card</option>
+        <option value="0%|Pay in 3|0.05">APR 0% — Pay in 3</option>
+        <option value="0%|6m|0.0525">APR 0% — 6 months</option>
+        <option value="0%|12m|0.08">APR 0% — 12 months</option>
+        <option value="0%|24m|0.13">APR 0% — 24 months</option>
+        <option value="0%|36m|0.175">APR 0% — 36 months</option>
+        <option value="0%|48m|0.18">APR 0% — 48 months</option>
+        <option value="0%|60m|0.205">APR 0% — 60 months</option>
+        <option value="7.9%|36m|0.0765">APR 7.9% — 36 months</option>
+        <option value="7.9%|48m|0.0925">APR 7.9% — 48 months</option>
+        <option value="7.9%|60m|0.095">APR 7.9% — 60 months</option>
+        <option value="7.9%|120m|0.15">APR 7.9% — 120 months</option>
+        <option value="9.9%|36m|0.0525">APR 9.9% — 36 months</option>
+        <option value="9.9%|48m|0.0625">APR 9.9% — 48 months</option>
+        <option value="9.9%|60m|0.065">APR 9.9% — 60 months</option>
+        <option value="9.9%|120m|0.085">APR 9.9% — 120 months</option>
+        <option value="10.9%|36m|0.012">APR 10.9% — 36 months</option>
+        <option value="10.9%|48m|0.01">APR 10.9% — 48 months</option>
+        <option value="10.9%|60m|0.005">APR 10.9% — 60 months</option>
+        <option value="10.9%|120m|0">APR 10.9% — 120 months</option>
+        <option value="11.9%|36m|0">APR 11.9% — 36 months</option>
+        <option value="11.9%|48m|0">APR 11.9% — 48 months</option>
+        <option value="11.9%|60m|0">APR 11.9% — 60 months</option>
+        <option value="11.9%|120m|0">APR 11.9% — 120 months</option>
+      </select>
+    </div>
+    <div id="fin-info" style="display:none">
+      <div class="fin-pill"><span>Subsidy added to each total</span><span id="fin-sub-lbl">—</span></div>
+      <div class="fin-pill"><span id="fin-mo-lbl">Indicative monthly</span><span id="fin-mo-val">—</span></div>
+    </div>
+  </div>
+
+  <div class="total-bar">
+    <div class="tb-row"><span>Essential Package all-in</span><b id="tb-b">—</b></div>
+    <div class="tb-row"><span>Comfort Package all-in</span><b id="tb-m">—</b></div>
+    <div class="tb-row"><span>Premium Package all-in</span><b id="tb-p">—</b></div>
+    <div class="tb-row" style="border-top:1px solid rgba(255,255,255,.12);margin-top:6px;padding-top:8px">
+      <span style="font-size:11px;color:rgba(255,255,255,.4)">Extras</span>
+      <span id="tb-ext" style="font-size:12px;color:rgba(255,255,255,.45)">—</span>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
+  <button class="btn btn-ghost" onclick="goPage(1)">← Back</button>
+</div>
+
+<!-- PAGE 3 — Review -->
+<!-- MULTI-SPLIT QUOTE PAGE -->
+<div class="page" id="p2m">
+  <p class="page-title">Multi-Split Quote</p>
+  <p class="page-sub">Outdoor unit auto-selected per tier based on rooms and kW</p>
+
+  <!-- VAT toggle -->
+  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;margin-bottom:14px">
+    <div>
+      <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px">COMMERCIAL JOB</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:1px">Toggle to add 20% VAT</div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+      <div id="vat-track-m" onclick="toggleVat()" style="width:44px;height:26px;background:rgba(255,255,255,.2);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
+        <div id="vat-knob-m" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+      </div>
+      <span id="vat-lbl-m" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Ex VAT</span>
+    </label>
+  </div>
+
+  <!-- Auto-selected outdoor units per tier -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hdr"><span class="ci">🏗️</span> Outdoor Units — auto-selected per tier</div>
+    <div style="font-size:11px;color:var(--mid);margin-bottom:10px">Based on ${rooms.length} rooms and total kW required. Override by adjusting room dimensions if needed.</div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="ms-ou-summary">
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
+        <span class="tier-badge tb-basic" style="font-size:10px;padding:2px 8px;flex-shrink:0">Essential</span>
+        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-essential">—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
+        <span class="tier-badge tb-mid" style="font-size:10px;padding:2px 8px;flex-shrink:0">Comfort</span>
+        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-comfort">—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
+        <span class="tier-badge tb-prem" style="font-size:10px;padding:2px 8px;flex-shrink:0">Premium</span>
+        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-premium">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rooms -->
+  <div id="ms-rooms-wrap"></div>
+
+  <!-- Totals bar -->
+  <div class="total-bar" style="margin-top:14px">
+    <div class="tb-row"><span>Essential all-in</span><b id="ms-tb-essential">—</b></div>
+    <div class="tb-row"><span>Comfort all-in</span><b id="ms-tb-comfort">—</b></div>
+    <div class="tb-row"><span>Premium all-in</span><b id="ms-tb-premium">—</b></div>
+  </div>
+
+  <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
+  <button class="btn btn-ghost" onclick="goPage(1)">← Back</button>
+</div>
+
+<div class="page" id="p3">
+  <p class="page-title">Review & Send</p>
+  <p class="page-sub">Check everything then send to customer</p>
+
+  <div class="card">
+    <div class="q-hdr">
+      <h2>SITE SURVEY QUOTE</h2>
+      <p id="rv-who"></p>
+      <span class="q-ref" id="rv-ref"></span>
+    </div>
+    <div id="rv-survey"></div>
+    <div id="rv-rooms"></div>
+    <div id="rv-addons"></div>
+    <div class="divider"></div>
+    <div class="grand-total" id="rv-totals"></div>
+    <p class="hint" style="margin-top:10px">Prices include supply & installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="ci">✉️</span> Send to Customer</div>
+    <div class="field">
+      <label class="lbl">Sending to</label>
+      <input type="text" id="rv-email" readonly style="background:var(--grey);color:var(--mid)">
+    </div>
+    <div class="field">
+      <label class="lbl">Survey Notes (optional)</label>
+      <textarea id="rv-notes" rows="3" placeholder="Access requirements, observations, existing system..." style="resize:none;font-size:14px;padding:11px 13px"></textarea>
+    </div>
+    <button class="btn btn-primary" id="send-btn" onclick="sendQuote()">📧 Send Quote to Customer</button>
+  </div>
+
+  <div id="send-status"></div>
+  <button class="btn btn-ghost" onclick="goPage(2)">← Edit Quote</button>
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────
+const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujispc2/';
+const SELECTION_WEBHOOK = 'YOUR_ZAPIER_SELECTION_WEBHOOK_URL'; // fires when customer taps a tier button
+
+// ── Unit data ────────────────────────────────────────────
+const UNITS = {
+  Basic: [
+    {kw:2.0,price:952.24, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
+    {kw:2.5,price:979.89, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
+    {kw:3.5,price:1044.67,make:'Daikin',     series:'Sensira',    model:'FTXF35F + RXF35F'},
+    {kw:4.2,price:1115.77,make:'Daikin',     series:'Sensira',    model:'FTXF42F + RXF42F'},
+    {kw:5.0,price:1192.76,make:'Daikin',     series:'Sensira',    model:'FTXF50F + RXF50F'},
+    {kw:6.0,price:1638.14,make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP60VGK2 + MUZ-AP60VG'},
+    {kw:7.1,price:2035.04,make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP71VGK2 + MUZ-AP71VG'},
+  ],
+  Mid: [
+    {kw:2.5,price:1297.22,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
+    {kw:3.5,price:1426.01,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
+    {kw:5.0,price:1699.79,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
+    {kw:6.0,price:1309.49,make:'Daikin',     series:'Sensira',    model:'FTXF60F + RXF60D9'},
+    {kw:7.1,price:1506.99,make:'Daikin',     series:'Sensira',    model:'FTXF71F + RXF71D9'},
+  ],
+  Premium: [
+    {kw:2.5,price:1395.23,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN25VG2B + MUZ-LN25VG'},
+    {kw:3.5,price:1548.32,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN35VG2B + MUZ-LN35VG'},
+    {kw:5.0,price:1970.61,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN50VG2B + MUZ-LN50VG'},
+    {kw:6.0,price:2131.80,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN60VG2B + MUZ-LN60VG'},
+  ],
+};
+
+// Pipe cost per extra metre (inc 20% markup) — pipe + drain + CY cable + trunking + clips
+const PIPE_PM = {'1/4" & 3/8"':15.89,'1/4" & 1/2"':17.07,'1/4" & 5/8"':19.37,'3/8" & 5/8"':21.50};
+
+// Inaba Denko trunking fittings (ex VAT, Kooltech prices)
+// [description, code, p75, p100]
+const FITTINGS = [
+  ['Straight Joint',     'SJ',   3.97,  5.49],
+  ['Flat 90° Bend',      'SK',  10.05, 13.01],
+  ['Flat 45° Bend',      'SKF', 10.73, 22.59],  // 100mm price est. from retail — verify vs Kooltech trade
+  ['Vertical 90° Elbow', 'SC',  17.90, 43.85],
+  ['Vertical 45° Elbow', 'SCF', 12.98, 23.29],  // 100mm price est. from retail — verify vs Kooltech trade
+  ['Duct End Cap',       'SE',   5.21,  6.25],
+  ['Wall Inlet Cover',   'SW',   9.18, 11.02],
+  ['Ceiling Cover',      'SCC', 15.53, 18.63],
+  ['Tee Joint',          'ST',  36.25, 43.50],
+];
+
+// ── Multi-split data ─────────────────────────────────────────
+// Outdoor units by brand
+const MS_DAIKIN_OUTDOORS = [
+  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:1256.24},
+  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1296.53},
+  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1559.60},
+  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1661.51},
+];
+
+const MS_MITSUBISHI_OUTDOORS = [
+  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:1275.31},
+  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1397.62},
+  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1554.76},
+  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1711.09},
+  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:2107.99},
+  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2246.50},
+];
+
+// Indoor heads per tier — net price (indoor head only, no outdoor unit)
+const MS_HEADS = {
+  // Essential: Daikin CTXF dedicated multi-split heads only
+  Essential: [
+    {kw:2.0, label:'Daikin CTXF 2.0kW', model:'CTXF20F',  net:117.71},
+    {kw:2.5, label:'Daikin CTXF 2.5kW', model:'CTXF25F',  net:133.51},
+    {kw:3.5, label:'Daikin CTXF 3.5kW', model:'CTXF35F',  net:147.73},
+  ],
+  // Comfort: MSZ-EF indoor heads — net price from Kooltech pricelist (indoor unit only)
+  Comfort: [
+    {kw:1.8, label:'Mitsubishi EF 1.8kW', model:'MSZ-EF18VGKB-E2',  net:284.31},
+    {kw:2.2, label:'Mitsubishi EF 2.2kW', model:'MSZ-EF22VGK2B-E2', net:298.89},
+    {kw:2.5, label:'Mitsubishi EF 2.5kW', model:'MSZ-EF25VGKB-E2',  net:328.05},
+    {kw:3.5, label:'Mitsubishi EF 3.5kW', model:'MSZ-EF35VGKB-E2',  net:391.23},
+    {kw:5.0, label:'Mitsubishi EF 5.0kW', model:'MSZ-EF50VGK2B-E1', net:426.87},
+  ],
+  // Premium: MSZ-LN indoor heads — net price from Kooltech pricelist (indoor unit only)
+  Premium: [
+    {kw:1.8, label:'Mitsubishi LN 1.8kW', model:'MSZ-LN18VG2B-E5',  net:358.02},
+    {kw:2.5, label:'Mitsubishi LN 2.5kW', model:'MSZ-LN25VG2B-E3',  net:382.32},
+    {kw:3.5, label:'Mitsubishi LN 3.5kW', model:'MSZ-LN35VG2B-E3',  net:457.65},
+    {kw:5.0, label:'Mitsubishi LN 5.0kW', model:'MSZ-LN50VG2B-E3',  net:623.70},
+    {kw:6.0, label:'Mitsubishi LN 6.0kW', model:'MSZ-LN60VG2B-E3',  net:714.42},
+  ],
+};
+
+// Tier → outdoor range mapping
+const MS_OUTDOOR_BY_TIER = {
+  Essential: MS_DAIKIN_OUTDOORS,
+  Comfort:   MS_MITSUBISHI_OUTDOORS,
+  Premium:   MS_MITSUBISHI_OUTDOORS,
+};
+
+// Kit & labour constants
+const MS_INDOOR_KIT   = 67.52;
+const MS_EXTRA_LABOUR = 400.00;
+const MS_MARKUP       = 1.20;
+
+function msPickHead(tier, kwRec){
+  var heads = MS_HEADS[tier];
+  return heads.find(function(h){ return h.kw >= (kwRec||2.0); }) || heads[heads.length-1];
+}
+
+function msPickOutdoor(tier, numRooms, totalKw){
+  var outdoors = MS_OUTDOOR_BY_TIER[tier];
+  // Sort by ports then maxKw, pick smallest that fits
+  var sorted = outdoors.slice().sort(function(a,b){ return a.ports-b.ports || a.maxKw-b.maxKw; });
+  return sorted.find(function(ou){ return ou.ports >= numRooms && ou.maxKw >= totalKw; }) || outdoors[outdoors.length-1];
+}
+
+function msHeadPrice(head){ return head.net * MS_MARKUP; }
+
+function msTierTotal(tier, rooms){
+  // Pick heads for each room
+  var heads = rooms.map(function(r){ return msPickHead(tier, r.kwRec||2.0); });
+  var totalHeadKw = heads.reduce(function(s,h){ return s+h.kw; }, 0);
+  var ou = msPickOutdoor(tier, rooms.length, totalHeadKw);
+  var indoorCost = heads.reduce(function(s,h,i){
+    return s + msHeadPrice(h) + MS_INDOOR_KIT
+      + (rooms[i].extraPipe||0) * (PIPE_PM[pipeConfig(h.kw)]||15.89)
+      + fittingsCost(rooms[i]);
+  }, 0);
+  var extraLabour = MS_EXTRA_LABOUR * (rooms.length - 1);
+  return {
+    tier: tier,
+    outdoor: ou,
+    heads: heads,
+    total: (ou.price + indoorCost + extraLabour) * vatMult(),
+  };
+}
+
+function msTotalPrice(rooms){
+  if(!rooms.length) return {Essential:{total:0},Comfort:{total:0},Premium:{total:0}};
+  return {
+    Essential: msTierTotal('Essential', rooms),
+    Comfort:   msTierTotal('Comfort',   rooms),
+    Premium:   msTierTotal('Premium',   rooms),
+  };
+}
+
+
+function fittingsCost(r){
+  // size based on job-level install type: multi-split = 100mm, single = 75mm
+  const use100 = survey.installType === 'multi';
+  return FITTINGS.reduce((sum,[,code,p75,p100])=>{
+    const qty = (r.fittings && r.fittings[code]) || 0;
+    const price = (use100 && p100 !== null) ? p100 : p75;
+    return sum + qty * price;
+  }, 0);
+}
+
+function pipeConfig(kw){ return kw<=4.2?'1/4" & 3/8"':kw<=5.0?'1/4" & 1/2"':'1/4" & 5/8"'; }
+function getUnit(tier,kw){ const l=UNITS[tier]; return l.find(u=>u.kw>=kw)||l[l.length-1]; }
+
+// ── kW calculation ───────────────────────────────────────
+function calcKw(r){
+  let kw = r.l * r.w * r.h * 0.068;
+  if(r.type==='Kitchen')       kw*=1.20;
+  if(r.type==='Conservatory')  kw*=1.30;
+  if(r.type==='Open Plan')     kw*=1.10;
+  if(r.orient==='south')       kw*=1.12;
+  else if(r.orient==='north')  kw*=0.95;
+  else if(r.orient==='west')   kw*=1.06;
+  if(r.conds.includes('glazed'))    kw*=1.20;
+  if(r.conds.includes('poor_ins'))  kw*=1.12;
+  if(r.conds.includes('good_ins'))  kw*=0.92;
+  if(r.conds.includes('top_floor')) kw*=1.15;
+  if(r.conds.includes('high_ceil')) kw*=1.08;
+  const sizes=[2.0,2.5,3.5,4.2,5.0,6.0,7.1];
+  return sizes.find(s=>s>=kw)||7.1;
+}
+
+function pipeCost(r,tier){
+  const u=getUnit(tier,r.kwRec||2.5);
+  return r.extraPipe*(PIPE_PM[pipeConfig(u.kw)]||15.89) + fittingsCost(r);
+}
+
+function tierTotals(){
+  const t={Basic:0,Mid:0,Premium:0};
+  ['Basic','Mid','Premium'].forEach(tier=>{
+    rooms.forEach(r=>{ t[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); });
+  });
+  return t;
+}
+function extrasTotal(){ return addons.reduce((s,a)=>s+(parseFloat(a.price)||0),0); }
+
+// ── State ────────────────────────────────────────────────
+let rooms=[], addons=[], rIdx=0, aIdx=0;
+let fin={apr:'',term:'',sub:0};
+let survey={power:'Yes — existing spur',existing:'No',installType:'single'};
+
+const ROOM_TYPES=['Bedroom','Living Room','Kitchen','Dining Room','Office','Study','Master Bedroom','Open Plan','Conservatory','Other'];
+const ORIENTS=[{v:'south',l:'South ☀️'},{v:'west',l:'West 🌅'},{v:'east',l:'East 🌄'},{v:'north',l:'North 🌧️'}];
+const CONDITIONS=[
+  {v:'glazed',l:'Heavily glazed'},{v:'poor_ins',l:'Poorly insulated'},
+  {v:'good_ins',l:'Well insulated'},{v:'top_floor',l:'Top floor / roof'},
+  {v:'high_ceil',l:'High ceilings'},
+];
+const STEPS=['Customer Details','Site Survey','Quote Options','Review & Send'];
+
+// ── Navigation ───────────────────────────────────────────
+function goPage(n){
+  if(n===1 && !validateP0()) return;
+  if(n===2){
+    saveRooms();
+    if(!validateP1()) return;
+    if(jobType==='multi'){ buildMsQuote(); }
+    else { buildQuote(); }
+  }
+  if(n===3) buildReview();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  var pageId = (n===2 && jobType==='multi') ? 'p2m' : 'p'+n;
+  document.getElementById(pageId).classList.add('on');
+  window.scrollTo(0,0);
+  ['d0','d1','d2','d3'].forEach((id,i)=>{
+    document.getElementById(id).className='dot'+(i<n?' done':i===n?' active':'');
+  });
+  document.getElementById('plbl').innerHTML='<b>'+STEPS[n]+'</b>';
+}
+
+// ── Validation ───────────────────────────────────────────
+function validateP0(){
+  let ok=true;
+  [['f-fn','fn',v=>v.length>0],['f-ln','ln',v=>v.length>0],
+   ['f-em','em',v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
+   ['f-ph','ph',v=>v.length>0],['f-ad','ad',v=>v.length>0]
+  ].forEach(([fid,iid,fn])=>{
+    const v=document.getElementById(iid).value.trim();
+    const pass=fn(v);
+    document.getElementById(fid).classList.toggle('err',!pass);
+    if(!pass) ok=false;
+  });
+  return ok;
+}
+function validateP1(){
+  if(!rooms.length){ addRoom(); return false; }
+  if(rooms.find(r=>!r.l||!r.w||!r.h)){ alert('Please enter dimensions for all rooms.'); return false; }
+  return true;
+}
+
+// ── Property survey pills ────────────────────────────────
+function pickPill(field, val, el){
+  survey[field]=val;
+  const group=el.parentElement;
+  group.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ── Rooms ────────────────────────────────────────────────
+function addRoom(){
+  rooms.push({id:rIdx++,type:'Bedroom',l:0,w:0,h:2.4,
+              orient:'south',conds:[],kwRec:0,extraPipe:0,fittings:{},
+              pos:'Wall mounted — high level',floor:'Ground floor',
+              outdoor:'Rear garden — ground',mount:'Feet on ground',
+              route:'External trunking — straight run',access:'None'});
+  renderRooms();
+}
+function removeRoom(id){ rooms=rooms.filter(r=>r.id!==id); renderRooms(); }
+
+function saveRooms(){
+  rooms.forEach(r=>{
+    const g=id=>{ const el=document.getElementById(id); return el?el.value:''; };
+    r.type=g('rt-'+r.id)||r.type;
+    r.l=parseFloat(g('rl-'+r.id))||0;
+    r.w=parseFloat(g('rw-'+r.id))||0;
+    r.h=parseFloat(g('rh-'+r.id))||2.4;
+    r.kwRec=r.l>0&&r.w>0?calcKw(r):0;
+    r.pos=g('ri-pos-'+r.id)||r.pos;
+    r.floor=g('ri-floor-'+r.id)||r.floor;
+    r.outdoor=g('ri-out-'+r.id)||r.outdoor;
+    r.mount=g('ri-mount-'+r.id)||r.mount;
+    r.route=g('ri-route-'+r.id)||r.route;
+  });
+}
+
+function setOrient(id,v){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  r.orient=v;
+  document.querySelectorAll('.op-'+id).forEach(el=>{
+    el.classList.toggle('on',el.dataset.v===v);
+  });
+  liveCalc(id);
+}
+
+function toggleCond(id,v,el){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  if(r.conds.includes(v)) r.conds=r.conds.filter(c=>c!==v);
+  else r.conds.push(v);
+  el.classList.toggle('on',r.conds.includes(v));
+  liveCalc(id);
+}
+
+function liveCalc(id){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  const l=parseFloat(document.getElementById('rl-'+id)?.value)||r.l;
+  const w=parseFloat(document.getElementById('rw-'+id)?.value)||r.w;
+  const h=parseFloat(document.getElementById('rh-'+id)?.value)||r.h;
+  r.l=l; r.w=w; r.h=h;
+  r.kwRec=l>0&&w>0&&h>0?calcKw(r):0;
+  const el=document.getElementById('kwr-'+id);
+  if(!el) return;
+  el.innerHTML=r.kwRec>0?
+    `<div class="kw-result"><div class="kw-val">${r.kwRec}kW</div>
+     <div class="kw-info">Recommended<span>${l}×${w}×${h}m = ${(l*w*h).toFixed(1)}m³${r.conds.length?' · '+r.conds.length+' factor(s) applied':''}</span></div></div>`:
+    `<p class="hint" style="margin-top:8px">Enter dimensions to see recommendation</p>`;
+}
+
+function setPipe(id,v){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  r.extraPipe=parseFloat(v)||0;
+  document.getElementById('pipecost-'+id).textContent=r.extraPipe>0?
+    '≈ +£'+(r.extraPipe*15.89).toFixed(0)+' (varies by unit)':'';
+  if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
+  else { refreshTierPrices(); updateTotals(); }
+}
+
+function renderRooms(){
+  document.getElementById('rooms-wrap').innerHTML=rooms.map((r,idx)=>`
+    <div class="room-card">
+      <div class="room-card-hdr">
+        <span class="room-num">Room ${idx+1}</span>
+        ${rooms.length>1?`<button class="rm-btn" onclick="removeRoom(${r.id})">Remove</button>`:''}
+      </div>
+
+      <div class="field">
+        <label class="lbl">Room Type</label>
+        <select id="rt-${r.id}" onchange="liveCalc(${r.id})">
+          ${ROOM_TYPES.map(t=>`<option${t===r.type?' selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="row3">
+        <div class="field"><label class="lbl">Length (m)</label>
+          <input type="number" id="rl-${r.id}" value="${r.l||''}" placeholder="5.0" min="1" max="30" step="0.1" oninput="liveCalc(${r.id})"></div>
+        <div class="field"><label class="lbl">Width (m)</label>
+          <input type="number" id="rw-${r.id}" value="${r.w||''}" placeholder="4.0" min="1" max="30" step="0.1" oninput="liveCalc(${r.id})"></div>
+        <div class="field"><label class="lbl">Height (m)</label>
+          <input type="number" id="rh-${r.id}" value="${r.h||2.4}" placeholder="2.4" min="1.5" max="6" step="0.1" oninput="liveCalc(${r.id})"></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Orientation <span style="text-transform:none;font-weight:400;color:var(--mid)">(affects kW calc)</span></label>
+        <div class="pills">
+          ${ORIENTS.map(o=>`<div class="pill op-${r.id}${r.orient===o.v?' on':''}" data-v="${o.v}" onclick="setOrient(${r.id},'${o.v}')">${o.l}</div>`).join('')}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Room Conditions</label>
+        <div class="pills">
+          ${CONDITIONS.map(c=>`<div class="pill${r.conds.includes(c.v)?' on':''}" onclick="toggleCond(${r.id},'${c.v}',this)">${c.l}</div>`).join('')}
+        </div>
+      </div>
+
+      <div id="kwr-${r.id}">
+        <p class="hint" style="margin-top:8px">Enter dimensions to see recommendation</p>
+      </div>
+
+      <div class="install-section">
+        <p class="install-lbl">Install Details — for job notes</p>
+        <div class="row2">
+          <div class="field"><label class="lbl">Indoor unit position</label>
+            <select id="ri-pos-${r.id}">
+              <option>Wall mounted — high level</option><option>Wall mounted — standard</option>
+              <option>Ceiling cassette</option><option>Floor standing</option>
+            </select></div>
+          <div class="field"><label class="lbl">Floor level</label>
+            <select id="ri-floor-${r.id}">
+              <option>Ground floor</option><option>First floor</option>
+              <option>Second floor</option><option>Loft / top floor</option>
+            </select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label class="lbl">Outdoor unit location</label>
+            <select id="ri-out-${r.id}">
+              <option>Rear garden — ground</option><option>Side of house — ground</option>
+              <option>Front of house — ground</option><option>Wall mounted — rear</option>
+              <option>Wall mounted — side</option><option>Flat roof</option><option>Balcony</option>
+            </select></div>
+          <div class="field"><label class="lbl">Outdoor mounting</label>
+            <select id="ri-mount-${r.id}">
+              <option>Feet on ground</option><option>Anti-vibration feet</option>
+              <option>Wall bracket</option><option>Flat roof frame</option><option>Cantilever bracket</option>
+            </select></div>
+        </div>
+        <div class="field"><label class="lbl">Pipe / trunking route</label>
+          <select id="ri-route-${r.id}">
+            <option>External trunking — straight run</option><option>External trunking — around corners</option>
+            <option>Internal chase / concealed</option><option>Mix internal & external</option><option>Through roof space</option>
+          </select></div>
+        <div class="field"><label class="lbl">Access</label>
+          <div class="pills">
+            ${['None','Scaffold needed','Restricted access','Neighbour permission','Other — see notes'].map(v=>`
+              <div class="pill${(r.access||'None')===v?' on':''}" onclick="setAccess(${r.id},'${v}',this)">${v}</div>`).join('')}
+          </div>
+        </div>
+
+      </div>
+    </div>`).join('');
+  // update fitting cost displays after render
+  rooms.forEach(r=>{
+    const fc=fittingsCost(r);
+    const el=document.getElementById('fittingcost-'+r.id);
+    if(el) el.textContent=fc>0?'Fittings: +£'+fc.toFixed(2):'';
+  });
+}
+
+function buildFittingsHtml(r){
+  var use100 = survey.installType === 'multi';
+  var sz = use100 ? '100mm' : '75mm';
+  var out = '<div class="field" style="margin-top:10px">';
+  out += '<label class="lbl">Trunking Fittings <span style="text-transform:none;font-weight:400;color:var(--mid)">— ' + sz + ' Inaba Denko</span></label>';
+  out += '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">';
+  FITTINGS.forEach(function(f){
+    var name=f[0], code=f[1], p75=f[2], p100=f[3];
+    var price = (use100 && p100 !== null) ? p100 : p75;
+    var na = (use100 && p100 === null);
+    var qty = (r.fittings && r.fittings[code]) ? r.fittings[code] : 0;
+    var inputId = 'fit-' + r.id + '-' + code;
+    out += '<div style="background:#f8fafc;border:1px solid var(--border);border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:10px">';
+    out += '<div style="flex:1;min-width:0">';
+    out += '<div style="font-size:13px;font-weight:600;color:var(--navy)">' + name + '</div>';
+    out += '<div style="font-size:11px;color:var(--mid);margin-top:1px">' + (na ? 'N/A — not available in 100mm' : '\u00A3' + price.toFixed(2) + ' each') + '</div>';
+    out += '</div>';
+    if(na){
+      out += '<div style="font-size:11px;color:#bbb;font-style:italic">N/A</div>';
+    } else {
+      out += '<div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0">';
+      out += '<button style="width:36px;height:38px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--navy);font-weight:700;line-height:1;touch-action:manipulation" onclick="stepFitting(' + r.id + ',\'' + code + '\',-1)">&#8722;</button>';
+      out += '<input type="number" value="' + qty + '" min="0" max="20" style="width:36px;height:38px;border:none;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:16px;color:var(--navy);padding:0;outline:none;-webkit-appearance:none;-moz-appearance:textfield" oninput="setFitting(' + r.id + ',\'' + code + '\',parseInt(this.value)||0)" id="' + inputId + '">';
+      out += '<button style="width:36px;height:38px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--navy);font-weight:700;line-height:1;touch-action:manipulation" onclick="stepFitting(' + r.id + ',\'' + code + '\',1)">&#43;</button>';
+      out += '</div>';
+    }
+    out += '</div>';
+  });
+  out += '</div>';
+  out += '<div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--sky)" id="fittingcost-' + r.id + '"></div>';
+  out += '</div>';
+  return out;
+}
+function setAccess(id,v,el){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  r.access=v;
+  el.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function stepFitting(id, code, delta){
+  var input = document.getElementById('fit-'+id+'-'+code);
+  var current = input ? (parseInt(input.value) || 0) : 0;
+  setFitting(id, code, current + delta);
+}
+
+function setFitting(id,code,val){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  val=Math.max(0,Math.min(20,isNaN(val)?0:val));
+  if(!r.fittings) r.fittings={};
+  r.fittings[code]=val;
+  const input=document.getElementById('fit-'+id+'-'+code);
+  if(input) input.value=val;
+  // update fittings cost display
+  const fc=fittingsCost(r);
+  const el=document.getElementById('fittingcost-'+id);
+  if(el) el.textContent=fc>0?'Fittings: +£'+fc.toFixed(2):'';
+  refreshTierPrices();
+  updateTotals();
+}
+
+let vatOn = false;
+let jobType = 'single'; // 'single' or 'multi'
+let msOutdoor = null;   // selected outdoor unit object for multi-split
+
+function toggleVat(){
+  vatOn = !vatOn;
+  // Update both single and multi-split VAT toggles
+  ['','−m'].forEach(function(sfx){
+    var track = document.getElementById('vat-track'+sfx);
+    var knob  = document.getElementById('vat-knob'+sfx);
+    var lbl   = document.getElementById('vat-lbl'+sfx);
+    if(track) track.style.background = vatOn ? 'var(--orange)' : 'rgba(255,255,255,.2)';
+    if(knob)  knob.style.left = vatOn ? '20px' : '2px';
+    if(lbl)   lbl.textContent = vatOn ? '+VAT (inc)' : 'Ex VAT';
+  });
+  if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
+  else { refreshTierPrices(); updateTotals(); }
+}
+
+function vatMult(){ return vatOn ? 1.2 : 1; }
+
+function refreshTierPrices(){
+  rooms.forEach(function(r){
+    ['Basic','Mid','Premium'].forEach(function(tier){
+      var el=document.getElementById('tp-'+r.id+'-'+tier);
+      if(!el) return;
+      var u=getUnit(tier,r.kwRec||2.5);
+      var full=(u.price+pipeCost(r,tier))*vatMult();
+      el.textContent='£'+Math.round(full).toLocaleString('en-GB');
+    });
+  });
+}
+
+// ── Quote page ───────────────────────────────────────────
+function buildQuote(){
+  document.getElementById('quote-wrap').innerHTML=rooms.map((r,idx)=>`
+    <div class="card">
+      <div class="card-hdr"><span class="ci">❄️</span>
+        Room ${idx+1}: ${r.type}
+        <span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">
+          · ${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW
+        </span>
+      </div>
+      <div class="tier-grid">
+        ${['Basic','Mid','Premium'].map(tier=>{
+          const u=getUnit(tier,r.kwRec||2.5);
+          const tc={'Basic':'tc-basic','Mid':'tc-mid','Premium':'tc-prem'}[tier];
+          const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
+          const tLabel={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+          const fullCost = u.price + pipeCost(r, tier);
+          return `<div class="tier-card ${tc}">
+            <div class="tier-badge ${tb}">${tLabel}</div>
+            <div class="tier-price" id="tp-${r.id}-${tier}">£${Math.round(fullCost).toLocaleString('en-GB')}</div>
+            <div class="tier-sub">${u.make}<br>${u.series}<br>${u.kw}kW</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="pipe-row">
+        <span class="lbl2">Extra pipe (m beyond 3m)</span>
+        <input type="number" value="${r.extraPipe||0}" min="0" max="50" step="1"
+          oninput="setPipe(${r.id},this.value)" style="width:72px;text-align:center">
+        <span class="pipe-note" id="pipecost-${r.id}"></span>
+      </div>
+      ${buildFittingsHtml(r)}
+    </div>`).join('');
+
+  renderAddons();
+  updateFin();
+}
+
+// ── Add-ons ──────────────────────────────────────────────
+function addAddon(){ addons.push({id:aIdx++,desc:'',price:''}); renderAddons(); }
+function removeAddon(id){ addons=addons.filter(a=>a.id!==id); renderAddons(); updateTotals(); }
+function renderAddons(){
+  document.getElementById('addons-wrap').innerHTML=addons.map(a=>`
+    <div class="addon-row">
+      <input type="text" value="${a.desc}" placeholder="e.g. Condensate pump"
+        oninput="updAddon(${a.id},'desc',this.value)">
+      <div class="pw"><input type="number" value="${a.price}" placeholder="0.00" min="0" step="0.01"
+        oninput="updAddon(${a.id},'price',this.value)"></div>
+      <button class="del-btn" onclick="removeAddon(${a.id})">✕</button>
+    </div>`).join('');
+}
+function updAddon(id,f,v){ const a=addons.find(a=>a.id===id); if(a){ a[f]=v; updateTotals(); } }
+
+// ── Finance ──────────────────────────────────────────────
+function updateFin(){
+  const sel=document.getElementById('fin-sel').value;
+  if(!sel){ fin={apr:'',term:'',sub:0}; document.getElementById('fin-info').style.display='none'; }
+  else{
+    const [apr,term,sub]=sel.split('|');
+    fin={apr,term,sub:parseFloat(sub)};
+    document.getElementById('fin-info').style.display='block';
+  }
+  updateTotals();
+}
+
+function updateTotals(){
+  const t=tierTotals();
+  const ext=extrasTotal();
+  const sub=fin.sub;
+  const vm=vatMult();
+  const gB=(t.Basic+ext)*(1+sub)*vm;
+  const gM=(t.Mid+ext)*(1+sub)*vm;
+  const gP=(t.Premium+ext)*(1+sub)*vm;
+  const f=n=>'£'+n.toFixed(2);
+  document.getElementById('tb-b').textContent=f(gB);
+  document.getElementById('tb-m').textContent=f(gM);
+  document.getElementById('tb-p').textContent=f(gP);
+  document.getElementById('tb-ext').textContent=ext>0?f(ext*vm):'—';
+  if(fin.sub>0){
+    document.getElementById('fin-sub-lbl').textContent=(fin.sub*100).toFixed(1)+'% added';
+    const mo=fin.term==='Pay in 3'?3:parseInt(fin.term);
+    document.getElementById('fin-mo-lbl').textContent='Monthly — Essential ('+fin.term+')';
+    document.getElementById('fin-mo-val').textContent='£'+(gB/mo).toFixed(2)+'/mo';
+    document.getElementById('fin-info').style.display='block';
+  }
+}
+
+// ── Review ───────────────────────────────────────────────
+function buildReview(){
+  const first=document.getElementById('fn').value.trim();
+  const last=document.getElementById('ln').value.trim();
+  const email=document.getElementById('em').value.trim();
+  const addr=document.getElementById('ad').value.trim();
+  const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const ref='AKT-'+Date.now().toString(36).toUpperCase().slice(-6);
+  window._ref=ref; window._date=date;
+
+  document.getElementById('rv-who').textContent=first+' '+last+' · '+addr;
+  document.getElementById('rv-ref').textContent='Ref: '+ref+' · '+date;
+  document.getElementById('rv-email').value=email;
+
+  // Survey summary
+  const consumer=document.getElementById('sv-consumer')?.value||'';
+  const wall=document.getElementById('sv-wall')?.value||'';
+  document.getElementById('rv-survey').innerHTML=`
+    <div class="survey-box">
+      <strong>Property Survey Notes</strong>
+      <span>Power supply:</span> ${survey.power}<br>
+      <span>Existing unit:</span> ${survey.existing}<br>
+      <span>Consumer unit:</span> ${consumer}<br>
+      <span>Wall construction:</span> ${wall}
+    </div>`;
+
+  // Rooms & totals — branch on job type
+  const finNote=fin.sub>0?` <span style="font-size:11px;color:var(--mid);font-weight:400">(inc ${(fin.sub*100).toFixed(1)}% finance subsidy)</span>`:'';
+  const vm=vatMult();
+
+  if(jobType==='multi'){
+    const mst = msTotalPrice(rooms);
+    // Outdoor unit lines per tier
+    const ouLines = ['Essential','Comfort','Premium'].map(tier=>{
+      const t = mst[tier];
+      const tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+      return `<div class="tline">
+        <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tier}</span>
+          ${t.outdoor.label}</span>
+        <strong>£${Math.round(t.outdoor.price*vm)}</strong>
+      </div>`;
+    }).join('');
+    document.getElementById('rv-rooms').innerHTML=
+      `<div class="rv-room"><div class="rv-room-hdr"><strong>Outdoor Units (auto-selected)</strong></div>${ouLines}</div>`+
+      rooms.map((r,idx)=>`
+        <div class="rv-room">
+          <div class="rv-room-hdr">
+            <strong>Room ${idx+1}: ${r.type}</strong>
+            <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+          </div>
+          ${['Essential','Comfort','Premium'].map(tier=>{
+            const head=msPickHead(tier,r.kwRec||2.0);
+            const hp=msHeadPrice(head)*vm;
+            const pc=pipeCost(r,tier);
+            const tb={Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+            return `<div class="tline">
+              <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tier}</span>
+                ${head.label}${pc>0?' +'+r.extraPipe+'m pipe':''}
+              </span>
+              <strong>£${(hp+pc).toFixed(2)}</strong>
+            </div>`;
+          }).join('')}
+        </div>`).join('');
+    document.getElementById('rv-totals').innerHTML=`
+      <div class="grand-line"><span>Essential all-in${finNote}</span><span>£${mst.Essential.total.toFixed(2)}</span></div>
+      <div class="grand-line"><span>Comfort all-in${finNote}</span><span>£${mst.Comfort.total.toFixed(2)}</span></div>
+      <div class="grand-line"><span>Premium all-in${finNote}</span><span>£${mst.Premium.total.toFixed(2)}</span></div>`;
+  } else {
+    document.getElementById('rv-rooms').innerHTML=rooms.map((r,idx)=>`
+      <div class="rv-room">
+        <div class="rv-room-hdr">
+          <strong>Room ${idx+1}: ${r.type}</strong>
+          <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+        </div>
+        ${['Basic','Mid','Premium'].map(tier=>{
+          const u=getUnit(tier,r.kwRec||2.5);
+          const pc=pipeCost(r,tier);
+          const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
+          const tl={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+          return `<div class="tline">
+            <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tl}</span>
+              ${u.make} ${u.series} ${u.kw}kW${pc>0?' +'+r.extraPipe+'m pipe':''}
+            </span>
+            <strong>£${((u.price+pc)*vm).toFixed(2)}</strong>
+          </div>`;
+        }).join('')}
+      </div>`).join('');
+    const t=tierTotals(); const ext=extrasTotal(); const sub=fin.sub;
+    const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
+    document.getElementById('rv-totals').innerHTML=`
+      <div class="grand-line"><span>Essential Package all-in${finNote}</span><span>£${gB.toFixed(2)}</span></div>
+      <div class="grand-line"><span>Comfort Package all-in${finNote}</span><span>£${gM.toFixed(2)}</span></div>
+      <div class="grand-line"><span>Premium Package all-in${finNote}</span><span>£${gP.toFixed(2)}</span></div>`;
+  }
+
+  // Add-ons (same for both)
+  const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
+  document.getElementById('rv-addons').innerHTML=filled.length?
+    '<div class="divider"></div>'+filled.map(a=>
+      `<div class="tline"><span>${a.desc}</span><span>£${parseFloat(a.price).toFixed(2)}</span></div>`
+    ).join(''):'';
+}
+
+
+// ── Send ─────────────────────────────────────────────────
+async function sendQuote(){
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true;
+  document.getElementById('send-status').innerHTML=`
+    <div class="card status-sending"><div class="spinner"></div><p>Sending...</p></div>`;
+
+  const g=id=>document.getElementById(id)?.value.trim()||'';
+  const first=g('fn'), last=g('ln'), email=g('em'), phone=g('ph'), addr=g('ad');
+  const notes=g('rv-notes');
+  const ref=window._ref, date=window._date;
+  const consumer=document.getElementById('sv-consumer')?.value||'';
+  const wall=document.getElementById('sv-wall')?.value||'';
+
+  const ext=extrasTotal();
+  const sub=fin.sub;
+  const vm=vatMult();
+  var gB, gM, gP;
+  if(jobType==='multi'){
+    const mst=msTotalPrice(rooms);
+    gB=mst.Essential.total; gM=mst.Comfort.total; gP=mst.Premium.total;
+  } else {
+    const t=tierTotals();
+    gB=(t.Basic+ext)*(1+sub)*vm;
+    gM=(t.Mid+ext)*(1+sub)*vm;
+    gP=(t.Premium+ext)*(1+sub)*vm;
+  }
+  const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
+  const jobTypeLabel = jobType==='multi' ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
+  const ouLabel = jobType==='multi' ? (function(){
+    var t=msTotalPrice(rooms);
+    return 'Essential: '+t.Essential.outdoor.label+' | Comfort/Premium: '+t.Comfort.outdoor.label;
+  })() : '';
+  const jobNotes = [
+    '=== '+jobTypeLabel+' JOB ===',
+    ouLabel ? 'Outdoor unit: '+ouLabel : null,
+    '=== PROPERTY SURVEY ===',
+    'Power: '+survey.power,
+    'Existing unit: '+survey.existing,
+    'Consumer unit: '+consumer,
+    'Wall type: '+wall,
+    '',
+    '=== PRICING ===',
+    'Essential Package: £'+gB.toFixed(2),
+    'Comfort Package:   £'+gM.toFixed(2),
+    'Premium:           £'+gP.toFixed(2),
+    fin.apr?'Finance: '+fin.apr+' '+fin.term:'',
+    '',
+    '=== ROOMS ===',
+  ].concat(
+    rooms.map(function(r,i){
+      return [
+        'Room '+(i+1)+': '+r.type+' ('+r.l+'×'+r.w+'×'+r.h+'m · '+r.kwRec+'kW)',
+        '  Indoor: '+r.pos+' · '+r.floor,
+        '  Outdoor: '+r.outdoor+' · '+r.mount,
+        '  Route: '+r.route,
+        '  Access: '+r.access,
+        r.extraPipe>0?'  Extra pipe: '+r.extraPipe+'m':null,
+        fittingsCost(r)>0?'  Fittings: '+FITTINGS.filter(function(f){return r.fittings&&r.fittings[f[1]]>0;}).map(function(f){
+          var use100=survey.installType==='multi'; var price=(use100&&f[3]!==null)?f[3]:f[2];
+          return r.fittings[f[1]]+'× '+f[0]+' (£'+(r.fittings[f[1]]*price).toFixed(2)+')';
+        }).join(', '):null,
+      ].filter(Boolean).join('\n');
+    })
+  ).concat([notes?'\n=== NOTES ===\n'+notes:null]).filter(Boolean).join('\n');
+
+  const payload={
+    customer_name:first+' '+last, customer_email:email,
+    customer_phone:phone, customer_address:addr,
+    quote_ref:ref, quote_date:date,
+    basic_total:'£'+gB.toFixed(2), mid_total:'£'+gM.toFixed(2), premium_total:'£'+gP.toFixed(2),
+    extras_total:'£'+ext.toFixed(2),
+    finance_product:fin.apr?fin.apr+' '+fin.term:'None',
+    finance_subsidy_pct:sub>0?(sub*100).toFixed(1)+'%':'0%',
+    notes:notes, job_notes:jobNotes,
+    // These fields are written to Google Sheets so Zap 3 can build the Jobber job
+    // when the customer selects a tier
+    gs_basic_job_notes:'=== OPTION SELECTED: ESSENTIAL PACKAGE ===\n£'+gB.toFixed(2)+' all-in\n\n'+jobNotes,
+    gs_mid_job_notes:'=== OPTION SELECTED: COMFORT PACKAGE ===\n£'+gM.toFixed(2)+' all-in\n\n'+jobNotes,
+    gs_premium_job_notes:'=== OPTION SELECTED: PREMIUM PACKAGE ===\n£'+gP.toFixed(2)+' all-in\n\n'+jobNotes,
+    email_html:buildEmail({first,last,addr,ref,date,t,ext,sub,fin,filled,notes,gB,gM,gP}),
+    rooms_json:JSON.stringify(rooms.map(r=>({
+      type:r.type, dims:r.l+'×'+r.w+'×'+r.h+'m', kw_rec:r.kwRec,
+      basic_unit:getUnit('Basic',r.kwRec||2.5).make+' '+getUnit('Basic',r.kwRec||2.5).series+' '+getUnit('Basic',r.kwRec||2.5).kw+'kW',
+      mid_unit:getUnit('Mid',r.kwRec||2.5).make+' '+getUnit('Mid',r.kwRec||2.5).series+' '+getUnit('Mid',r.kwRec||2.5).kw+'kW',
+      premium_unit:getUnit('Premium',r.kwRec||2.5).make+' '+getUnit('Premium',r.kwRec||2.5).series+' '+getUnit('Premium',r.kwRec||2.5).kw+'kW',
+      basic_price:(getUnit('Basic',r.kwRec||2.5).price+pipeCost(r,'Basic')).toFixed(2),
+      mid_price:(getUnit('Mid',r.kwRec||2.5).price+pipeCost(r,'Mid')).toFixed(2),
+      premium_price:(getUnit('Premium',r.kwRec||2.5).price+pipeCost(r,'Premium')).toFixed(2),
+      extra_pipe_m:r.extraPipe,
+      fittings_cost:fittingsCost(r).toFixed(2),
+      fittings_detail:FITTINGS.filter(([,code])=>(r.fittings&&r.fittings[code]>0)).map(([name,code])=>r.fittings[code]+'× '+name).join(', '),
+      indoor_pos:r.pos, floor:r.floor, outdoor:r.outdoor,
+      mount:r.mount, route:r.route, access:r.access,
+    }))),
+  };
+
+  try{
+    await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    document.getElementById('send-status').innerHTML=`
+      <div class="card status-ok">
+        <div class="tick">✓</div>
+        <h3>Quote Sent!</h3>
+        <p>Sent to <strong>${email}</strong></p>
+        <p style="margin-top:6px;font-size:12px">Ref: ${ref}</p>
+      </div>`;
+  }catch(e){
+    document.getElementById('send-status').innerHTML=`
+      <div class="card" style="border:2px solid #e74c3c;padding:18px;text-align:center">
+        <p style="color:#e74c3c;font-weight:600">Failed — check webhook URL</p>
+        <p style="color:var(--mid);font-size:12px;margin-top:4px">${e.message}</p>
+      </div>`;
+    btn.disabled=false;
+  }
+}
+
+// ── Email builder ────────────────────────────────────────
+function buildEmail({first,last,addr,ref,date,t,ext,sub,fin,filled,notes,gB,gM,gP}){
+
+  // Selection button URLs — hit SELECTION_WEBHOOK with ref + chosen tier
+  // Encoded as query params on a redirect URL so it works as a plain href in email
+  function selUrl(tier){
+    const base=SELECTION_WEBHOOK==='YOUR_ZAPIER_SELECTION_WEBHOOK_URL'?'#':SELECTION_WEBHOOK;
+    const params=encodeURIComponent(JSON.stringify({ref,tier,customer_name:first+' '+last,customer_email:''}));
+    return `${base}?ref=${encodeURIComponent(ref)}&tier=${encodeURIComponent(tier)}&name=${encodeURIComponent(first+' '+last)}`;
+  }
+
+  // Room rows — different layout for single vs multi-split
+  var roomRows;
+  if(jobType==='multi'){
+    const mstEmail = msTotalPrice(rooms);
+    const ouLine = ['Essential','Comfort','Premium'].map(tier=>{
+      const ou = mstEmail[tier].outdoor;
+      const tbg = {Essential:'#f4f6f9',Comfort:'#fff4ef',Premium:'#1a2e4a'}[tier];
+      const ttc = {Essential:'#1a2e4a',Comfort:'#E8612A',Premium:'#C5E8F5'}[tier];
+      return `<tr style="background:#f8fafc"><td colspan="3" style="padding:8px 14px;border-top:1px solid #eef0f3">
+        <span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">${tier}</span>
+        <span style="font-size:12px;color:#555;margin-left:6px">${ou.label}</span>
+        <span style="float:right;font-size:12px;font-weight:700;color:#1a2e4a">£${Math.round(ou.price*vatMult())}</span>
+      </td></tr>`;
+    }).join('');
+    roomRows = ouLine + rooms.map((r,i)=>{
+      const tierBlocks=['Essential','Comfort','Premium'].map(tier=>{
+        const head=msPickHead(tier,r.kwRec||2.0);
+        const pc=pipeCost(r,tier);
+        const hp=msHeadPrice(head)*vatMult();
+        const tbg={'Essential':'#f4f6f9','Comfort':'#fff4ef','Premium':'#1a2e4a'}[tier];
+        const ttc={'Essential':'#1a2e4a','Comfort':'#E8612A','Premium':'#C5E8F5'}[tier];
+        const tl={'Essential':'ESSENTIAL','Comfort':'COMFORT','Premium':'PREMIUM'}[tier];
+        return `<tr style="border-bottom:1px solid #eef0f3">
+          <td style="padding:8px 14px;width:38%"><span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:0.5px">${tl}</span></td>
+          <td style="padding:8px 8px;font-size:12px;color:#555;width:38%">${head.label}${pc>0?' +'+r.extraPipe+'m pipe':''}</td>
+          <td style="padding:8px 10px;text-align:right;font-size:15px;font-weight:700;color:#1a2e4a;width:24%">£${(hp+pc).toFixed(0)}</td>
+        </tr>`;
+      }).join('');
+      return `<tr style="background:#f8fafc"><td colspan="3" style="padding:10px 14px 4px;border-top:2px solid #eef0f3">
+          <strong style="font-size:13px;color:#1a2e4a">Room ${i+1}: ${r.type}</strong>
+          <span style="font-size:11px;color:#8a9bb0;margin-left:6px">${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+        </td></tr>${tierBlocks}`;
+    }).join('');
+  } else {
+  // Per-room stacked layout — each tier on its own row inside the room block
+  roomRows=rooms.map((r,i)=>{
+    const tierBlocks=['Basic','Mid','Premium'].map(tier=>{
+      const u=getUnit(tier,r.kwRec||2.5);
+      const pc=pipeCost(r,tier);
+      const tbg={'Basic':'#f4f6f9','Mid':'#E8612A','Premium':'#1a2e4a'}[tier];
+      const ttc={'Basic':'#1a2e4a','Mid':'#fff','Premium':'#C5E8F5'}[tier];
+      const label={'Basic':'ESSENTIAL','Mid':'COMFORT','Premium':'PREMIUM'}[tier];
+      return `<tr style="border-bottom:1px solid #eef0f3">
+        <td style="padding:8px 14px;width:38%">
+          <span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:0.5px">${label}</span>
+        </td>
+        <td style="padding:8px 8px;font-size:12px;color:#555;width:38%">${u.make} ${u.series} ${u.kw}kW${r.extraPipe>0?' +'+r.extraPipe+'m pipe':''}${fittingsCost(r)>0?' +fittings':''}</td>
+        <td style="padding:8px 10px;text-align:right;font-size:15px;font-weight:700;color:#1a2e4a;width:24%">£${(u.price+pc).toFixed(0)}</td>
+      </tr>`;
+    }).join('');
+    return `<tr style="background:#f8fafc">
+      <td colspan="3" style="padding:10px 14px 4px;border-top:2px solid #eef0f3">
+        <strong style="font-size:13px;color:#1a2e4a">${r.type}</strong>
+        <span style="font-size:11px;color:#8a9bb0;margin-left:6px">${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+      </td>
+    </tr>${tierBlocks}`;
+  }).join('');
+  } // end single-split else
+
+  const addonRows=filled.length>0?`<tr style="background:#f8fafc">
+    <td colspan="3" style="padding:10px 14px 4px;border-top:2px solid #eef0f3">
+      <strong style="font-size:12px;color:#1a2e4a">Additional items</strong>
+    </td></tr>`+filled.map(a=>`
+    <tr><td colspan="2" style="padding:7px 14px;border-bottom:1px solid #eef0f3;font-size:12px;color:#555">+ ${a.desc}</td>
+    <td style="padding:7px 10px;text-align:right;font-size:12px;font-weight:600;color:#1a2e4a;border-bottom:1px solid #eef0f3">£${parseFloat(a.price).toFixed(0)}</td></tr>`).join(''):'';
+
+  const finNote=sub>0?`<p style="font-size:11px;color:#8a9bb0;margin:6px 0 0">
+    Finance: ${fin.apr} over ${fin.term} — subsidy included in totals.${(()=>{
+      const mo=fin.term==='Pay in 3'?3:parseInt(fin.term);
+      return ` Est. monthly: Essential £${(gB/mo).toFixed(0)} · Comfort £${(gM/mo).toFixed(0)} · Premium £${(gP/mo).toFixed(0)}/mo`;
+    })()}</p>`:'';
+
+  // Selection buttons — stacked vertically for mobile
+  const btnBasic=selUrl('Basic');
+  const btnMid=selUrl('Mid');
+  const btnPremium=selUrl('Premium');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f2f5f9;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f5f9;padding:20px 0">
+<tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
+
+<!-- HEADER -->
+<tr><td style="background:#1a2e4a;border-radius:12px 12px 0 0;padding:22px 24px 18px">
+  <div style="font-size:20px;font-weight:900;color:#fff;letter-spacing:1px">AKITA</div>
+  <div style="font-size:10px;color:#C5E8F5;letter-spacing:2px;margin-top:2px">AIR CONDITIONING &amp; REFRIGERATION</div>
+  <div style="margin-top:12px;display:inline-block;background:#E8612A;color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-radius:4px;letter-spacing:1px">SITE SURVEY QUOTE</div>
+</td></tr>
+
+<!-- REF BAR -->
+<tr><td style="background:#142238;padding:8px 24px">
+  <table width="100%"><tr>
+    <td style="color:#C5E8F5;font-size:11px">Ref: <strong style="color:#fff">${ref}</strong></td>
+    <td align="right" style="color:#C5E8F5;font-size:11px">${date}</td>
+  </tr></table>
+</td></tr>
+
+<!-- BODY -->
+<tr><td style="background:#fff;padding:22px 24px">
+  <p style="font-size:15px;color:#1a2e4a;margin:0 0 5px;font-weight:700">Dear ${first},</p>
+  <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 20px">
+    Thank you for having us visit <strong>${addr}</strong>.
+    Based on our survey we have prepared three options — tap a button below to confirm your choice and we will send your formal quote straight away.
+  </p>
+
+  <!-- ROOM BREAKDOWN TABLE -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef0f3;border-radius:8px;overflow:hidden;margin-bottom:18px">
+    <tr style="background:#f4f6f9">
+      <th style="padding:9px 14px;text-align:left;font-size:10px;color:#8a9bb0;font-weight:700;border-bottom:1px solid #eef0f3" colspan="3">ROOM BREAKDOWN</th>
+    </tr>
+    ${roomRows}${addonRows}
+  </table>
+
+  <!-- ALL-IN TOTALS — stacked cards for mobile -->
+  ${ext>0?`<p style="font-size:11px;color:#8a9bb0;margin:0 0 10px">Extras (£${ext.toFixed(0)}) included in all totals below.</p>`:''}
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px">
+    <tr>
+      <td style="background:#f4f6f9;border-radius:6px;padding:14px;text-align:center;width:32%">
+        <div style="font-size:9px;font-weight:700;color:#888;margin-bottom:6px;letter-spacing:1.5px">ESSENTIAL</div>
+        <div style="font-size:24px;font-weight:900;color:#1a2e4a">£${gB.toFixed(0)}</div>
+        <div style="font-size:10px;color:#888;margin-top:3px">Daikin Sensira</div>
+      </td>
+      <td style="width:2%"></td>
+      <td style="background:#fff4ef;border-radius:6px;padding:14px;text-align:center;width:32%;border:1px solid #f0d5c8">
+        <div style="font-size:9px;font-weight:700;color:#E8612A;margin-bottom:6px;letter-spacing:1.5px">COMFORT</div>
+        <div style="font-size:24px;font-weight:900;color:#1a2e4a">£${gM.toFixed(0)}</div>
+        <div style="font-size:10px;color:#888;margin-top:3px">Mitsubishi EF Zen</div>
+      </td>
+      <td style="width:2%"></td>
+      <td style="background:#1a2e4a;border-radius:6px;padding:14px;text-align:center;width:32%">
+        <div style="font-size:9px;font-weight:700;color:#C5E8F5;margin-bottom:6px;letter-spacing:1.5px">PREMIUM</div>
+        <div style="font-size:24px;font-weight:900;color:#fff">£${gP.toFixed(0)}</div>
+        <div style="font-size:10px;color:#8aaccc;margin-top:3px">Mitsubishi LN</div>
+      </td>
+    </tr>
+  </table>
+  <p style="font-size:10px;color:#aaa;margin:0 0 22px">Supply &amp; installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
+  ${finNote}
+
+  <!-- SELECTION BUTTONS -->
+  <div style="background:#f4f6f9;border-radius:8px;padding:18px 16px;margin-bottom:20px">
+    <p style="font-size:13px;font-weight:700;color:#1a2e4a;margin:0 0 4px;text-align:center">Ready to go ahead?</p>
+    <p style="font-size:12px;color:#888;margin:0 0 14px;text-align:center">Tap your preferred option — we'll raise your quote straight away.</p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="padding:0 4px 0 0">
+          <a href="${btnBasic}" style="display:block;background:#fff;border:2px solid #ddd;color:#1a2e4a;font-size:12px;font-weight:700;text-align:center;padding:13px 6px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">ESSENTIAL<br><span style="font-size:13px;font-weight:900">£${gB.toFixed(0)}</span></a>
+        </td>
+        <td style="padding:0 4px">
+          <a href="${btnMid}" style="display:block;background:#E8612A;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:13px 6px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">COMFORT<br><span style="font-size:13px;font-weight:900">£${gM.toFixed(0)}</span></a>
+        </td>
+        <td style="padding:0 0 0 4px">
+          <a href="${btnPremium}" style="display:block;background:#1a2e4a;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:13px 6px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">PREMIUM<br><span style="font-size:13px;font-weight:900">£${gP.toFixed(0)}</span></a>
+        </td>
+      </tr>
+    </table>
+    <p style="font-size:10px;color:#aaa;margin:10px 0 0;text-align:center">Or reply to this email if you'd prefer to chat first.</p>
+  </div>
+
+  ${notes?`<div style="background:#f4f6f9;border-left:3px solid #2e7fbf;padding:11px 15px;border-radius:0 8px 8px 0;margin-bottom:20px">
+    <p style="font-size:11px;font-weight:700;color:#1a2e4a;margin:0 0 3px">SURVEY NOTES</p>
+    <p style="font-size:12px;color:#555;line-height:1.5;margin:0">${notes}</p>
+  </div>`:''}
+
+  <p style="font-size:13px;color:#555;margin:0">Questions? Call <strong style="color:#1a2e4a">0330 043 7537</strong> or reply to this email.</p>
+</td></tr>
+
+<!-- FOOTER -->
+<tr><td style="background:#1a2e4a;padding:16px 24px;border-radius:0 0 12px 12px">
+  <div style="color:#fff;font-size:12px;font-weight:700">Akita Air Conditioning &amp; Refrigeration</div>
+  <div style="color:#C5E8F5;font-size:11px;margin-top:3px">0330 043 7537 · hello@akita.ac · akita.ac</div>
+  <div style="color:#8a9bb0;font-size:10px;margin-top:3px">F-Gas Certified · Reg 16593086 · Refcom REF1023379 · Lavenham, Suffolk</div>
+</td></tr>
+
+</table></td></tr></table>
+</body></html>`;
+}
+
+// ── Selection handler (fires when customer taps tier button) ──
+// Called by Zapier Zap 3 — receives ref + tier, creates Jobber job
+// The SELECTION_WEBHOOK URL is embedded in each button href in the email.
+// When customer taps, it hits Zapier with: ref, tier, customer_name
+// Zapier then looks up full quote data from Google Sheets by ref and creates the Jobber job.
+// Payload stored in Google Sheets when quote is first sent (Zap 1 writes a row).
+// Zap 3 reads that row by ref, pulls Basic/Mid/Premium totals + job notes, creates job.
+
+// ── Job type selection ───────────────────────────────────
+function setJobType(type){
+  jobType = type;
+  survey.installType = (type === 'multi') ? 'multi' : 'single';
+  // Reset rooms so old job doesn't bleed into new
+  rooms = []; rIdx = 0; msOutdoor = null;
+  addRoom();
+  // Highlight selected card
+  document.getElementById('jt-single-card').style.borderColor = type==='single' ? 'var(--orange)' : 'var(--border)';
+  document.getElementById('jt-multi-card').style.borderColor  = type==='multi'  ? 'var(--orange)' : 'var(--border)';
+  // Navigate to customer details after brief visual feedback
+  setTimeout(function(){
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+    document.getElementById('p0').classList.add('on');
+    window.scrollTo(0,0);
+  }, 180);
+}
+
+// ── Multi-split functions ─────────────────────────────────
+function buildMsQuote(){
+  buildMsRooms();
+  updateMsTotals();
+}
+
+function buildMsRooms(){
+  var wrap = document.getElementById('ms-rooms-wrap');
+  if(!wrap) return;
+  wrap.innerHTML = rooms.map(function(r, idx){
+    var html = '<div class="card">';
+    html += '<div class="card-hdr"><span class="ci">❄️</span> Room '+(idx+1)+': '+r.type;
+    html += '<span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">· '+r.l+'×'+r.w+'×'+r.h+'m · '+r.kwRec+'kW</span></div>';
+    html += '<div class="tier-grid">';
+    ['Essential','Comfort','Premium'].forEach(function(tier){
+      var head = msPickHead(tier, r.kwRec);
+      var hp = msHeadPrice(head) * vatMult();
+      var tc = {Essential:'tc-basic',Comfort:'tc-mid',Premium:'tc-prem'}[tier];
+      var tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+      html += '<div class="tier-card '+tc+'">';
+      html += '<div class="tier-badge '+tb+'">'+tier+'</div>';
+      html += '<div class="tier-price" id="ms-tp-'+r.id+'-'+tier+'">£'+Math.round(hp)+'</div>';
+      html += '<div class="tier-sub">'+head.label+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="pipe-row"><span class="lbl2">Extra pipe (m beyond 3m)</span>';
+    html += '<input type="number" value="'+(r.extraPipe||0)+'" min="0" max="50" step="1" oninput="setPipe('+r.id+',this.value)" style="width:72px;text-align:center">';
+    html += '<span class="pipe-note" id="pipecost-'+r.id+'"></span></div>';
+    html += buildFittingsHtml(r);
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+function updateMsTotals(){
+  if(!rooms.length) return;
+  var totals = msTotalPrice(rooms);
+  var f = function(n){ return '£'+n.toFixed(2); };
+  ['Essential','Comfort','Premium'].forEach(function(tier){
+    var t = totals[tier];
+    var ouEl = document.getElementById('ms-ou-'+tier.toLowerCase());
+    var totEl = document.getElementById('ms-tb-'+tier.toLowerCase());
+    if(ouEl) ouEl.textContent = t.outdoor.label+' · £'+Math.round(t.outdoor.price*vatMult());
+    if(totEl) totEl.textContent = f(t.total);
+  });
+}
+
+function refreshMsHeadPrices(){
+  rooms.forEach(function(r){
+    ['Essential','Comfort','Premium'].forEach(function(tier){
+      var el = document.getElementById('ms-tp-'+r.id+'-'+tier);
+      if(!el) return;
+      var head = msPickHead(tier, r.kwRec||2.0);
+      el.textContent = '£'+Math.round(msHeadPrice(head)*vatMult());
+    });
+  });
+  updateMsTotals();
+}
+
+// ── Init ─────────────────────────────────────────────────
+// Start on job type screen
+document.getElementById('pjt').classList.add('on');
+document.getElementById('p0').classList.remove('on');
+addRoom();
+addons=[{id:aIdx++,desc:'Condensate pump',price:''},{id:aIdx++,desc:'Electrician / sparky (day rate)',price:''}];
+</script>
+</body>
+</html>
