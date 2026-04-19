@@ -1248,7 +1248,7 @@ async function sendQuote(){
   try{
     const controller = new AbortController();
     const timeout = setTimeout(()=>controller.abort(), 10000);
-    const resp = await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal,mode:'no-cors'});
+    await fetch(WEBHOOK,{method:'POST',body:JSON.stringify(payload),signal:controller.signal,mode:'no-cors'});
     clearTimeout(timeout);
     document.getElementById('send-status').innerHTML=`
       <div class="card status-ok">
