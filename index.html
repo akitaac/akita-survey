@@ -1225,12 +1225,10 @@ async function sendQuote(){
     finance_product:fin.apr?fin.apr+' '+fin.term:'None',
     finance_subsidy_pct:sub>0?(sub*100).toFixed(1)+'%':'0%',
     notes:notes, job_notes:jobNotes,
-    // These fields are written to Google Sheets so Zap 3 can build the Jobber job
-    // when the customer selects a tier
     gs_basic_job_notes:'=== OPTION SELECTED: ESSENTIAL PACKAGE ===\n£'+gB.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_mid_job_notes:'=== OPTION SELECTED: COMFORT PACKAGE ===\n£'+gM.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_premium_job_notes:'=== OPTION SELECTED: PREMIUM PACKAGE ===\n£'+gP.toFixed(2)+' all-in\n\n'+jobNotes,
-    email_html:buildEmail({first,last,addr,ref,date,t,ext,sub,fin,filled,notes,gB,gM,gP}),
+    email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP}),
     rooms_json:JSON.stringify(rooms.map(r=>({
       type:r.type, dims:r.l+'×'+r.w+'×'+r.h+'m', kw_rec:r.kwRec,
       basic_unit:getUnit('Basic',r.kwRec||2.5).make+' '+getUnit('Basic',r.kwRec||2.5).series+' '+getUnit('Basic',r.kwRec||2.5).kw+'kW',
@@ -1248,7 +1246,10 @@ async function sendQuote(){
   };
 
   try{
-    await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 10000);
+    const resp = await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+    clearTimeout(timeout);
     document.getElementById('send-status').innerHTML=`
       <div class="card status-ok">
         <div class="tick">✓</div>
@@ -1267,7 +1268,7 @@ async function sendQuote(){
 }
 
 // ── Email builder ────────────────────────────────────────
-function buildEmail({first,last,addr,ref,date,t,ext,sub,fin,filled,notes,gB,gM,gP}){
+function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP}){
 
   // Selection button URLs — hit SELECTION_WEBHOOK with ref + chosen tier
   // Encoded as query params on a redirect URL so it works as a plain href in email
