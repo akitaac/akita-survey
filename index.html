@@ -215,10 +215,26 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <input type="tel" id="ph" placeholder="07700 900000" autocomplete="tel">
       <div class="errmsg">Required</div>
     </div>
-    <div class="field" id="f-ad">
-      <label class="lbl">Property Address</label>
-      <input type="text" id="ad" placeholder="12 High Street, Lavenham, Suffolk">
+    <div class="field" id="f-ad1">
+      <label class="lbl">Street Address</label>
+      <input type="text" id="ad1" placeholder="12 High Street" autocomplete="address-line1">
       <div class="errmsg">Required</div>
+    </div>
+    <div class="field" id="f-ad2">
+      <label class="lbl">Town / City</label>
+      <input type="text" id="ad2" placeholder="Lavenham" autocomplete="address-level2">
+      <div class="errmsg">Required</div>
+    </div>
+    <div class="row2">
+      <div class="field" id="f-ad3">
+        <label class="lbl">County</label>
+        <input type="text" id="ad3" placeholder="Suffolk" autocomplete="address-level1">
+      </div>
+      <div class="field" id="f-ad4">
+        <label class="lbl">Postcode</label>
+        <input type="text" id="ad4" placeholder="CO10 9AA" autocomplete="postal-code">
+        <div class="errmsg">Required</div>
+      </div>
     </div>
   </div>
   <button class="btn btn-primary" onclick="goPage(1)">Continue to Survey →</button>
@@ -684,7 +700,7 @@ function validateP0(){
   let ok=true;
   [['f-fn','fn',v=>v.length>0],['f-ln','ln',v=>v.length>0],
    ['f-em','em',v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
-   ['f-ph','ph',v=>v.length>0],['f-ad','ad',v=>v.length>0]
+   ['f-ph','ph',v=>v.length>0],['f-ad1','ad1',v=>v.length>0],['f-ad2','ad2',v=>v.length>0],['f-ad4','ad4',v=>v.length>0]
   ].forEach(([fid,iid,fn])=>{
     const v=document.getElementById(iid).value.trim();
     const pass=fn(v);
@@ -1051,7 +1067,11 @@ function buildReview(){
   const first=document.getElementById('fn').value.trim();
   const last=document.getElementById('ln').value.trim();
   const email=document.getElementById('em').value.trim();
-  const addr=document.getElementById('ad').value.trim();
+  const ad1=document.getElementById('ad1').value.trim();
+  const ad2=document.getElementById('ad2').value.trim();
+  const ad3=document.getElementById('ad3').value.trim();
+  const ad4=document.getElementById('ad4').value.trim();
+  const addr=[ad1,ad2,ad3,ad4].filter(Boolean).join(', ');
   const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const ref='AKT-'+Date.now().toString(36).toUpperCase().slice(-6);
   window._ref=ref; window._date=date;
@@ -1158,7 +1178,9 @@ async function sendQuote(){
     <div class="card status-sending"><div class="spinner"></div><p>Sending...</p></div>`;
 
   const g=id=>document.getElementById(id)?.value.trim()||'';
-  const first=g('fn'), last=g('ln'), email=g('em'), phone=g('ph'), addr=g('ad');
+  const first=g('fn'), last=g('ln'), email=g('em'), phone=g('ph');
+  const ad1=g('ad1'), ad2=g('ad2'), ad3=g('ad3'), ad4=g('ad4');
+  const addr=[ad1,ad2,ad3,ad4].filter(Boolean).join(', ');
   const notes=g('rv-notes');
   const ref=window._ref, date=window._date;
   const consumer=document.getElementById('sv-consumer')?.value||'';
@@ -1219,6 +1241,7 @@ async function sendQuote(){
   const payload={
     customer_name:first+' '+last, customer_email:email,
     customer_phone:phone, customer_address:addr,
+    customer_street:ad1, customer_city:ad2, customer_county:ad3, customer_postcode:ad4,
     quote_ref:ref, quote_date:date,
     basic_total:'£'+gB.toFixed(2), mid_total:'£'+gM.toFixed(2), premium_total:'£'+gP.toFixed(2),
     extras_total:'£'+ext.toFixed(2),
