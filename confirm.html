@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akita Air Conditioning — Confirming your quote</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Barlow',sans-serif;background:#f2f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:16px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 4px 24px rgba(26,46,74,.12)}
+  .hdr{background:#1a2e4a;padding:24px;text-align:center}
+  .hdr img{height:60px;border-radius:10px}
+  .body{padding:32px 28px;text-align:center}
+  .spinner{width:48px;height:48px;border:3px solid #e8f4fb;border-top-color:#E8612A;border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 20px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .tick{width:64px;height:64px;background:#1B8A4A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .error-icon{width:64px;height:64px;background:#e74c3c;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px}
+  h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;color:#1a2e4a;margin-bottom:8px}
+  p{font-size:14px;color:#7a8fa8;line-height:1.6;margin-bottom:8px}
+  .tier-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.5px;margin-bottom:16px}
+  .essential{background:#E8F5E9;color:#1B5E20}
+  .comfort{background:#FFF8E1;color:#BF6000}
+  .premium{background:#E3F2FD;color:#0D47A1}
+  .ref{font-size:12px;color:#aaa;margin-top:12px}
+  .ftr{background:#f8fafc;border-top:1px solid #eee;padding:16px;text-align:center;font-size:11px;color:#aaa}
+  .ftr a{color:#2e7fbf;text-decoration:none}
+  #state-loading{display:block}
+  #state-success{display:none}
+  #state-error{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="hdr">
+    <img src="https://cdn.shopify.com/s/files/1/0906/1780/7181/files/akita-logo-cartoon-husky-sunglasses-coat.png?v=1773353080" alt="Akita">
+  </div>
+
+  <div class="body">
+    <!-- Loading state -->
+    <div id="state-loading">
+      <div class="spinner"></div>
+      <h1>Confirming your choice</h1>
+      <p>Just a moment while we process your selection...</p>
+    </div>
+
+    <!-- Success state -->
+    <div id="state-success">
+      <div class="tick">✓</div>
+      <h1>You're all set!</h1>
+      <div class="tier-badge" id="tier-label">Essential</div>
+      <p>Thanks <strong id="customer-name"></strong> — we've received your selection and will be in touch shortly to confirm your installation date.</p>
+      <p style="margin-top:12px">Any questions? Call us on <strong style="color:#1a2e4a">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf">hello@akita.ac</a></p>
+      <p class="ref" id="quote-ref"></p>
+    </div>
+
+    <!-- Error state -->
+    <div id="state-error">
+      <div class="error-icon">✕</div>
+      <h1>Something went wrong</h1>
+      <p>We couldn't process your selection. Please call us on <strong style="color:#1a2e4a">0330 043 7537</strong> and we'll sort it straight away.</p>
+    </div>
+  </div>
+
+  <div class="ftr">
+    Akita Air Conditioning &amp; Refrigeration &nbsp;·&nbsp; <a href="https://akita.ac">akita.ac</a> &nbsp;·&nbsp; F-Gas Certified · REFCOM REF1023379
+  </div>
+</div>
+
+<script>
+const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
+
+function getParam(name){
+  return new URLSearchParams(window.location.search).get(name) || '';
+}
+
+const ref  = getParam('ref');
+const tier = getParam('tier');
+const name = getParam('name');
+
+// Set tier badge
+const badge = document.getElementById('tier-label');
+const tierMap = {Basic:'Essential',Mid:'Comfort',Premium:'Premium'};
+const tierClass = {Basic:'essential',Mid:'comfort',Premium:'premium'};
+badge.textContent = tierMap[tier] || tier;
+badge.className = 'tier-badge ' + (tierClass[tier] || 'essential');
+
+document.getElementById('customer-name').textContent = decodeURIComponent(name);
+document.getElementById('quote-ref').textContent = 'Ref: ' + ref;
+
+// Fire webhook silently
+async function confirm(){
+  try {
+    await fetch(WEBHOOK + '?cors=true', {
+      method: 'POST',
+      body: JSON.stringify({ref, tier, customer_name: decodeURIComponent(name)}),
+      mode: 'no-cors'
+    });
+    // Show success (no-cors means we can't read response, assume success)
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('state-success').style.display = 'block';
+  } catch(e){
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('state-error').style.display = 'block';
+  }
+}
+
+// Small delay so spinner is visible
+setTimeout(confirm, 800);
+</script>
+</body>
+</html>

@@ -1273,8 +1273,7 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP}
   // Selection button URLs — hit SELECTION_WEBHOOK with ref + chosen tier
   // Encoded as query params on a redirect URL so it works as a plain href in email
   function selUrl(tier){
-    const base=SELECTION_WEBHOOK==='YOUR_ZAPIER_SELECTION_WEBHOOK_URL'?'#':SELECTION_WEBHOOK;
-    const params=encodeURIComponent(JSON.stringify({ref,tier,customer_name:first+' '+last,customer_email:''}));
+    const base = 'https://akitaac.github.io/akita-survey/confirm.html';
     return `${base}?ref=${encodeURIComponent(ref)}&tier=${encodeURIComponent(tier)}&name=${encodeURIComponent(first+' '+last)}`;
   }
 
