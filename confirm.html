@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -28,28 +27,27 @@
   .ftr{background:#f8fafc;border-top:1px solid #eee;padding:16px;text-align:center;font-size:11px;color:#aaa}
   .ftr a{color:#2e7fbf;text-decoration:none}
 
-/* Confirm button */
-.btn-confirm{
-display:block;width:100%;padding:16px;margin-top:20px;
-background:#E8612A;color:#fff;border:none;border-radius:10px;
-font-family:‘Barlow Condensed’,sans-serif;font-weight:800;font-size:20px;
-letter-spacing:.5px;cursor:pointer;transition:background .2s;
-}
-.btn-confirm:hover{background:#c94d1f}
-.btn-back{
-display:block;width:100%;padding:12px;margin-top:10px;
-background:transparent;color:#7a8fa8;border:1.5px solid #dde3ea;border-radius:10px;
-font-family:‘Barlow’,sans-serif;font-weight:500;font-size:14px;
-cursor:pointer;transition:border-color .2s;
-}
-.btn-back:hover{border-color:#1a2e4a;color:#1a2e4a}
+  /* Confirm button */
+  .btn-confirm{
+    display:block;width:100%;padding:16px;margin-top:20px;
+    background:#E8612A;color:#fff;border:none;border-radius:10px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;
+    letter-spacing:.5px;cursor:pointer;transition:background .2s;
+  }
+  .btn-confirm:hover{background:#c94d1f}
+  .btn-back{
+    display:block;width:100%;padding:12px;margin-top:10px;
+    background:transparent;color:#7a8fa8;border:1.5px solid #dde3ea;border-radius:10px;
+    font-family:'Barlow',sans-serif;font-weight:500;font-size:14px;
+    cursor:pointer;transition:border-color .2s;
+  }
+  .btn-back:hover{border-color:#1a2e4a;color:#1a2e4a}
 
-#state-confirm{display:block}
-#state-processing{display:none}
-#state-success{display:none}
-#state-error{display:none}
+  #state-confirm{display:block}
+  #state-processing{display:none}
+  #state-success{display:none}
+  #state-error{display:none}
 </style>
-
 </head>
 <body>
 <div class="card">
@@ -59,42 +57,40 @@ cursor:pointer;transition:border-color .2s;
 
   <div class="body">
 
-```
-<!-- Step 1: Confirmation prompt -->
-<div id="state-confirm">
-  <div class="tier-badge" id="tier-label-confirm">Essential</div>
-  <h1>Confirm your choice</h1>
-  <p>You're about to select the <strong id="tier-name-confirm"></strong> package for your quote.</p>
-  <p style="margin-top:4px">Please confirm this is the option you'd like to proceed with.</p>
-  <button class="btn-confirm" onclick="proceed()">Yes, confirm my selection</button>
-  <button class="btn-back" onclick="goBack()">← Go back and review</button>
-  <p class="ref" id="quote-ref-confirm"></p>
-</div>
+    <!-- Step 1: Confirmation prompt -->
+    <div id="state-confirm">
+      <div class="tier-badge" id="tier-label-confirm">Essential</div>
+      <h1>Confirm your choice</h1>
+      <p>You're about to select the <strong id="tier-name-confirm"></strong> package for your quote.</p>
+      <p style="margin-top:4px">Please confirm this is the option you'd like to proceed with.</p>
+      <button class="btn-confirm" onclick="proceed()">Yes, confirm my selection</button>
+      <button class="btn-back" onclick="goBack()">← Go back and review</button>
+      <p class="ref" id="quote-ref-confirm"></p>
+    </div>
 
-<!-- Step 2: Processing -->
-<div id="state-processing">
-  <div class="spinner"></div>
-  <h1>Confirming your choice</h1>
-  <p>Just a moment while we process your selection...</p>
-</div>
+    <!-- Step 2: Processing -->
+    <div id="state-processing">
+      <div class="spinner"></div>
+      <h1>Confirming your choice</h1>
+      <p>Just a moment while we process your selection...</p>
+    </div>
 
-<!-- Step 3: Success -->
-<div id="state-success">
-  <div class="tick">✓</div>
-  <h1>You're all set!</h1>
-  <div class="tier-badge" id="tier-label-success">Essential</div>
-  <p>Thanks <strong id="customer-name"></strong> — we've received your selection and will be in touch shortly to confirm your installation date.</p>
-  <p style="margin-top:12px">Any questions? Call us on <strong style="color:#1a2e4a">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf">hello@akita.ac</a></p>
-  <p class="ref" id="quote-ref-success"></p>
-</div>
+    <!-- Step 3: Success -->
+    <div id="state-success">
+      <div class="tick">✓</div>
+      <h1>You're all set!</h1>
+      <div class="tier-badge" id="tier-label-success">Essential</div>
+      <p>Thanks <strong id="customer-name"></strong> — we've received your selection and will be in touch shortly to confirm your installation date.</p>
+      <p style="margin-top:12px">Any questions? Call us on <strong style="color:#1a2e4a">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf">hello@akita.ac</a></p>
+      <p class="ref" id="quote-ref-success"></p>
+    </div>
 
-<!-- Error -->
-<div id="state-error">
-  <div class="error-icon">✕</div>
-  <h1>Something went wrong</h1>
-  <p>We couldn't process your selection. Please call us on <strong style="color:#1a2e4a">0330 043 7537</strong> and we'll sort it straight away.</p>
-</div>
-```
+    <!-- Error -->
+    <div id="state-error">
+      <div class="error-icon">✕</div>
+      <h1>Something went wrong</h1>
+      <p>We couldn't process your selection. Please call us on <strong style="color:#1a2e4a">0330 043 7537</strong> and we'll sort it straight away.</p>
+    </div>
 
   </div>
 
@@ -132,7 +128,13 @@ document.getElementById('customer-name').textContent = decodeURIComponent(name);
 document.getElementById('quote-ref-success').textContent = 'Ref: ' + ref;
 
 function goBack(){
-  history.back();
+  // Can't go back to an email — show a helpful message instead
+  document.getElementById('state-confirm').innerHTML = `
+    <h1 style="margin-bottom:12px">No problem!</h1>
+    <p>Go back to your quote email and tap a different package option.</p>
+    <p style="margin-top:12px">Any questions? Call us on <strong style="color:#1a2e4a">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf">hello@akita.ac</a></p>
+    <p class="ref">Ref: ${ref}</p>
+  `;
 }
 
 async function proceed(){
@@ -155,6 +157,5 @@ async function proceed(){
   }
 }
 </script>
-
 </body>
 </html>
