@@ -2,2343 +2,1960 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Akita — Site Survey Quote Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --navy:#1a2e4a;
-      --navy2:#142238;
-      --sky:#2e7fbf;
-      --orange:#E8612A;
-      --light:#C5E8F5;
-      --white:#fff;
-      --grey:#f2f5f9;
-      --mid:#7a8fa8;
-      --border:#dde3ec;
+      --navy-2:#22395a;
+      --blue:#2e7fbf;
+      --bg:#f3f6fa;
+      --white:#ffffff;
+      --line:#dce5ee;
+      --text:#213245;
+      --muted:#6f8093;
+      --orange:#e8612a;
+      --shadow:0 10px 30px rgba(26,46,74,.08);
+      --radius:18px;
       --gbg:#E8F5E9;
       --gtc:#1B5E20;
       --abg:#FFF8E1;
       --atc:#BF6000;
       --bbg:#E3F2FD;
       --btc:#0D47A1;
-      --shadow:0 10px 30px rgba(26,46,74,.08);
     }
 
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
     body{
       font-family:'Barlow',sans-serif;
-      background:var(--grey);
-      color:var(--navy);
-      min-height:100vh;
-      padding-bottom:40px;
+      color:var(--text);
+      background:var(--bg);
     }
 
-    .hdr{
-      background:var(--navy);
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      position:sticky;
-      top:0;
-      z-index:100;
-      box-shadow:0 2px 12px rgba(0,0,0,.22);
+    .wrap{
+      width:100%;
+      max-width:1180px;
+      margin:0 auto;
+      padding:18px;
     }
 
-    .hdr img{
-      height:40px;
-      width:40px;
-      object-fit:contain;
-      border-radius:8px;
-    }
-
-    .hdr h1{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:900;
-      font-size:18px;
+    .hero{
+      background:linear-gradient(135deg,var(--navy),var(--navy-2));
       color:#fff;
-      line-height:1;
-    }
-
-    .hdr p{
-      font-size:11px;
-      color:var(--light);
-      margin-top:2px;
-    }
-
-    .hdr-badge{
-      margin-left:auto;
-      background:var(--orange);
-      color:#fff;
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:700;
-      font-size:11px;
-      padding:4px 10px;
-      border-radius:20px;
-      white-space:nowrap;
-    }
-
-    .prog{
-      background:var(--navy2);
-      padding:10px 16px 12px;
-    }
-
-    .prog-dots{
-      display:flex;
-      gap:6px;
-      justify-content:center;
-    }
-
-    .dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:rgba(255,255,255,.18);
-      transition:all .25s;
-    }
-
-    .dot.done{background:var(--sky)}
-    .dot.active{background:var(--orange);transform:scale(1.4)}
-
-    .prog-lbl{
-      font-size:11px;
-      color:rgba(255,255,255,.45);
-      text-align:center;
-      margin-top:6px;
-    }
-
-    .prog-lbl b{color:var(--light)}
-
-    .page{
-      display:none;
-      padding:18px 14px 32px;
-      animation:fu .28s ease;
-    }
-
-    .page.on{display:block}
-
-    @keyframes fu{
-      from{opacity:0;transform:translateY(10px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-
-    .page-title{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:24px;
-      color:var(--navy);
-      margin-bottom:3px;
-    }
-
-    .page-sub{
-      font-size:13px;
-      color:var(--mid);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
       margin-bottom:18px;
     }
 
-    .card{
-      background:#fff;
-      border-radius:12px;
-      padding:18px;
-      margin-bottom:14px;
-      box-shadow:0 2px 16px rgba(26,46,74,.09);
-    }
-
-    .card-hdr{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:700;
-      font-size:16px;
-      color:var(--navy);
-      margin-bottom:14px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-
-    .ci{
-      width:28px;
-      height:28px;
-      background:var(--navy);
-      color:#fff;
-      border-radius:7px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:14px;
-      flex-shrink:0;
-    }
-
-    .field{margin-bottom:13px}
-    .field:last-child{margin-bottom:0}
-
-    label.lbl{
-      display:block;
-      font-size:11px;
-      font-weight:700;
-      color:var(--mid);
-      text-transform:uppercase;
-      letter-spacing:.6px;
-      margin-bottom:5px;
-    }
-
-    input,select,textarea{
-      width:100%;
-      padding:12px 13px;
-      border:1.5px solid var(--border);
-      border-radius:8px;
-      font-family:'Barlow',sans-serif;
-      font-size:16px;
-      color:var(--navy);
-      background:#fff;
-      outline:none;
-      transition:border-color .18s;
-      -webkit-appearance:none;
-    }
-
-    input:focus,select:focus,textarea:focus{
-      border-color:var(--sky);
-    }
-
-    select{
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9bb0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat:no-repeat;
-      background-position:right 13px center;
-      padding-right:34px;
-    }
-
-    textarea{resize:vertical}
-
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-
-    .err input,.err select{border-color:#e74c3c}
-    .errmsg{
-      color:#e74c3c;
-      font-size:11px;
-      margin-top:4px;
-      display:none;
-    }
-    .err .errmsg{display:block}
-
-    .hint{
-      font-size:11px;
-      color:var(--mid);
-      margin-top:5px;
-      line-height:1.4;
-    }
-
-    .pills{
-      display:flex;
-      flex-wrap:wrap;
-      gap:7px;
-      margin-top:6px;
-    }
-
-    .pill{
-      padding:7px 12px;
-      border:1.5px solid var(--border);
-      border-radius:20px;
-      cursor:pointer;
-      font-size:13px;
-      font-weight:500;
-      color:var(--mid);
-      background:#fff;
-      user-select:none;
-      transition:all .15s;
-    }
-
-    .pill.on{
-      border-color:var(--sky);
-      background:#e8f4fb;
-      color:var(--navy);
-      font-weight:600;
-    }
-
-    .pill.on::before{
-      content:'✓ ';
-      font-size:11px;
-      color:var(--sky);
-    }
-
-    .room-card{
-      background:var(--grey);
-      border:1.5px solid var(--border);
-      border-radius:10px;
-      padding:15px;
-      margin-bottom:12px;
-    }
-
-    .room-card-hdr{
+    .hero-inner{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      margin-bottom:13px;
-    }
-
-    .room-num{
-      background:var(--navy);
-      color:#fff;
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:700;
-      font-size:13px;
-      padding:3px 11px;
-      border-radius:20px;
-    }
-
-    .rm-btn{
-      background:none;
-      border:1.5px solid #ddd;
-      border-radius:6px;
-      padding:4px 10px;
-      font-size:12px;
-      color:#999;
-      cursor:pointer;
-    }
-
-    .install-section{
-      margin-top:12px;
-      padding-top:12px;
-      border-top:1px dashed var(--border);
-    }
-
-    .install-lbl{
-      font-size:11px;
-      font-weight:700;
-      color:var(--mid);
-      text-transform:uppercase;
-      letter-spacing:.6px;
-      margin-bottom:10px;
-    }
-
-    .kw-result{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      background:#e8f4fb;
-      border:1px solid var(--sky);
-      border-radius:8px;
-      padding:9px 13px;
-      margin-top:10px;
-    }
-
-    .kw-val{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:20px;
-      color:var(--sky);
-    }
-
-    .kw-info{
-      font-size:12px;
-      color:var(--navy);
-      line-height:1.4;
-    }
-
-    .kw-info span{
-      color:var(--mid);
-      font-size:11px;
-      display:block;
-      margin-top:1px;
-    }
-
-    .pipe-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-top:10px;
+      gap:20px;
+      padding:22px 24px;
       flex-wrap:wrap;
     }
 
-    .pipe-row .lbl2{
-      font-size:11px;
-      font-weight:700;
-      color:var(--mid);
-      text-transform:uppercase;
-      letter-spacing:.5px;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand img{
+      width:100%;
+      max-width:210px;
+      height:auto;
+      display:block;
+    }
+
+    .hero-copy h1{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:42px;
+      line-height:1;
+      margin:0 0 6px;
+      letter-spacing:.4px;
+    }
+
+    .hero-copy p{
+      margin:0;
+      color:#d8e6f2;
+      font-size:15px;
+    }
+
+    .badge{
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);
+      color:#fff;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:600;
       white-space:nowrap;
     }
 
-    .pipe-row input{
-      width:72px;
-      text-align:center;
-      font-size:15px;
-      padding:9px 10px;
+    .grid{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:18px;
+      align-items:start;
     }
 
-    .pipe-note{
-      font-size:12px;
-      color:var(--orange);
-      font-weight:600;
+    .panel{
+      background:var(--white);
+      border:1px solid #e7edf3;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
     }
 
-    .btn-add{
+    .panel-hd{
+      padding:18px 20px;
+      border-bottom:1px solid #edf2f6;
+      background:#fbfdff;
+    }
+
+    .panel-hd h2{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:28px;
+      letter-spacing:.3px;
+      color:var(--navy);
+      margin:0 0 4px;
+    }
+
+    .panel-hd p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .panel-bd{
+      padding:20px;
+    }
+
+    .section{
+      margin-bottom:20px;
+      padding-bottom:20px;
+      border-bottom:1px solid #eef3f7;
+    }
+
+    .section:last-child{
+      margin-bottom:0;
+      padding-bottom:0;
+      border-bottom:none;
+    }
+
+    .section-title{
+      font-family:'Barlow Condensed',sans-serif;
+      color:var(--navy);
+      font-size:24px;
+      margin:0 0 12px;
+      letter-spacing:.2px;
+    }
+
+    .section-sub{
+      color:var(--muted);
+      font-size:14px;
+      margin:0 0 14px;
+    }
+
+    .field-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:13px;
+      font-weight:700;
+      color:#34475b;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea{
       width:100%;
-      padding:13px;
-      border:2px dashed var(--border);
-      border-radius:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
       background:#fff;
-      color:var(--sky);
+      min-height:48px;
+      padding:12px 14px;
       font-family:'Barlow',sans-serif;
-      font-weight:600;
-      font-size:14px;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      margin-bottom:14px;
-      transition:all .18s;
+      font-size:15px;
+      color:var(--text);
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
     }
 
-    .addon-row{
+    textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:#8ab6db;
+      box-shadow:0 0 0 4px rgba(46,127,191,.10);
+    }
+
+    .help{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:-2px;
+    }
+
+    .choice-row{
       display:grid;
-      grid-template-columns:1fr 100px 38px;
-      gap:8px;
-      align-items:center;
-      margin-bottom:9px;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
 
-    .addon-row input{
-      font-size:14px;
-      padding:10px 12px;
-    }
-
-    .pw{
+    .choice-card{
       position:relative;
-    }
-
-    .pw::before{
-      content:'£';
-      position:absolute;
-      left:10px;
-      top:50%;
-      transform:translateY(-50%);
-      color:var(--mid);
-      font-size:14px;
-      pointer-events:none;
-    }
-
-    .pw input{padding-left:22px}
-
-    .del-btn{
-      background:none;
-      border:1.5px solid #e0e0e0;
-      border-radius:6px;
-      width:36px;
-      height:36px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
       cursor:pointer;
-      color:#bbb;
-      font-size:16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      background:#fff;
+      transition:.15s ease;
     }
 
-    .tier-grid{
+    .choice-card:hover{
+      border-color:#b9d3e9;
+      transform:translateY(-1px);
+    }
+
+    .choice-card input{
+      position:absolute;
+      inset:0;
+      opacity:0;
+      cursor:pointer;
+    }
+
+    .choice-card.active{
+      border-color:var(--blue);
+      background:#f7fbff;
+      box-shadow:0 0 0 3px rgba(46,127,191,.10);
+    }
+
+    .choice-card strong{
+      display:block;
+      color:var(--navy);
+      font-size:18px;
+      margin-bottom:3px;
+    }
+
+    .choice-card span{
+      display:block;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .check{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 13px;
+      background:#fff;
+    }
+
+    .check input{
+      margin-top:3px;
+      transform:scale(1.15);
+      accent-color:var(--blue);
+    }
+
+    .check strong{
+      display:block;
+      font-size:15px;
+      color:var(--navy);
+      margin-bottom:2px;
+    }
+
+    .check small{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .room-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:12px;
+      min-height:48px;
+      padding:12px 18px;
+      font-family:'Barlow',sans-serif;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+
+    .btn-primary{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .btn-primary:hover{background:#cf4e1e}
+    .btn-secondary{
+      background:#eff4f8;
+      color:var(--navy);
+      border:1px solid var(--line);
+    }
+
+    .btn-secondary:hover{background:#e8eff5}
+
+    .btn:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+    }
+
+    .room-list{
       display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:8px;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .room-card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .room-card-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
       margin-bottom:10px;
     }
 
-    .tier-card{
-      border:2px solid var(--border);
-      border-radius:10px;
-      padding:12px 8px;
-      text-align:center;
-      background:#fff;
-    }
-
-    .tier-badge{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:12px;
-      padding:2px 8px;
-      border-radius:20px;
-      display:inline-block;
-      margin-bottom:6px;
-    }
-
-    .tb-basic{background:var(--gbg);color:var(--gtc)}
-    .tc-basic{border-color:#c8e6c9}
-    .tb-mid{background:var(--abg);color:var(--atc)}
-    .tc-mid{border-color:#ffe082}
-    .tb-prem{background:var(--bbg);color:var(--btc)}
-    .tc-prem{border-color:#90caf9}
-
-    .tier-price{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
+    .room-card h4{
+      margin:0;
       font-size:19px;
       color:var(--navy);
     }
 
-    .tier-sub{
-      font-size:10px;
-      color:var(--mid);
-      margin-top:3px;
-      line-height:1.3;
-    }
-
-    .fin-pill{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      background:var(--grey);
-      border-radius:8px;
-      padding:9px 12px;
-      margin-top:7px;
-    }
-
-    .fin-pill span:first-child{
-      font-size:12px;
-      color:var(--mid);
-    }
-
-    .fin-pill span:last-child{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:700;
-      font-size:14px;
-      color:var(--orange);
-    }
-
-    .total-bar{
-      background:var(--navy);
-      border-radius:10px;
-      padding:14px 16px;
-      margin-bottom:14px;
-    }
-
-    .tb-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:5px 0;
+    .room-card p{
+      margin:4px 0 0;
+      color:var(--muted);
       font-size:13px;
-      color:rgba(255,255,255,.65);
     }
 
-    .tb-row b{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:16px;
-      color:#fff;
+    .mini{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px 12px;
+      font-size:13px;
+      color:#42576b;
     }
 
-    .btn{
-      width:100%;
-      padding:15px;
-      border:none;
+    .mini div{
+      padding:8px 10px;
+      background:#f8fbfd;
       border-radius:10px;
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:700;
-      font-size:18px;
-      letter-spacing:.5px;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
     }
 
-    .btn-primary{background:var(--orange);color:#fff}
-    .btn-ghost{
-      background:transparent;
+    .quote-cards{
+      display:grid;
+      gap:14px;
+    }
+
+    .quote-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      background:#fff;
+    }
+
+    .quote-card h3{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:27px;
+      letter-spacing:.2px;
+      margin:0 0 4px;
       color:var(--navy);
-      border:2px solid var(--border);
-      font-size:15px;
-      margin-top:10px;
     }
 
-    .q-hdr{
-      background:var(--navy);
-      border-radius:12px 12px 0 0;
-      padding:20px;
-      margin:-18px -18px 18px;
+    .quote-card p{
+      margin:0 0 10px;
+      color:var(--muted);
+      font-size:14px;
     }
 
-    .q-hdr h2{
+    .price{
       font-family:'Barlow Condensed',sans-serif;
-      font-weight:900;
-      font-size:22px;
-      color:#fff;
+      font-size:42px;
+      line-height:1;
+      color:var(--navy);
+      margin:10px 0 8px;
     }
 
-    .q-hdr p{
+    .subline{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:12px;
+    }
+
+    .list{
+      margin:0;
+      padding-left:18px;
+      color:#42576b;
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .list li + li{margin-top:4px}
+
+    .quote-essential{border-top:5px solid #77b87f}
+    .quote-comfort{border-top:5px solid #f1b449}
+    .quote-premium{border-top:5px solid #6ea7d8}
+
+    .summary-box{
+      background:#f8fbfd;
+      border:1px dashed #c5d9e8;
+      border-radius:14px;
+      padding:14px;
+      margin-top:14px;
+    }
+
+    .summary-box h4{
+      margin:0 0 8px;
+      color:var(--navy);
+      font-size:16px;
+    }
+
+    .summary-box pre{
+      margin:0;
+      white-space:pre-wrap;
+      font-family:'Barlow',sans-serif;
+      font-size:13px;
+      line-height:1.6;
+      color:#42576b;
+    }
+
+    .status{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:13px;
+      line-height:1.5;
+      display:none;
+    }
+
+    .status.show{display:block}
+    .status.ok{
+      background:#eef9f1;
+      border:1px solid #bfe2c8;
+      color:#216738;
+    }
+    .status.error{
+      background:#fff1f0;
+      border:1px solid #f1c4bf;
+      color:#8a2f25;
+    }
+
+    .footer-note{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:12px;
+      background:#fff7f2;
+      border:1px solid #f3d0bf;
+      color:#7b4a31;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .notice{
+      margin-top:14px;
       font-size:12px;
-      color:var(--light);
-      margin-top:3px;
+      line-height:1.5;
+      color:var(--muted);
     }
 
-    .q-ref{
+    .pill{
       display:inline-block;
-      background:var(--orange);
-      color:#fff;
-      font-size:11px;
+      font-size:12px;
       font-weight:700;
-      padding:3px 10px;
-      border-radius:20px;
-      margin-top:8px;
-      font-family:'Barlow Condensed',sans-serif;
-    }
-
-    .rv-room{
-      margin-bottom:14px;
-      padding-bottom:14px;
-      border-bottom:1px solid var(--border);
-    }
-
-    .rv-room:last-child{
-      border-bottom:none;
-      margin-bottom:0;
-      padding-bottom:0;
-    }
-
-    .rv-room-hdr{
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
+      color:#27506d;
+      background:#eaf4fb;
+      border-radius:999px;
+      padding:6px 10px;
       margin-bottom:8px;
     }
 
-    .rv-room-hdr strong{font-size:14px}
-    .rv-room-hdr span{font-size:11px;color:var(--mid)}
-
-    .tline{
-      display:flex;
-      justify-content:space-between;
-      padding:4px 0;
-      font-size:13px;
+    .addon-row{
+      display:grid;
+      grid-template-columns:1fr 120px 40px;
+      gap:10px;
+      margin-bottom:10px;
       align-items:center;
     }
 
-    .grand-total{
+    .addon-row .money{
+      position:relative;
+    }
+
+    .addon-row .money::before{
+      content:'£';
+      position:absolute;
+      left:12px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .addon-row .money input{
+      padding-left:24px;
+    }
+
+    .addon-del{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:10px;
+      height:48px;
+      cursor:pointer;
+      font-size:18px;
+      color:#999;
+    }
+
+    .review-card{
+      background:#fff;
+      border:1px solid #e7edf3;
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .review-head{
+      background:linear-gradient(135deg,var(--navy),var(--navy-2));
+      padding:22px 20px;
+      color:#fff;
+    }
+
+    .review-head h2{
+      margin:0;
       font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:20px;
+      font-size:28px;
+      letter-spacing:.4px;
+    }
+
+    .review-head p{
+      margin:6px 0 0;
+      color:#d8e6f2;
+      font-size:13px;
+    }
+
+    .review-ref{
+      display:inline-block;
+      margin-top:10px;
+      background:var(--orange);
+      color:#fff;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .review-body{
+      padding:18px;
+    }
+
+    .review-section{
+      background:#f8fbfd;
+      border:1px solid #e3edf5;
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .review-section h4{
+      margin:0 0 8px;
+      color:var(--navy);
+      font-size:16px;
+      font-family:'Barlow Condensed',sans-serif;
+    }
+
+    .review-room{
+      padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+
+    .review-room:last-child{
+      border-bottom:none;
+      padding-bottom:0;
+    }
+
+    .review-room:first-child{
+      padding-top:0;
+    }
+
+    .review-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:4px 0;
+      font-size:13px;
+    }
+
+    .review-row span:last-child{
+      text-align:right;
+    }
+
+    .grand-total{
+      margin-top:12px;
       padding-top:12px;
       border-top:2px solid var(--navy);
-      margin-top:8px;
-      display:flex;
-      flex-direction:column;
-      gap:5px;
+      display:grid;
+      gap:6px;
     }
 
     .grand-line{
       display:flex;
       justify-content:space-between;
       align-items:center;
-    }
-
-    .grand-line span:last-child{color:var(--orange)}
-
-    .divider{
-      height:1px;
-      background:var(--border);
-      margin:12px 0;
-    }
-
-    .survey-box{
-      background:var(--grey);
-      border-radius:8px;
-      padding:12px 14px;
-      margin-bottom:14px;
-      font-size:12px;
-      line-height:1.8;
-    }
-
-    .survey-box strong{
-      font-size:11px;
-      font-weight:700;
-      color:var(--mid);
-      text-transform:uppercase;
-      letter-spacing:.5px;
-      display:block;
-      margin-bottom:6px;
-    }
-
-    .survey-box span{color:var(--mid)}
-
-    .status-sending{
-      text-align:center;
-      padding:28px;
-      color:var(--mid);
-    }
-
-    .spinner{
-      width:38px;
-      height:38px;
-      border:3px solid var(--border);
-      border-top-color:var(--orange);
-      border-radius:50%;
-      animation:spin .75s linear infinite;
-      margin:0 auto 14px;
-    }
-
-    @keyframes spin{
-      to{transform:rotate(360deg)}
-    }
-
-    .status-ok{
-      text-align:center;
-      padding:28px;
-    }
-
-    .tick{
-      width:60px;
-      height:60px;
-      background:#1B8A4A;
-      color:#fff;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:26px;
-      margin:0 auto 14px;
-      animation:pop .4s cubic-bezier(.34,1.56,.64,1);
-    }
-
-    @keyframes pop{
-      from{transform:scale(0);opacity:0}
-      to{transform:scale(1);opacity:1}
-    }
-
-    .status-ok h3{
       font-family:'Barlow Condensed',sans-serif;
       font-size:22px;
-      font-weight:800;
-      color:var(--navy);
-      margin-bottom:6px;
     }
 
-    .status-ok p{
-      font-size:13px;
-      color:var(--mid);
-      line-height:1.5;
+    .grand-line span:last-child{
+      color:var(--orange);
     }
 
-    @media (max-width:680px){
-      .row2,.row3,.tier-grid,.addon-row{
-        grid-template-columns:1fr;
-      }
+    @media (max-width: 960px){
+      .grid{grid-template-columns:1fr}
+    }
 
+    @media (max-width: 680px){
+      .wrap{padding:12px}
+      .hero-inner{padding:18px}
+      .hero-copy h1{font-size:34px}
+      .field-grid,
+      .choice-row,
+      .mini,
       .addon-row{
         grid-template-columns:1fr;
       }
+      .panel-bd,.panel-hd{padding:16px}
+      .price{font-size:36px}
     }
   </style>
 </head>
 <body>
 
-<header class="hdr">
-  <img src="https://cdn.shopify.com/s/files/1/0906/1780/7181/files/akita-logo-cartoon-husky-sunglasses-coat.png?v=1773353080" alt="Akita">
-  <div>
-    <h1>AKITA AIR CONDITIONING</h1>
-    <p>Site Survey Quote Tool</p>
-  </div>
-  <span class="hdr-badge">On-Site</span>
-</header>
+  <div class="wrap">
 
-<div class="prog">
-  <div class="prog-dots">
-    <div class="dot active" id="d0"></div>
-    <div class="dot" id="d1"></div>
-    <div class="dot" id="d2"></div>
-    <div class="dot" id="d3"></div>
-  </div>
-  <div class="prog-lbl" id="plbl"><b>Customer Details</b></div>
-</div>
-
-<!-- PAGE JOB TYPE -->
-<div class="page on" id="pjt">
-  <div style="text-align:center;padding:40px 20px 20px">
-    <div style="font-size:48px;margin-bottom:12px">❄️</div>
-    <p class="page-title" style="margin-bottom:6px">New Quote</p>
-    <p class="page-sub" style="margin-bottom:32px">What type of installation?</p>
-
-    <div onclick="setJobType('single')" style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 18px;margin-bottom:12px;text-align:left;cursor:pointer;transition:border-color .2s" id="jt-single-card">
-      <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">SINGLE SPLIT</div>
-      <div style="font-size:13px;color:var(--mid);margin-top:3px">One outdoor unit per room</div>
-      <div style="font-size:11px;color:var(--sky);margin-top:6px;font-weight:600">75mm trunking · per-room pricing</div>
-    </div>
-
-    <div onclick="setJobType('multi')" style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 18px;text-align:left;cursor:pointer;transition:border-color .2s" id="jt-multi-card">
-      <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">MULTI-SPLIT</div>
-      <div style="font-size:13px;color:var(--mid);margin-top:3px">One outdoor unit, multiple indoor heads</div>
-      <div style="font-size:11px;color:var(--sky);margin-top:6px;font-weight:600">100mm trunking · system pricing</div>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE 0 -->
-<div class="page" id="p0">
-  <p class="page-title">Customer Details</p>
-  <p class="page-sub">Enter details before the survey</p>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">👤</span> Contact</div>
-
-    <div class="row2">
-      <div class="field" id="f-fn">
-        <label class="lbl">First Name</label>
-        <input type="text" id="fn" placeholder="John">
-        <div class="errmsg">Required</div>
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="brand">
+          <img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Akita%20White.png" alt="Akita Air Conditioning & Refrigeration">
+          <div class="hero-copy">
+            <h1>Site Survey Quote Tool</h1>
+            <p>Build a clean customer quote and better engineer notes in one go.</p>
+          </div>
+        </div>
+        <div class="badge">On-site survey workflow</div>
       </div>
-      <div class="field" id="f-ln">
-        <label class="lbl">Last Name</label>
-        <input type="text" id="ln" placeholder="Smith">
-        <div class="errmsg">Required</div>
+    </section>
+
+    <div class="grid">
+
+      <section class="panel">
+        <div class="panel-hd">
+          <h2>Survey Input</h2>
+          <p>Customer details, install details, finance preference and internal pricing adjustments.</p>
+        </div>
+
+        <div class="panel-bd">
+
+          <div class="section">
+            <h3 class="section-title">Installation Type</h3>
+            <p class="section-sub">Choose the job type first so the survey and pricing stay sensible.</p>
+
+            <div class="choice-row">
+              <label class="choice-card active" id="singleCard">
+                <input type="radio" name="systemType" value="single" checked>
+                <strong>Single Split</strong>
+                <span>One outdoor unit per room · 75mm trunking · per-room pricing</span>
+              </label>
+
+              <label class="choice-card" id="multiCard">
+                <input type="radio" name="systemType" value="multi">
+                <strong>Multi-Split</strong>
+                <span>One outdoor unit, multiple indoor heads · 100mm trunking · system pricing</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Customer Details</h3>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="firstName">First name</label>
+                <input id="firstName" type="text" placeholder="First name">
+              </div>
+              <div class="field">
+                <label for="lastName">Last name</label>
+                <input id="lastName" type="text" placeholder="Last name">
+              </div>
+              <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" placeholder="Email address">
+              </div>
+              <div class="field">
+                <label for="phone">Phone number</label>
+                <input id="phone" type="tel" placeholder="Phone number">
+              </div>
+              <div class="field full">
+                <label for="address1">Street address</label>
+                <input id="address1" type="text" placeholder="Street address">
+              </div>
+              <div class="field">
+                <label for="town">Town / city</label>
+                <input id="town" type="text" placeholder="Town / city">
+              </div>
+              <div class="field">
+                <label for="county">County</label>
+                <input id="county" type="text" placeholder="County">
+              </div>
+              <div class="field full">
+                <label for="postcode">Postcode</label>
+                <input id="postcode" type="text" placeholder="Postcode">
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Property Details</h3>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="powerSupply">Power supply / fused spur near outdoor location?</label>
+                <select id="powerSupply">
+                  <option>Yes — existing spur</option>
+                  <option>No — new circuit needed</option>
+                  <option>Unknown</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="existingUnit">Existing unit to decommission?</label>
+                <select id="existingUnit">
+                  <option>No</option>
+                  <option>Yes — 1 unit</option>
+                  <option>Yes — multiple</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="consumerUnit">Consumer unit location</label>
+                <select id="consumerUnit">
+                  <option>Under stairs</option>
+                  <option>Garage</option>
+                  <option>Kitchen</option>
+                  <option>Hallway</option>
+                  <option>Utility room</option>
+                  <option>Other — see notes</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="wallType">Wall construction</label>
+                <select id="wallType">
+                  <option>Cavity brick</option>
+                  <option>Solid brick</option>
+                  <option>Timber frame</option>
+                  <option>Rendered / block</option>
+                  <option>Stone</option>
+                  <option>Other — see notes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Room Details</h3>
+            <p class="section-sub">Add each room so the quote options and engineer notes stay accurate.</p>
+
+            <div id="roomList" class="room-list"></div>
+
+            <div class="room-actions">
+              <button class="btn btn-secondary" type="button" id="addRoomBtn">＋ Add Room</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Add-ons & Extras</h3>
+            <p class="section-sub">Items like scaffolding, extra labour, pumps or other adjustments.</p>
+
+            <div id="addonsWrap"></div>
+
+            <div class="room-actions">
+              <button class="btn btn-secondary" type="button" id="addAddonBtn">＋ Add Extra Item</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Finance</h3>
+            <p class="section-sub">Optional — subsidy added to customer total automatically.</p>
+
+            <div class="field">
+              <label for="financeSelect">Finance Product</label>
+              <select id="financeSelect">
+                <option value="">No finance — cash / card</option>
+                <option value="0%|Pay in 3|0.05">APR 0% — Pay in 3</option>
+                <option value="0%|6m|0.0525">APR 0% — 6 months</option>
+                <option value="0%|12m|0.08">APR 0% — 12 months</option>
+                <option value="0%|24m|0.13">APR 0% — 24 months</option>
+                <option value="0%|36m|0.175">APR 0% — 36 months</option>
+                <option value="0%|48m|0.18">APR 0% — 48 months</option>
+                <option value="0%|60m|0.205">APR 0% — 60 months</option>
+                <option value="7.9%|36m|0.0765">APR 7.9% — 36 months</option>
+                <option value="7.9%|48m|0.0925">APR 7.9% — 48 months</option>
+                <option value="7.9%|60m|0.095">APR 7.9% — 60 months</option>
+                <option value="7.9%|120m|0.15">APR 7.9% — 120 months</option>
+                <option value="9.9%|36m|0.0525">APR 9.9% — 36 months</option>
+                <option value="9.9%|48m|0.0625">APR 9.9% — 48 months</option>
+                <option value="9.9%|60m|0.065">APR 9.9% — 60 months</option>
+                <option value="9.9%|120m|0.085">APR 9.9% — 120 months</option>
+                <option value="10.9%|36m|0.012">APR 10.9% — 36 months</option>
+                <option value="10.9%|48m|0.01">APR 10.9% — 48 months</option>
+                <option value="10.9%|60m|0.005">APR 10.9% — 60 months</option>
+                <option value="10.9%|120m|0">APR 10.9% — 120 months</option>
+                <option value="11.9%|36m|0">APR 11.9% — 36 months</option>
+                <option value="11.9%|48m|0">APR 11.9% — 48 months</option>
+                <option value="11.9%|60m|0">APR 11.9% — 60 months</option>
+                <option value="11.9%|120m|0">APR 11.9% — 120 months</option>
+              </select>
+            </div>
+
+            <div id="financeInfo" style="display:none">
+              <div class="summary-box" style="margin-top:10px">
+                <pre id="financeSummary" style="margin:0"></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Commercial / VAT</h3>
+            <p class="section-sub">Switch on to add 20% VAT for commercial work.</p>
+
+            <div class="field">
+              <label for="vatToggle">Commercial job?</label>
+              <select id="vatToggle">
+                <option value="no">No — domestic / no VAT</option>
+                <option value="yes">Yes — add VAT</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="room-actions">
+              <button class="btn btn-secondary" type="button" id="recalcBtn">View Quote Options</button>
+              <button class="btn btn-primary" type="button" id="submitBtn">Submit Quote</button>
+            </div>
+            <div id="submitStatus" class="status"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-hd">
+          <h2>Quote Options</h2>
+          <p>Customer-friendly package totals on the front, with full engineer notes behind the scenes.</p>
+        </div>
+
+        <div class="panel-bd">
+          <span class="pill" id="systemLabel">Single split quote</span>
+
+          <div id="multiOutdoorBox" class="summary-box" style="display:none">
+            <h4>Outdoor Units — auto-selected per tier</h4>
+            <pre id="multiOutdoorText">—</pre>
+          </div>
+
+          <div class="quote-cards">
+            <div class="quote-card quote-essential">
+              <h3>Essential</h3>
+              <p>Great-value install with a solid, reliable setup.</p>
+              <div class="price" id="priceEssential">£0</div>
+              <div class="subline" id="subEssential">Supply & installation</div>
+              <ul class="list">
+                <li>Entry-level package</li>
+                <li>Suitable for standard installs</li>
+                <li>Clean customer-facing option</li>
+              </ul>
+            </div>
+
+            <div class="quote-card quote-comfort">
+              <h3>Comfort</h3>
+              <p>The best all-round package for most homes.</p>
+              <div class="price" id="priceComfort">£0</div>
+              <div class="subline" id="subComfort">Supply & installation</div>
+              <ul class="list">
+                <li>Balanced performance and finish</li>
+                <li>Strong all-round value</li>
+                <li>Most popular option</li>
+              </ul>
+            </div>
+
+            <div class="quote-card quote-premium">
+              <h3>Premium</h3>
+              <p>Higher-spec finish and a more premium system choice.</p>
+              <div class="price" id="pricePremium">£0</div>
+              <div class="subline" id="subPremium">Supply & installation</div>
+              <ul class="list">
+                <li>Premium package and finish</li>
+                <li>Ideal for feature rooms</li>
+                <li>Best presentation for a polished quote</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <h4>Engineer / Job Notes Preview</h4>
+            <pre id="jobNotesPreview">Add room details to build the quote and notes.</pre>
+          </div>
+
+          <div class="footer-note">
+            Finance subsidy, extras and VAT are included in the live totals. Unit names are included in the engineer notes and webhook payload.
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+    <div style="margin-top:18px" class="review-card">
+      <div class="review-head">
+        <h2>Review & Send</h2>
+        <p id="reviewWho">Complete the survey to prepare your quote.</p>
+        <span class="review-ref" id="reviewRef">Ref: Pending</span>
+      </div>
+      <div class="review-body">
+        <div class="review-section">
+          <h4>Property Survey Notes</h4>
+          <div id="reviewSurvey"></div>
+        </div>
+
+        <div class="review-section">
+          <h4>Room Summary</h4>
+          <div id="reviewRooms"></div>
+        </div>
+
+        <div class="review-section">
+          <h4>Add-ons & Extras</h4>
+          <div id="reviewAddons"></div>
+        </div>
+
+        <div class="review-section">
+          <h4>Survey Notes</h4>
+          <textarea id="reviewNotes" placeholder="Access requirements, observations, existing system..." style="min-height:90px"></textarea>
+        </div>
+
+        <div class="grand-total" id="reviewTotals"></div>
       </div>
     </div>
 
-    <div class="field" id="f-em">
-      <label class="lbl">Email Address</label>
-      <input type="email" id="em" placeholder="john@example.com">
-      <div class="errmsg">Valid email required</div>
-    </div>
-
-    <div class="field" id="f-ph">
-      <label class="lbl">Phone Number</label>
-      <input type="tel" id="ph" placeholder="07700 900000">
-      <div class="errmsg">Required</div>
-    </div>
-
-    <div class="field" id="f-ad1">
-      <label class="lbl">Street Address</label>
-      <input type="text" id="ad1" placeholder="12 High Street">
-      <div class="errmsg">Required</div>
-    </div>
-
-    <div class="field" id="f-ad2">
-      <label class="lbl">Town / City</label>
-      <input type="text" id="ad2" placeholder="Lavenham">
-      <div class="errmsg">Required</div>
-    </div>
-
-    <div class="row2">
-      <div class="field" id="f-ad3">
-        <label class="lbl">County</label>
-        <input type="text" id="ad3" placeholder="Suffolk">
-      </div>
-      <div class="field" id="f-ad4">
-        <label class="lbl">Postcode</label>
-        <input type="text" id="ad4" placeholder="CO10 9AA">
-        <div class="errmsg">Required</div>
-      </div>
-    </div>
   </div>
 
-  <button class="btn btn-primary" onclick="goPage(1)">Continue to Survey →</button>
-</div>
-
-<!-- PAGE 1 -->
-<div class="page" id="p1">
-  <p class="page-title">Site Survey</p>
-  <p class="page-sub">Property details then measure each room</p>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">🏠</span> Property Details</div>
-
-    <div class="field">
-      <label class="lbl">Install type <span style="text-transform:none;font-weight:400;color:var(--mid)">(sets trunking size)</span></label>
-      <div class="pills" id="pills-installType">
-        <div class="pill on" onclick="pickPill('installType','single',this)">Single split(s) — 75mm</div>
-        <div class="pill" onclick="pickPill('installType','multi',this)">Multi-split — 100mm</div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label class="lbl">Power supply / fused spur near outdoor location?</label>
-      <div class="pills" id="pills-power">
-        <div class="pill on" onclick="pickPill('power','Yes — existing spur',this)">Yes — existing spur</div>
-        <div class="pill" onclick="pickPill('power','No — new circuit needed',this)">No — new circuit</div>
-        <div class="pill" onclick="pickPill('power','Unknown',this)">Unknown</div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label class="lbl">Existing unit to decommission?</label>
-      <div class="pills" id="pills-existing">
-        <div class="pill on" onclick="pickPill('existing','No',this)">No</div>
-        <div class="pill" onclick="pickPill('existing','Yes — 1 unit',this)">Yes — 1 unit</div>
-        <div class="pill" onclick="pickPill('existing','Yes — multiple',this)">Yes — multiple</div>
-      </div>
-    </div>
-
-    <div class="row2">
-      <div class="field">
-        <label class="lbl">Consumer unit location</label>
-        <select id="sv-consumer">
-          <option>Under stairs</option>
-          <option>Garage</option>
-          <option>Kitchen</option>
-          <option>Hallway</option>
-          <option>Utility room</option>
-          <option>Other — see notes</option>
-        </select>
-      </div>
-      <div class="field">
-        <label class="lbl">Wall construction</label>
-        <select id="sv-wall">
-          <option>Cavity brick</option>
-          <option>Solid brick</option>
-          <option>Timber frame</option>
-          <option>Rendered / block</option>
-          <option>Stone</option>
-          <option>Other — see notes</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div id="rooms-wrap"></div>
-  <button class="btn-add" onclick="addRoom()"><span style="font-size:20px">＋</span> Add Another Room</button>
-  <button class="btn btn-primary" onclick="goPage(2)">View Quote Options →</button>
-  <button class="btn btn-ghost" onclick="goPage(0)">← Back</button>
-</div>
-
-<!-- PAGE 2 SINGLE -->
-<div class="page" id="p2">
-  <p class="page-title">Quote Options</p>
-  <p class="page-sub">All three options shown — add extras and finance below</p>
-
-  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;margin-bottom:14px">
-    <div>
-      <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px">COMMERCIAL JOB</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:1px">Toggle to add 20% VAT to all prices</div>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-      <div id="vat-track" onclick="toggleVat()" style="width:44px;height:26px;background:rgba(255,255,255,.2);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
-        <div id="vat-knob" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
-      </div>
-      <span id="vat-lbl" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Ex VAT</span>
-    </label>
-  </div>
-
-  <div id="quote-wrap"></div>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">🔧</span> Add-ons & Extras</div>
-    <div id="addons-wrap"></div>
-    <button class="btn-add" style="margin-bottom:0" onclick="addAddon()">
-      <span style="font-size:18px">＋</span> Add Extra Item
-    </button>
-  </div>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">💳</span> Finance</div>
-    <p class="hint" style="margin-bottom:10px">Optional — subsidy added to customer total automatically</p>
-    <div class="field">
-      <label class="lbl">Finance Product</label>
-      <select id="fin-sel" onchange="updateFin()">
-        <option value="">No finance — cash / card</option>
-        <option value="0%|Pay in 3|0.05">APR 0% — Pay in 3</option>
-        <option value="0%|6m|0.0525">APR 0% — 6 months</option>
-        <option value="0%|12m|0.08">APR 0% — 12 months</option>
-        <option value="0%|24m|0.13">APR 0% — 24 months</option>
-        <option value="0%|36m|0.175">APR 0% — 36 months</option>
-        <option value="0%|48m|0.18">APR 0% — 48 months</option>
-        <option value="0%|60m|0.205">APR 0% — 60 months</option>
-        <option value="7.9%|36m|0.0765">APR 7.9% — 36 months</option>
-        <option value="7.9%|48m|0.0925">APR 7.9% — 48 months</option>
-        <option value="7.9%|60m|0.095">APR 7.9% — 60 months</option>
-        <option value="7.9%|120m|0.15">APR 7.9% — 120 months</option>
-        <option value="9.9%|36m|0.0525">APR 9.9% — 36 months</option>
-        <option value="9.9%|48m|0.0625">APR 9.9% — 48 months</option>
-        <option value="9.9%|60m|0.065">APR 9.9% — 60 months</option>
-        <option value="9.9%|120m|0.085">APR 9.9% — 120 months</option>
-        <option value="10.9%|36m|0.012">APR 10.9% — 36 months</option>
-        <option value="10.9%|48m|0.01">APR 10.9% — 48 months</option>
-        <option value="10.9%|60m|0.005">APR 10.9% — 60 months</option>
-        <option value="10.9%|120m|0">APR 10.9% — 120 months</option>
-        <option value="11.9%|36m|0">APR 11.9% — 36 months</option>
-        <option value="11.9%|48m|0">APR 11.9% — 48 months</option>
-        <option value="11.9%|60m|0">APR 11.9% — 60 months</option>
-        <option value="11.9%|120m|0">APR 11.9% — 120 months</option>
-      </select>
-    </div>
-    <div id="fin-info" style="display:none">
-      <div class="fin-pill"><span>Subsidy added to each total</span><span id="fin-sub-lbl">—</span></div>
-      <div class="fin-pill"><span id="fin-mo-lbl">Indicative monthly</span><span id="fin-mo-val">—</span></div>
-    </div>
-  </div>
-
-  <div class="total-bar">
-    <div class="tb-row"><span>Essential Package all-in</span><b id="tb-b">—</b></div>
-    <div class="tb-row"><span>Comfort Package all-in</span><b id="tb-m">—</b></div>
-    <div class="tb-row"><span>Premium Package all-in</span><b id="tb-p">—</b></div>
-    <div class="tb-row" style="border-top:1px solid rgba(255,255,255,.12);margin-top:6px;padding-top:8px">
-      <span style="font-size:11px;color:rgba(255,255,255,.4)">Extras</span>
-      <span id="tb-ext" style="font-size:12px;color:rgba(255,255,255,.45)">—</span>
-    </div>
-  </div>
-
-  <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
-  <button class="btn btn-ghost" onclick="goPage(1)">← Back</button>
-</div>
-
-<!-- PAGE 2 MULTI -->
-<div class="page" id="p2m">
-  <p class="page-title">Multi-Split Quote</p>
-  <p class="page-sub">Outdoor unit auto-selected per tier based on rooms and kW</p>
-
-  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;margin-bottom:14px">
-    <div>
-      <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px">COMMERCIAL JOB</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:1px">Toggle to add 20% VAT</div>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-      <div id="vat-track-m" onclick="toggleVat()" style="width:44px;height:26px;background:rgba(255,255,255,.2);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
-        <div id="vat-knob-m" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
-      </div>
-      <span id="vat-lbl-m" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Ex VAT</span>
-    </label>
-  </div>
-
-  <div class="card" style="margin-bottom:14px">
-    <div class="card-hdr"><span class="ci">🏗️</span> Outdoor Units — auto-selected per tier</div>
-    <div style="font-size:11px;color:var(--mid);margin-bottom:10px">Based on room count and total kW required.</div>
-    <div style="display:flex;flex-direction:column;gap:8px" id="ms-ou-summary">
-      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
-        <span class="tier-badge tb-basic" style="font-size:10px;padding:2px 8px;flex-shrink:0">Essential</span>
-        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-essential">—</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
-        <span class="tier-badge tb-mid" style="font-size:10px;padding:2px 8px;flex-shrink:0">Comfort</span>
-        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-comfort">—</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
-        <span class="tier-badge tb-prem" style="font-size:10px;padding:2px 8px;flex-shrink:0">Premium</span>
-        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-premium">—</span>
-      </div>
-    </div>
-  </div>
-
-  <div id="ms-rooms-wrap"></div>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">🔧</span> Add-ons & Extras</div>
-    <div id="addons-wrap-m"></div>
-    <button class="btn-add" style="margin-bottom:0" onclick="addAddon()">
-      <span style="font-size:18px">＋</span> Add Extra Item
-    </button>
-  </div>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">💳</span> Finance</div>
-    <p class="hint" style="margin-bottom:10px">Optional — subsidy added to customer total automatically</p>
-    <div class="field">
-      <label class="lbl">Finance Product</label>
-      <select id="fin-sel-m" onchange="syncFinanceFromMulti()">
-        <option value="">No finance — cash / card</option>
-        <option value="0%|Pay in 3|0.05">APR 0% — Pay in 3</option>
-        <option value="0%|6m|0.0525">APR 0% — 6 months</option>
-        <option value="0%|12m|0.08">APR 0% — 12 months</option>
-        <option value="0%|24m|0.13">APR 0% — 24 months</option>
-        <option value="0%|36m|0.175">APR 0% — 36 months</option>
-        <option value="0%|48m|0.18">APR 0% — 48 months</option>
-        <option value="0%|60m|0.205">APR 0% — 60 months</option>
-        <option value="7.9%|36m|0.0765">APR 7.9% — 36 months</option>
-        <option value="7.9%|48m|0.0925">APR 7.9% — 48 months</option>
-        <option value="7.9%|60m|0.095">APR 7.9% — 60 months</option>
-        <option value="7.9%|120m|0.15">APR 7.9% — 120 months</option>
-        <option value="9.9%|36m|0.0525">APR 9.9% — 36 months</option>
-        <option value="9.9%|48m|0.0625">APR 9.9% — 48 months</option>
-        <option value="9.9%|60m|0.065">APR 9.9% — 60 months</option>
-        <option value="9.9%|120m|0.085">APR 9.9% — 120 months</option>
-        <option value="10.9%|36m|0.012">APR 10.9% — 36 months</option>
-        <option value="10.9%|48m|0.01">APR 10.9% — 48 months</option>
-        <option value="10.9%|60m|0.005">APR 10.9% — 60 months</option>
-        <option value="10.9%|120m|0">APR 10.9% — 120 months</option>
-        <option value="11.9%|36m|0">APR 11.9% — 36 months</option>
-        <option value="11.9%|48m|0">APR 11.9% — 48 months</option>
-        <option value="11.9%|60m|0">APR 11.9% — 60 months</option>
-        <option value="11.9%|120m|0">APR 11.9% — 120 months</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="total-bar" style="margin-top:14px">
-    <div class="tb-row"><span>Essential all-in</span><b id="ms-tb-essential">—</b></div>
-    <div class="tb-row"><span>Comfort all-in</span><b id="ms-tb-comfort">—</b></div>
-    <div class="tb-row"><span>Premium all-in</span><b id="ms-tb-premium">—</b></div>
-  </div>
-
-  <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
-  <button class="btn btn-ghost" onclick="goPage(1)">← Back</button>
-</div>
-
-<!-- PAGE 3 -->
-<div class="page" id="p3">
-  <p class="page-title">Review & Send</p>
-  <p class="page-sub">Check everything then send to customer</p>
-
-  <div class="card">
-    <div class="q-hdr">
-      <h2>SITE SURVEY QUOTE</h2>
-      <p id="rv-who"></p>
-      <span class="q-ref" id="rv-ref"></span>
-    </div>
-    <div id="rv-survey"></div>
-    <div id="rv-rooms"></div>
-    <div id="rv-addons"></div>
-    <div class="divider"></div>
-    <div class="grand-total" id="rv-totals"></div>
-    <p class="hint" style="margin-top:10px">Prices include supply & installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
-  </div>
-
-  <div class="card">
-    <div class="card-hdr"><span class="ci">✉️</span> Send to Customer</div>
-    <div class="field">
-      <label class="lbl">Sending to</label>
-      <input type="text" id="rv-email" readonly style="background:var(--grey);color:var(--mid)">
-    </div>
-    <div class="field">
-      <label class="lbl">Survey Notes (optional)</label>
-      <textarea id="rv-notes" rows="3" placeholder="Access requirements, observations, existing system..." style="resize:none;font-size:14px;padding:11px 13px"></textarea>
-    </div>
-    <button class="btn btn-primary" id="send-btn" onclick="sendQuote()">📧 Send Quote to Customer</button>
-  </div>
-
-  <div id="send-status"></div>
-  <button class="btn btn-ghost" onclick="goPage(2)">← Edit Quote</button>
-</div>
-
-<script>
-const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujispc2/';
-const SELECTION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
-const STEPS = ['Customer Details','Site Survey','Quote Options','Review & Send'];
-
-const UNITS = {
-  Basic: [
-    {kw:2.0,price:952.24, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
-    {kw:2.5,price:979.89, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
-    {kw:3.5,price:1044.67,make:'Daikin',     series:'Sensira',    model:'FTXF35F + RXF35F'},
-    {kw:4.2,price:1115.77,make:'Daikin',     series:'Sensira',    model:'FTXF42F + RXF42F'},
-    {kw:5.0,price:1192.76,make:'Daikin',     series:'Sensira',    model:'FTXF50F + RXF50F'},
-    {kw:6.0,price:1638.14,make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP60VGK2 + MUZ-AP60VG'},
-    {kw:7.1,price:2035.04,make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP71VGK2 + MUZ-AP71VG'}
-  ],
-  Mid: [
-    {kw:2.5,price:1297.22,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
-    {kw:3.5,price:1426.01,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
-    {kw:5.0,price:1699.79,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
-    {kw:6.0,price:1309.49,make:'Daikin',     series:'Sensira',    model:'FTXF60F + RXF60D9'},
-    {kw:7.1,price:1506.99,make:'Daikin',     series:'Sensira',    model:'FTXF71F + RXF71D9'}
-  ],
-  Premium: [
-    {kw:2.5,price:1395.23,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN25VG2B + MUZ-LN25VG'},
-    {kw:3.5,price:1548.32,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN35VG2B + MUZ-LN35VG'},
-    {kw:5.0,price:1970.61,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN50VG2B + MUZ-LN50VG'},
-    {kw:6.0,price:2131.80,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN60VG2B + MUZ-LN60VG'}
-  ]
-};
-
-const PIPE_PM = {
-  '1/4" & 3/8"':15.89,
-  '1/4" & 1/2"':17.07,
-  '1/4" & 5/8"':19.37,
-  '3/8" & 5/8"':21.50
-};
-
-const FITTINGS = [
-  ['Straight Joint','SJ',3.97,5.49],
-  ['Flat 90° Bend','SK',10.05,13.01],
-  ['Flat 45° Bend','SKF',10.73,22.59],
-  ['Vertical 90° Elbow','SC',17.90,43.85],
-  ['Vertical 45° Elbow','SCF',12.98,23.29],
-  ['Duct End Cap','SE',5.21,6.25],
-  ['Wall Inlet Cover','SW',9.18,11.02],
-  ['Ceiling Cover','SCC',15.53,18.63],
-  ['Tee Joint','ST',36.25,43.50]
-];
-
-const MS_DAIKIN_OUTDOORS = [
-  {label:'Daikin 2MXF40A 2-port 4.0kW', model:'2MXF40A', ports:2, maxKw:4.0, price:1256.24},
-  {label:'Daikin 2MXF50A 2-port 5.0kW', model:'2MXF50A', ports:2, maxKw:5.0, price:1296.53},
-  {label:'Daikin 3MXF52A 3-port 5.2kW', model:'3MXF52A9', ports:3, maxKw:5.2, price:1559.60},
-  {label:'Daikin 3MXF68A 3-port 6.8kW', model:'3MXF68A9', ports:3, maxKw:6.8, price:1661.51}
-];
-
-const MS_MITSUBISHI_OUTDOORS = [
-  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:1275.31},
-  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1397.62},
-  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1554.76},
-  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1711.09},
-  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:2107.99},
-  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2246.50}
-];
-
-const MS_HEADS = {
-  Essential: [
-    {kw:2.0, label:'Daikin CTXF 2.0kW', model:'CTXF20F', net:117.71},
-    {kw:2.5, label:'Daikin CTXF 2.5kW', model:'CTXF25F', net:133.51},
-    {kw:3.5, label:'Daikin CTXF 3.5kW', model:'CTXF35F', net:147.73}
-  ],
-  Comfort: [
-    {kw:1.8, label:'Mitsubishi EF 1.8kW', model:'MSZ-EF18VGKB-E2', net:284.31},
-    {kw:2.2, label:'Mitsubishi EF 2.2kW', model:'MSZ-EF22VGK2B-E2', net:298.89},
-    {kw:2.5, label:'Mitsubishi EF 2.5kW', model:'MSZ-EF25VGKB-E2', net:328.05},
-    {kw:3.5, label:'Mitsubishi EF 3.5kW', model:'MSZ-EF35VGKB-E2', net:391.23},
-    {kw:5.0, label:'Mitsubishi EF 5.0kW', model:'MSZ-EF50VGK2B-E1', net:426.87}
-  ],
-  Premium: [
-    {kw:1.8, label:'Mitsubishi LN 1.8kW', model:'MSZ-LN18VG2B-E5', net:358.02},
-    {kw:2.5, label:'Mitsubishi LN 2.5kW', model:'MSZ-LN25VG2B-E3', net:382.32},
-    {kw:3.5, label:'Mitsubishi LN 3.5kW', model:'MSZ-LN35VG2B-E3', net:457.65},
-    {kw:5.0, label:'Mitsubishi LN 5.0kW', model:'MSZ-LN50VG2B-E3', net:623.70},
-    {kw:6.0, label:'Mitsubishi LN 6.0kW', model:'MSZ-LN60VG2B-E3', net:714.42}
-  ]
-};
-
-const MS_OUTDOOR_BY_TIER = {
-  Essential: MS_DAIKIN_OUTDOORS,
-  Comfort: MS_MITSUBISHI_OUTDOORS,
-  Premium: MS_MITSUBISHI_OUTDOORS
-};
-
-const MS_INDOOR_KIT = 67.52;
-const MS_EXTRA_LABOUR = 400.00;
-const MS_MARKUP = 1.20;
-
-let rooms = [];
-let addons = [];
-let rIdx = 0;
-let aIdx = 0;
-let vatOn = false;
-let jobType = 'single';
-let fin = { apr:'', term:'', sub:0 };
-let survey = { power:'Yes — existing spur', existing:'No', installType:'single' };
-
-const ROOM_TYPES = ['Bedroom','Living Room','Kitchen','Dining Room','Office','Study','Master Bedroom','Open Plan','Conservatory','Other'];
-const ORIENTS = [
-  {v:'south',l:'South ☀️'},
-  {v:'west',l:'West 🌅'},
-  {v:'east',l:'East 🌄'},
-  {v:'north',l:'North 🌧️'}
-];
-const CONDITIONS = [
-  {v:'glazed',l:'Heavily glazed'},
-  {v:'poor_ins',l:'Poorly insulated'},
-  {v:'good_ins',l:'Well insulated'},
-  {v:'top_floor',l:'Top floor / roof'},
-  {v:'high_ceil',l:'High ceilings'}
-];
-
-function setJobType(type){
-  jobType = type;
-  survey.installType = type;
-
-  document.getElementById('jt-single-card').style.borderColor = type === 'single' ? 'var(--sky)' : 'var(--border)';
-  document.getElementById('jt-multi-card').style.borderColor = type === 'multi' ? 'var(--sky)' : 'var(--border)';
-
-  goPage(0);
-}
-
-function goPage(n){
-  if(n === 1 && !validateP0()) return;
-  if(n === 2){
-    saveRooms();
-    if(!validateP1()) return;
-    if(jobType === 'multi'){
-      buildMsQuote();
-    } else {
-      buildQuote();
-    }
-  }
-  if(n === 3) buildReview();
-
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  const pageId = (n === 2 && jobType === 'multi') ? 'p2m' : 'p' + n;
-  document.getElementById(pageId).classList.add('on');
-
-  window.scrollTo(0,0);
-
-  ['d0','d1','d2','d3'].forEach((id,i) => {
-    document.getElementById(id).className = 'dot' + (i < n ? ' done' : i === n ? ' active' : '');
-  });
-
-  document.getElementById('plbl').innerHTML = '<b>' + STEPS[n] + '</b>';
-}
-
-function validateP0(){
-  let ok = true;
-  [
-    ['f-fn','fn',v => v.length > 0],
-    ['f-ln','ln',v => v.length > 0],
-    ['f-em','em',v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
-    ['f-ph','ph',v => v.length > 0],
-    ['f-ad1','ad1',v => v.length > 0],
-    ['f-ad2','ad2',v => v.length > 0],
-    ['f-ad4','ad4',v => v.length > 0]
-  ].forEach(([fid,iid,fn]) => {
-    const v = document.getElementById(iid).value.trim();
-    const pass = fn(v);
-    document.getElementById(fid).classList.toggle('err', !pass);
-    if(!pass) ok = false;
-  });
-  return ok;
-}
-
-function validateP1(){
-  if(!rooms.length){
-    addRoom();
-    return false;
-  }
-  if(rooms.find(r => !r.l || !r.w || !r.h)){
-    alert('Please enter dimensions for all rooms.');
-    return false;
-  }
-  return true;
-}
-
-function pickPill(field, val, el){
-  survey[field] = val;
-  const group = el.parentElement;
-  group.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
-  el.classList.add('on');
-}
-
-function calcKw(r){
-  let kw = r.l * r.w * r.h * 0.068;
-
-  if(r.type === 'Kitchen') kw *= 1.20;
-  if(r.type === 'Conservatory') kw *= 1.30;
-  if(r.type === 'Open Plan') kw *= 1.10;
-
-  if(r.orient === 'south') kw *= 1.12;
-  else if(r.orient === 'north') kw *= 0.95;
-  else if(r.orient === 'west') kw *= 1.06;
-
-  if(r.conds.includes('glazed')) kw *= 1.20;
-  if(r.conds.includes('poor_ins')) kw *= 1.12;
-  if(r.conds.includes('good_ins')) kw *= 0.92;
-  if(r.conds.includes('top_floor')) kw *= 1.15;
-  if(r.conds.includes('high_ceil')) kw *= 1.08;
-
-  const sizes = [2.0,2.5,3.5,4.2,5.0,6.0,7.1];
-  return sizes.find(s => s >= kw) || 7.1;
-}
-
-function pipeConfig(kw){
-  return kw <= 4.2 ? '1/4" & 3/8"' : kw <= 5.0 ? '1/4" & 1/2"' : '1/4" & 5/8"';
-}
-
-function getUnit(tier, kw){
-  const l = UNITS[tier];
-  return l.find(u => u.kw >= kw) || l[l.length - 1];
-}
-
-function fittingsCost(r){
-  const use100 = survey.installType === 'multi';
-  return FITTINGS.reduce((sum, [ , code, p75, p100 ]) => {
-    const qty = (r.fittings && r.fittings[code]) || 0;
-    const price = (use100 && p100 !== null) ? p100 : p75;
-    return sum + qty * price;
-  }, 0);
-}
-
-function pipeCost(r, tier){
-  const u = getUnit(tier, r.kwRec || 2.5);
-  return (r.extraPipe || 0) * (PIPE_PM[pipeConfig(u.kw)] || 15.89) + fittingsCost(r);
-}
-
-function tierTotals(){
-  const t = { Basic:0, Mid:0, Premium:0 };
-
-  ['Basic','Mid','Premium'].forEach(tier => {
-    rooms.forEach(r => {
-      t[tier] += getUnit(tier, r.kwRec || 2.5).price + pipeCost(r, tier);
-    });
-  });
-
-  return t;
-}
-
-function extrasTotal(){
-  return addons.reduce((s,a) => s + (parseFloat(a.price) || 0), 0);
-}
-
-function addRoom(){
-  rooms.push({
-    id:rIdx++,
-    type:'Bedroom',
-    l:0,
-    w:0,
-    h:2.4,
-    orient:'south',
-    conds:[],
-    kwRec:0,
-    extraPipe:0,
-    fittings:{},
-    pos:'Wall mounted — high level',
-    floor:'Ground floor',
-    outdoor:'Rear garden — ground',
-    mount:'Feet on ground',
-    route:'External trunking — straight run',
-    access:'None'
-  });
-
-  renderRooms();
-}
-
-function removeRoom(id){
-  rooms = rooms.filter(r => r.id !== id);
-  renderRooms();
-}
-
-function saveRooms(){
-  rooms.forEach(r => {
-    const g = id => {
-      const el = document.getElementById(id);
-      return el ? el.value : '';
+  <script>
+    const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujispc2/';
+    const SELECTION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
+
+    const UNITS = {
+      Basic: [
+        {kw:2.0,price:952.24, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
+        {kw:2.5,price:979.89, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
+        {kw:3.5,price:1044.67,make:'Daikin',     series:'Sensira',    model:'FTXF35F + RXF35F'},
+        {kw:4.2,price:1115.77,make:'Daikin',     series:'Sensira',    model:'FTXF42F + RXF42F'},
+        {kw:5.0,price:1192.76,make:'Daikin',     series:'Sensira',    model:'FTXF50F + RXF50F'},
+        {kw:6.0,price:1638.14,make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP60VGK2 + MUZ-AP60VG'},
+        {kw:7.1,price:2035.04,make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP71VGK2 + MUZ-AP71VG'}
+      ],
+      Mid: [
+        {kw:2.5,price:1297.22,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
+        {kw:3.5,price:1426.01,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
+        {kw:5.0,price:1699.79,make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
+        {kw:6.0,price:1309.49,make:'Daikin',     series:'Sensira',    model:'FTXF60F + RXF60D9'},
+        {kw:7.1,price:1506.99,make:'Daikin',     series:'Sensira',    model:'FTXF71F + RXF71D9'}
+      ],
+      Premium: [
+        {kw:2.5,price:1395.23,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN25VG2B + MUZ-LN25VG'},
+        {kw:3.5,price:1548.32,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN35VG2B + MUZ-LN35VG'},
+        {kw:5.0,price:1970.61,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN50VG2B + MUZ-LN50VG'},
+        {kw:6.0,price:2131.80,make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN60VG2B + MUZ-LN60VG'}
+      ]
     };
 
-    r.type = g('rt-' + r.id) || r.type;
-    r.l = parseFloat(g('rl-' + r.id)) || 0;
-    r.w = parseFloat(g('rw-' + r.id)) || 0;
-    r.h = parseFloat(g('rh-' + r.id)) || 2.4;
-    r.kwRec = r.l > 0 && r.w > 0 ? calcKw(r) : 0;
-    r.pos = g('ri-pos-' + r.id) || r.pos;
-    r.floor = g('ri-floor-' + r.id) || r.floor;
-    r.outdoor = g('ri-out-' + r.id) || r.outdoor;
-    r.mount = g('ri-mount-' + r.id) || r.mount;
-    r.route = g('ri-route-' + r.id) || r.route;
-  });
-}
+    const PIPE_PM = {
+      '1/4" & 3/8"':15.89,
+      '1/4" & 1/2"':17.07,
+      '1/4" & 5/8"':19.37,
+      '3/8" & 5/8"':21.50
+    };
 
-function setOrient(id, v){
-  const r = rooms.find(x => x.id === id);
-  if(!r) return;
+    const FITTINGS = [
+      ['Straight Joint','SJ',3.97,5.49],
+      ['Flat 90° Bend','SK',10.05,13.01],
+      ['Flat 45° Bend','SKF',10.73,22.59],
+      ['Vertical 90° Elbow','SC',17.90,43.85],
+      ['Vertical 45° Elbow','SCF',12.98,23.29],
+      ['Duct End Cap','SE',5.21,6.25],
+      ['Wall Inlet Cover','SW',9.18,11.02],
+      ['Ceiling Cover','SCC',15.53,18.63],
+      ['Tee Joint','ST',36.25,43.50]
+    ];
 
-  r.orient = v;
+    const MS_DAIKIN_OUTDOORS = [
+      {label:'Daikin 2MXF40A 2-port 4.0kW', model:'2MXF40A', ports:2, maxKw:4.0, price:1256.24},
+      {label:'Daikin 2MXF50A 2-port 5.0kW', model:'2MXF50A', ports:2, maxKw:5.0, price:1296.53},
+      {label:'Daikin 3MXF52A 3-port 5.2kW', model:'3MXF52A9', ports:3, maxKw:5.2, price:1559.60},
+      {label:'Daikin 3MXF68A 3-port 6.8kW', model:'3MXF68A9', ports:3, maxKw:6.8, price:1661.51}
+    ];
 
-  document.querySelectorAll('.op-' + id).forEach(el => {
-    el.classList.toggle('on', el.dataset.v === v);
-  });
+    const MS_MITSUBISHI_OUTDOORS = [
+      {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:1275.31},
+      {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1397.62},
+      {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1554.76},
+      {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1711.09},
+      {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:2107.99},
+      {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2246.50}
+    ];
 
-  liveCalc(id);
-}
+    const MS_HEADS = {
+      Essential: [
+        {kw:2.0, label:'Daikin CTXF 2.0kW', model:'CTXF20F', net:117.71},
+        {kw:2.5, label:'Daikin CTXF 2.5kW', model:'CTXF25F', net:133.51},
+        {kw:3.5, label:'Daikin CTXF 3.5kW', model:'CTXF35F', net:147.73}
+      ],
+      Comfort: [
+        {kw:1.8, label:'Mitsubishi EF 1.8kW', model:'MSZ-EF18VGKB-E2', net:284.31},
+        {kw:2.2, label:'Mitsubishi EF 2.2kW', model:'MSZ-EF22VGK2B-E2', net:298.89},
+        {kw:2.5, label:'Mitsubishi EF 2.5kW', model:'MSZ-EF25VGKB-E2', net:328.05},
+        {kw:3.5, label:'Mitsubishi EF 3.5kW', model:'MSZ-EF35VGKB-E2', net:391.23},
+        {kw:5.0, label:'Mitsubishi EF 5.0kW', model:'MSZ-EF50VGK2B-E1', net:426.87}
+      ],
+      Premium: [
+        {kw:1.8, label:'Mitsubishi LN 1.8kW', model:'MSZ-LN18VG2B-E5', net:358.02},
+        {kw:2.5, label:'Mitsubishi LN 2.5kW', model:'MSZ-LN25VG2B-E3', net:382.32},
+        {kw:3.5, label:'Mitsubishi LN 3.5kW', model:'MSZ-LN35VG2B-E3', net:457.65},
+        {kw:5.0, label:'Mitsubishi LN 5.0kW', model:'MSZ-LN50VG2B-E3', net:623.70},
+        {kw:6.0, label:'Mitsubishi LN 6.0kW', model:'MSZ-LN60VG2B-E3', net:714.42}
+      ]
+    };
 
-function toggleCond(id, v, el){
-  const r = rooms.find(x => x.id === id);
-  if(!r) return;
+    const MS_OUTDOOR_BY_TIER = {
+      Essential: MS_DAIKIN_OUTDOORS,
+      Comfort: MS_MITSUBISHI_OUTDOORS,
+      Premium: MS_MITSUBISHI_OUTDOORS
+    };
 
-  if(r.conds.includes(v)) r.conds = r.conds.filter(c => c !== v);
-  else r.conds.push(v);
+    const MS_INDOOR_KIT = 67.52;
+    const MS_EXTRA_LABOUR = 400.00;
+    const MS_MARKUP = 1.20;
 
-  el.classList.toggle('on', r.conds.includes(v));
-  liveCalc(id);
-}
+    const ROOM_TYPES = ['Bedroom','Living Room','Kitchen','Dining Room','Office','Study','Master Bedroom','Open Plan','Conservatory','Other'];
+    const ORIENTS = [
+      {v:'south',l:'South ☀️'},
+      {v:'west',l:'West 🌅'},
+      {v:'east',l:'East 🌄'},
+      {v:'north',l:'North 🌧️'}
+    ];
+    const CONDITIONS = [
+      {v:'glazed',l:'Heavily glazed'},
+      {v:'poor_ins',l:'Poorly insulated'},
+      {v:'good_ins',l:'Well insulated'},
+      {v:'top_floor',l:'Top floor / roof'},
+      {v:'high_ceil',l:'High ceilings'}
+    ];
 
-function liveCalc(id){
-  const r = rooms.find(x => x.id === id);
-  if(!r) return;
+    let rooms = [];
+    let addons = [];
+    let rIdx = 0;
+    let aIdx = 0;
+    let vatOn = false;
+    let fin = { apr:'', term:'', sub:0 };
+    let jobType = 'single';
+    let quoteRef = '';
 
-  const l = parseFloat(document.getElementById('rl-' + id)?.value) || r.l;
-  const w = parseFloat(document.getElementById('rw-' + id)?.value) || r.w;
-  const h = parseFloat(document.getElementById('rh-' + id)?.value) || r.h;
-
-  r.l = l;
-  r.w = w;
-  r.h = h;
-  r.kwRec = l > 0 && w > 0 && h > 0 ? calcKw(r) : 0;
-
-  const el = document.getElementById('kwr-' + id);
-  if(!el) return;
-
-  el.innerHTML = r.kwRec > 0
-    ? `<div class="kw-result"><div class="kw-val">${r.kwRec}kW</div><div class="kw-info">Recommended<span>${l}×${w}×${h}m = ${(l*w*h).toFixed(1)}m³${r.conds.length ? ' · ' + r.conds.length + ' factor(s) applied' : ''}</span></div></div>`
-    : `<p class="hint" style="margin-top:8px">Enter dimensions to see recommendation</p>`;
-}
-
-function setPipe(id, v){
-  const r = rooms.find(x => x.id === id);
-  if(!r) return;
-
-  r.extraPipe = parseFloat(v) || 0;
-
-  const pipeEl = document.getElementById('pipecost-' + id);
-  if(pipeEl){
-    pipeEl.textContent = r.extraPipe > 0 ? '≈ +£' + (r.extraPipe * 15.89).toFixed(0) + ' (varies by unit)' : '';
-  }
-
-  if(jobType === 'multi'){
-    buildMsQuote();
-    updateMsTotals();
-  } else {
-    refreshTierPrices();
-    updateTotals();
-  }
-}
-
-function setAccess(id, v, el){
-  const r = rooms.find(x => x.id === id);
-  if(!r) return;
-
-  r.access = v;
-  el.closest('.pills').querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
-  el.classList.add('on');
-}
-
-function stepFitting(id, code, delta){
-  const input = document.getElementById('fit-' + id + '-' + code);
-  const current = input ? (parseInt(input.value) || 0) : 0;
-  setFitting(id, code, current + delta);
-}
-
-function setFitting(id, code, val){
-  const r = rooms.find(x => x.id === id);
-  if(!r) return;
-
-  val = Math.max(0, Math.min(20, isNaN(val) ? 0 : val));
-  if(!r.fittings) r.fittings = {};
-  r.fittings[code] = val;
-
-  const input = document.getElementById('fit-' + id + '-' + code);
-  if(input) input.value = val;
-
-  const fc = fittingsCost(r);
-  const el = document.getElementById('fittingcost-' + id);
-  if(el) el.textContent = fc > 0 ? 'Fittings: +£' + fc.toFixed(2) : '';
-
-  if(jobType === 'multi'){
-    buildMsQuote();
-    updateMsTotals();
-  } else {
-    refreshTierPrices();
-    updateTotals();
-  }
-}
-
-function buildFittingsHtml(r){
-  const use100 = survey.installType === 'multi';
-  const sz = use100 ? '100mm' : '75mm';
-  let out = '<div class="field" style="margin-top:10px">';
-  out += '<label class="lbl">Trunking Fittings <span style="text-transform:none;font-weight:400;color:var(--mid)">— ' + sz + ' Inaba Denko</span></label>';
-  out += '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">';
-
-  FITTINGS.forEach(function(f){
-    const name = f[0];
-    const code = f[1];
-    const p75 = f[2];
-    const p100 = f[3];
-    const price = (use100 && p100 !== null) ? p100 : p75;
-    const na = (use100 && p100 === null);
-    const qty = (r.fittings && r.fittings[code]) ? r.fittings[code] : 0;
-    const inputId = 'fit-' + r.id + '-' + code;
-
-    out += '<div style="background:#f8fafc;border:1px solid var(--border);border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:10px">';
-    out += '<div style="flex:1;min-width:0">';
-    out += '<div style="font-size:13px;font-weight:600;color:var(--navy)">' + name + '</div>';
-    out += '<div style="font-size:11px;color:var(--mid);margin-top:1px">' + (na ? 'N/A — not available in 100mm' : '£' + price.toFixed(2) + ' each') + '</div>';
-    out += '</div>';
-
-    if(na){
-      out += '<div style="font-size:11px;color:#bbb;font-style:italic">N/A</div>';
-    } else {
-      out += '<div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0">';
-      out += '<button style="width:36px;height:38px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--navy);font-weight:700;line-height:1;touch-action:manipulation" onclick="stepFitting(' + r.id + ',\'' + code + '\',-1)">&#8722;</button>';
-      out += '<input type="number" value="' + qty + '" min="0" max="20" style="width:36px;height:38px;border:none;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:16px;color:var(--navy);padding:0;outline:none;-webkit-appearance:none;-moz-appearance:textfield" oninput="setFitting(' + r.id + ',\'' + code + '\',parseInt(this.value)||0)" id="' + inputId + '">';
-      out += '<button style="width:36px;height:38px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--navy);font-weight:700;line-height:1;touch-action:manipulation" onclick="stepFitting(' + r.id + ',\'' + code + '\',1)">&#43;</button>';
-      out += '</div>';
+    function formatMoney(value){
+      return '£' + (Number(value) || 0).toFixed(2);
     }
 
-    out += '</div>';
-  });
+    function vatMult(){
+      return vatOn ? 1.2 : 1;
+    }
 
-  out += '</div>';
-  out += '<div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--sky)" id="fittingcost-' + r.id + '"></div>';
-  out += '</div>';
-  return out;
-}
+    function pipeConfig(kw){
+      return kw <= 4.2 ? '1/4" & 3/8"' : kw <= 5.0 ? '1/4" & 1/2"' : '1/4" & 5/8"';
+    }
 
-function renderRooms(){
-  document.getElementById('rooms-wrap').innerHTML = rooms.map((r, idx) => `
-    <div class="room-card">
-      <div class="room-card-hdr">
-        <span class="room-num">Room ${idx + 1}</span>
-        ${rooms.length > 1 ? `<button class="rm-btn" onclick="removeRoom(${r.id})">Remove</button>` : ''}
-      </div>
+    function getUnit(tier, kw){
+      const list = UNITS[tier];
+      return list.find(u => u.kw >= kw) || list[list.length - 1];
+    }
 
-      <div class="field">
-        <label class="lbl">Room Type</label>
-        <select id="rt-${r.id}" onchange="liveCalc(${r.id})">
-          ${ROOM_TYPES.map(t => `<option${t === r.type ? ' selected' : ''}>${t}</option>`).join('')}
-        </select>
-      </div>
+    function calcKw(r){
+      let kw = r.l * r.w * r.h * 0.068;
 
-      <div class="row3">
-        <div class="field">
-          <label class="lbl">Length (m)</label>
-          <input type="number" id="rl-${r.id}" value="${r.l || ''}" placeholder="5.0" min="1" max="30" step="0.1" oninput="liveCalc(${r.id})">
-        </div>
-        <div class="field">
-          <label class="lbl">Width (m)</label>
-          <input type="number" id="rw-${r.id}" value="${r.w || ''}" placeholder="4.0" min="1" max="30" step="0.1" oninput="liveCalc(${r.id})">
-        </div>
-        <div class="field">
-          <label class="lbl">Height (m)</label>
-          <input type="number" id="rh-${r.id}" value="${r.h || 2.4}" placeholder="2.4" min="1.5" max="6" step="0.1" oninput="liveCalc(${r.id})">
-        </div>
-      </div>
+      if(r.type === 'Kitchen') kw *= 1.20;
+      if(r.type === 'Conservatory') kw *= 1.30;
+      if(r.type === 'Open Plan') kw *= 1.10;
 
-      <div class="field">
-        <label class="lbl">Orientation <span style="text-transform:none;font-weight:400;color:var(--mid)">(affects kW calc)</span></label>
-        <div class="pills">
-          ${ORIENTS.map(o => `<div class="pill op-${r.id}${r.orient === o.v ? ' on' : ''}" data-v="${o.v}" onclick="setOrient(${r.id},'${o.v}')">${o.l}</div>`).join('')}
-        </div>
-      </div>
+      if(r.orient === 'south') kw *= 1.12;
+      else if(r.orient === 'north') kw *= 0.95;
+      else if(r.orient === 'west') kw *= 1.06;
 
-      <div class="field">
-        <label class="lbl">Room Conditions</label>
-        <div class="pills">
-          ${CONDITIONS.map(c => `<div class="pill${r.conds.includes(c.v) ? ' on' : ''}" onclick="toggleCond(${r.id},'${c.v}',this)">${c.l}</div>`).join('')}
-        </div>
-      </div>
+      if(r.conds.includes('glazed')) kw *= 1.20;
+      if(r.conds.includes('poor_ins')) kw *= 1.12;
+      if(r.conds.includes('good_ins')) kw *= 0.92;
+      if(r.conds.includes('top_floor')) kw *= 1.15;
+      if(r.conds.includes('high_ceil')) kw *= 1.08;
 
-      <div id="kwr-${r.id}">
-        <p class="hint" style="margin-top:8px">Enter dimensions to see recommendation</p>
-      </div>
+      const sizes = [2.0,2.5,3.5,4.2,5.0,6.0,7.1];
+      return sizes.find(s => s >= kw) || 7.1;
+    }
 
-      <div class="pipe-row">
-        <span class="lbl2">Linear metres / extra pipe beyond standard 3m</span>
-        <input type="number" min="0" step="1" value="${r.extraPipe || 0}" oninput="setPipe(${r.id},this.value)">
-        <span class="pipe-note" id="pipecost-${r.id}"></span>
-      </div>
+    function fittingsCost(r){
+      const use100 = jobType === 'multi';
+      return FITTINGS.reduce((sum, [ , code, p75, p100 ]) => {
+        const qty = (r.fittings && r.fittings[code]) || 0;
+        const price = (use100 && p100 !== null) ? p100 : p75;
+        return sum + qty * price;
+      }, 0);
+    }
 
-      ${buildFittingsHtml(r)}
-
-      <div class="install-section">
-        <p class="install-lbl">Install Details — for job notes</p>
-
-        <div class="row2">
-          <div class="field">
-            <label class="lbl">Indoor unit position</label>
-            <select id="ri-pos-${r.id}">
-              <option>Wall mounted — high level</option>
-              <option>Wall mounted — standard</option>
-              <option>Ceiling cassette</option>
-              <option>Floor standing</option>
-            </select>
-          </div>
-          <div class="field">
-            <label class="lbl">Floor level</label>
-            <select id="ri-floor-${r.id}">
-              <option>Ground floor</option>
-              <option>First floor</option>
-              <option>Second floor</option>
-              <option>Loft / top floor</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row2">
-          <div class="field">
-            <label class="lbl">Outdoor unit location</label>
-            <select id="ri-out-${r.id}">
-              <option>Rear garden — ground</option>
-              <option>Side of house — ground</option>
-              <option>Front of house — ground</option>
-              <option>Wall mounted — rear</option>
-              <option>Wall mounted — side</option>
-              <option>Flat roof</option>
-              <option>Balcony</option>
-            </select>
-          </div>
-          <div class="field">
-            <label class="lbl">Outdoor mounting</label>
-            <select id="ri-mount-${r.id}">
-              <option>Feet on ground</option>
-              <option>Anti-vibration feet</option>
-              <option>Wall bracket</option>
-              <option>Flat roof frame</option>
-              <option>Cantilever bracket</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="lbl">Pipe / trunking route</label>
-          <select id="ri-route-${r.id}">
-            <option>External trunking — straight run</option>
-            <option>External trunking — around corners</option>
-            <option>Internal chase / concealed</option>
-            <option>Mix internal & external</option>
-            <option>Through roof space</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label class="lbl">Access</label>
-          <div class="pills">
-            ${['None','Scaffold needed','Restricted access','Neighbour permission','Other — see notes'].map(v => `
-              <div class="pill${(r.access || 'None') === v ? ' on' : ''}" onclick="setAccess(${r.id},'${v}',this)">${v}</div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  rooms.forEach(r => {
-    const fc = fittingsCost(r);
-    const el = document.getElementById('fittingcost-' + r.id);
-    if(el) el.textContent = fc > 0 ? 'Fittings: +£' + fc.toFixed(2) : '';
-    liveCalc(r.id);
-  });
-}
-
-function refreshTierPrices(){
-  rooms.forEach(function(r){
-    ['Basic','Mid','Premium'].forEach(function(tier){
-      const el = document.getElementById('tp-' + r.id + '-' + tier);
-      if(!el) return;
+    function pipeCost(r, tier){
       const u = getUnit(tier, r.kwRec || 2.5);
-      const full = (u.price + pipeCost(r, tier)) * vatMult();
-      el.textContent = '£' + Math.round(full).toLocaleString('en-GB');
-    });
-  });
-}
+      return (r.extraPipe || 0) * (PIPE_PM[pipeConfig(u.kw)] || 15.89) + fittingsCost(r);
+    }
 
-function buildQuote(){
-  document.getElementById('quote-wrap').innerHTML = rooms.map((r, idx) => {
-    const ub = getUnit('Basic', r.kwRec || 2.5);
-    const um = getUnit('Mid', r.kwRec || 2.5);
-    const up = getUnit('Premium', r.kwRec || 2.5);
+    function tierTotals(){
+      const t = { Basic:0, Mid:0, Premium:0 };
+      ['Basic','Mid','Premium'].forEach(tier => {
+        rooms.forEach(r => {
+          t[tier] += getUnit(tier, r.kwRec || 2.5).price + pipeCost(r, tier);
+        });
+      });
+      return t;
+    }
 
-    return `
-      <div class="card">
-        <div class="card-hdr">
-          <span class="ci">❄️</span>
-          Room ${idx + 1}: ${r.type}
-          <span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">· ${r.kwRec || '—'}kW</span>
+    function extrasTotal(){
+      return addons.reduce((s,a) => s + (parseFloat(a.price) || 0), 0);
+    }
+
+    function msPickHead(tier, kwRec){
+      const heads = MS_HEADS[tier];
+      return heads.find(h => h.kw >= (kwRec || 2.0)) || heads[heads.length - 1];
+    }
+
+    function msPickOutdoor(tier, numRooms, totalKw){
+      const outdoors = MS_OUTDOOR_BY_TIER[tier];
+      const sorted = outdoors.slice().sort((a,b) => a.ports - b.ports || a.maxKw - b.maxKw);
+      return sorted.find(ou => ou.ports >= numRooms && ou.maxKw >= totalKw) || outdoors[outdoors.length - 1];
+    }
+
+    function msHeadPrice(head){
+      return head.net * MS_MARKUP;
+    }
+
+    function msTierTotal(tier, roomList){
+      const heads = roomList.map(r => msPickHead(tier, r.kwRec || 2.0));
+      const totalHeadKw = heads.reduce((s,h) => s + h.kw, 0);
+      const outdoor = msPickOutdoor(tier, roomList.length, totalHeadKw);
+
+      const indoorCost = heads.reduce((s,h,i) => {
+        return s + msHeadPrice(h) + MS_INDOOR_KIT + ((roomList[i].extraPipe || 0) * (PIPE_PM[pipeConfig(h.kw)] || 15.89)) + fittingsCost(roomList[i]);
+      }, 0);
+
+      const extraLabour = MS_EXTRA_LABOUR * Math.max(0, roomList.length - 1);
+
+      return {
+        tier,
+        outdoor,
+        heads,
+        baseTotal: outdoor.price + indoorCost + extraLabour
+      };
+    }
+
+    function msTotalPrice(roomList){
+      if(!roomList.length){
+        return {
+          Essential:{baseTotal:0},
+          Comfort:{baseTotal:0},
+          Premium:{baseTotal:0}
+        };
+      }
+
+      return {
+        Essential: msTierTotal('Essential', roomList),
+        Comfort: msTierTotal('Comfort', roomList),
+        Premium: msTierTotal('Premium', roomList)
+      };
+    }
+
+    function updateFinance(){
+      const v = document.getElementById('financeSelect').value;
+      const financeInfo = document.getElementById('financeInfo');
+      const financeSummary = document.getElementById('financeSummary');
+
+      if(!v){
+        fin = { apr:'', term:'', sub:0 };
+        financeInfo.style.display = 'none';
+        updateQuote();
+        return;
+      }
+
+      const parts = v.split('|');
+      fin = {
+        apr: parts[0] || '',
+        term: parts[1] || '',
+        sub: parseFloat(parts[2]) || 0
+      };
+
+      let comfortTotal = 0;
+
+      if(jobType === 'multi'){
+        const mst = updateMsTotals();
+        comfortTotal = mst.c;
+      } else {
+        const st = updateSingleTotals();
+        comfortTotal = st.gM;
+      }
+
+      const months = fin.term === 'Pay in 3' ? 3 : (parseInt(fin.term) || 0);
+
+      financeSummary.textContent =
+        `APR: ${fin.apr}
+Term: ${fin.term}
+Subsidy added: ${(fin.sub * 100).toFixed(2)}%
+Indicative monthly (Comfort): ${months ? '£' + (comfortTotal / months).toFixed(2) : '—'}`;
+
+      financeInfo.style.display = 'block';
+      updateQuote();
+    }
+
+    function setJobType(type){
+      jobType = type;
+      document.getElementById('singleCard').classList.toggle('active', type === 'single');
+      document.getElementById('multiCard').classList.toggle('active', type === 'multi');
+      document.querySelector('input[value="single"]').checked = type === 'single';
+      document.querySelector('input[value="multi"]').checked = type === 'multi';
+      updateQuote();
+    }
+
+    function toggleVat(){
+      vatOn = document.getElementById('vatToggle').value === 'yes';
+      updateQuote();
+    }
+
+    function createRoom(){
+      return {
+        id:rIdx++,
+        type:'Bedroom',
+        l:0,
+        w:0,
+        h:2.4,
+        orient:'south',
+        conds:[],
+        kwRec:0,
+        extraPipe:0,
+        fittings:{},
+        pos:'Wall mounted — high level',
+        floor:'Ground floor',
+        outdoor:'Rear garden — ground',
+        mount:'Feet on ground',
+        route:'External trunking — straight run',
+        access:'None'
+      };
+    }
+
+    function addRoom(){
+      rooms.push(createRoom());
+      renderRooms();
+      updateQuote();
+    }
+
+    function removeRoom(id){
+      rooms = rooms.filter(r => r.id !== id);
+      renderRooms();
+      updateQuote();
+    }
+
+    function addAddon(){
+      addons.push({ id:aIdx++, name:'', price:0 });
+      renderAddons();
+      updateQuote();
+    }
+
+    function removeAddon(id){
+      addons = addons.filter(a => a.id !== id);
+      renderAddons();
+      updateQuote();
+    }
+
+    function renderAddons(){
+      const wrap = document.getElementById('addonsWrap');
+      if(!addons.length){
+        wrap.innerHTML = '<p class="help">No extras added yet.</p>';
+        return;
+      }
+
+      wrap.innerHTML = addons.map(a => `
+        <div class="addon-row">
+          <input type="text" placeholder="e.g. Scaffolding / extra labour / pump" value="${a.name || ''}" oninput="setAddonName(${a.id}, this.value)">
+          <div class="money">
+            <input type="number" min="0" step="0.01" value="${a.price || 0}" oninput="setAddonPrice(${a.id}, this.value)">
+          </div>
+          <button class="addon-del" type="button" onclick="removeAddon(${a.id})">×</button>
         </div>
+      `).join('');
+    }
 
-        <div class="tier-grid">
-          <div class="tier-card tc-basic">
-            <span class="tier-badge tb-basic">Essential</span>
-            <div class="tier-price" id="tp-${r.id}-Basic">£0</div>
-            <div class="tier-sub">${ub.make} ${ub.series}<br>${ub.kw}kW</div>
-          </div>
-          <div class="tier-card tc-mid">
-            <span class="tier-badge tb-mid">Comfort</span>
-            <div class="tier-price" id="tp-${r.id}-Mid">£0</div>
-            <div class="tier-sub">${um.make} ${um.series}<br>${um.kw}kW</div>
-          </div>
-          <div class="tier-card tc-prem">
-            <span class="tier-badge tb-prem">Premium</span>
-            <div class="tier-price" id="tp-${r.id}-Premium">£0</div>
-            <div class="tier-sub">${up.make} ${up.series}<br>${up.kw}kW</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+    function setAddonName(id, value){
+      const addon = addons.find(a => a.id === id);
+      if(addon) addon.name = value;
+    }
 
-  renderAddons();
-  refreshTierPrices();
-  updateTotals();
-}
+    function setAddonPrice(id, value){
+      const addon = addons.find(a => a.id === id);
+      if(addon) addon.price = parseFloat(value) || 0;
+      updateQuote();
+    }
 
-function addAddon(){
-  addons.push({ id:aIdx++, name:'', price:0 });
-  renderAddons();
-  if(jobType === 'multi') updateMsTotals();
-  else updateTotals();
-}
+    function renderOrientationPills(room){
+      return ORIENTS.map(o => `
+        <span class="pill ${room.orient === o.v ? 'on' : ''}" onclick="setRoomOrient(${room.id}, '${o.v}')">${o.l}</span>
+      `).join('');
+    }
 
-function removeAddon(id){
-  addons = addons.filter(a => a.id !== id);
-  renderAddons();
-  if(jobType === 'multi') updateMsTotals();
-  else updateTotals();
-}
+    function renderConditionPills(room){
+      return CONDITIONS.map(c => `
+        <span class="pill ${room.conds.includes(c.v) ? 'on' : ''}" onclick="toggleRoomCondition(${room.id}, '${c.v}')">${c.l}</span>
+      `).join('');
+    }
 
-function renderAddons(){
-  const html = addons.map(a => `
-    <div class="addon-row">
-      <input type="text" placeholder="e.g. Scaffolding / extra labour / pump" value="${a.name || ''}" oninput="setAddonName(${a.id},this.value)">
-      <div class="pw">
-        <input type="number" min="0" step="0.01" value="${a.price || 0}" oninput="setAddonPrice(${a.id},this.value)">
-      </div>
-      <button class="del-btn" onclick="removeAddon(${a.id})">×</button>
-    </div>
-  `).join('');
-
-  const wrap1 = document.getElementById('addons-wrap');
-  const wrap2 = document.getElementById('addons-wrap-m');
-  if(wrap1) wrap1.innerHTML = html || '<p class="hint">No extras added.</p>';
-  if(wrap2) wrap2.innerHTML = html || '<p class="hint">No extras added.</p>';
-}
-
-function setAddonName(id, val){
-  const a = addons.find(x => x.id === id);
-  if(a) a.name = val;
-}
-
-function setAddonPrice(id, val){
-  const a = addons.find(x => x.id === id);
-  if(a) a.price = parseFloat(val) || 0;
-  if(jobType === 'multi') updateMsTotals();
-  else updateTotals();
-}
-
-function vatMult(){
-  return vatOn ? 1.2 : 1;
-}
-
-function toggleVat(){
-  vatOn = !vatOn;
-
-  ['', '-m'].forEach(sfx => {
-    const track = document.getElementById('vat-track' + sfx);
-    const knob = document.getElementById('vat-knob' + sfx);
-    const lbl = document.getElementById('vat-lbl' + sfx);
-
-    if(track) track.style.background = vatOn ? 'var(--orange)' : 'rgba(255,255,255,.2)';
-    if(knob) knob.style.left = vatOn ? '20px' : '2px';
-    if(lbl) lbl.textContent = vatOn ? '+VAT (inc)' : 'Ex VAT';
-  });
-
-  if(jobType === 'multi'){
-    buildMsQuote();
-    updateMsTotals();
-  } else {
-    refreshTierPrices();
-    updateTotals();
-  }
-}
-
-function updateFin(){
-  const select = document.getElementById('fin-sel');
-  const v = select ? select.value : '';
-  const info = document.getElementById('fin-info');
-  const subLbl = document.getElementById('fin-sub-lbl');
-  const moLbl = document.getElementById('fin-mo-lbl');
-  const moVal = document.getElementById('fin-mo-val');
-
-  if(!v){
-    fin = { apr:'', term:'', sub:0 };
-    if(info) info.style.display = 'none';
-
-    const other = document.getElementById('fin-sel-m');
-    if(other && other.value !== '') other.value = '';
-
-    if(jobType === 'multi') updateMsTotals();
-    else updateTotals();
-    return;
-  }
-
-  const parts = v.split('|');
-  fin = {
-    apr: parts[0] || '',
-    term: parts[1] || '',
-    sub: parseFloat(parts[2]) || 0
-  };
-
-  if(info){
-    info.style.display = 'block';
-    subLbl.textContent = (fin.sub * 100).toFixed(2) + '%';
-  }
-
-  const other = document.getElementById('fin-sel-m');
-  if(other) other.value = v;
-
-  let monthlyBase = 0;
-
-  if(jobType === 'multi'){
-    const mst = updateMsTotals();
-    monthlyBase = mst.c;
-  } else {
-    const t = updateTotals();
-    monthlyBase = t.gM;
-  }
-
-  const termNum = fin.term === 'Pay in 3' ? 3 : (parseInt(fin.term) || 0);
-  if(moLbl) moLbl.textContent = termNum ? `Indicative monthly (${fin.term})` : 'Indicative monthly';
-  if(moVal) moVal.textContent = termNum ? '£' + (monthlyBase / termNum).toFixed(2) : '—';
-}
-
-function syncFinanceFromMulti(){
-  const v = document.getElementById('fin-sel-m').value;
-  const main = document.getElementById('fin-sel');
-  if(main) main.value = v;
-  updateFin();
-}
-
-function updateTotals(){
-  const t = tierTotals();
-  const ext = extrasTotal();
-  const sub = fin.sub || 0;
-  const vm = vatMult();
-
-  const gB = (t.Basic + ext) * (1 + sub) * vm;
-  const gM = (t.Mid + ext) * (1 + sub) * vm;
-  const gP = (t.Premium + ext) * (1 + sub) * vm;
-
-  const f = n => '£' + n.toFixed(2);
-
-  document.getElementById('tb-b').textContent = f(gB);
-  document.getElementById('tb-m').textContent = f(gM);
-  document.getElementById('tb-p').textContent = f(gP);
-  document.getElementById('tb-ext').textContent = ext > 0 ? f(ext * vm) : '—';
-
-  if(fin.sub > 0){
-    document.getElementById('fin-sub-lbl').textContent = (fin.sub * 100).toFixed(1) + '% added';
-    const mo = fin.term === 'Pay in 3' ? 3 : parseInt(fin.term);
-    document.getElementById('fin-mo-lbl').textContent = 'Monthly — Comfort (' + fin.term + ')';
-    document.getElementById('fin-mo-val').textContent = mo ? '£' + (gM / mo).toFixed(2) + '/mo' : '—';
-    document.getElementById('fin-info').style.display = 'block';
-  }
-
-  return { gB, gM, gP, ext };
-}
-
-function msPickHead(tier, kwRec){
-  const heads = MS_HEADS[tier];
-  return heads.find(h => h.kw >= (kwRec || 2.0)) || heads[heads.length - 1];
-}
-
-function msPickOutdoor(tier, numRooms, totalKw){
-  const outdoors = MS_OUTDOOR_BY_TIER[tier];
-  const sorted = outdoors.slice().sort((a,b) => a.ports - b.ports || a.maxKw - b.maxKw);
-  return sorted.find(ou => ou.ports >= numRooms && ou.maxKw >= totalKw) || outdoors[outdoors.length - 1];
-}
-
-function msHeadPrice(head){
-  return head.net * MS_MARKUP;
-}
-
-function msTierTotal(tier, roomsIn){
-  const heads = roomsIn.map(r => msPickHead(tier, r.kwRec || 2.0));
-  const totalHeadKw = heads.reduce((s,h) => s + h.kw, 0);
-  const ou = msPickOutdoor(tier, roomsIn.length, totalHeadKw);
-
-  const indoorCost = heads.reduce((s,h,i) => {
-    return s + msHeadPrice(h) + MS_INDOOR_KIT + ((roomsIn[i].extraPipe || 0) * (PIPE_PM[pipeConfig(h.kw)] || 15.89)) + fittingsCost(roomsIn[i]);
-  }, 0);
-
-  const extraLabour = MS_EXTRA_LABOUR * Math.max(0, roomsIn.length - 1);
-
-  return {
-    tier:tier,
-    outdoor:ou,
-    heads:heads,
-    baseTotal:ou.price + indoorCost + extraLabour
-  };
-}
-
-function msTotalPrice(roomsIn){
-  if(!roomsIn.length){
-    return {
-      Essential:{baseTotal:0},
-      Comfort:{baseTotal:0},
-      Premium:{baseTotal:0}
-    };
-  }
-
-  return {
-    Essential: msTierTotal('Essential', roomsIn),
-    Comfort: msTierTotal('Comfort', roomsIn),
-    Premium: msTierTotal('Premium', roomsIn)
-  };
-}
-
-function buildMsQuote(){
-  const mst = msTotalPrice(rooms);
-
-  document.getElementById('ms-ou-essential').textContent = mst.Essential.outdoor ? mst.Essential.outdoor.label : '—';
-  document.getElementById('ms-ou-comfort').textContent = mst.Comfort.outdoor ? mst.Comfort.outdoor.label : '—';
-  document.getElementById('ms-ou-premium').textContent = mst.Premium.outdoor ? mst.Premium.outdoor.label : '—';
-
-  document.getElementById('ms-rooms-wrap').innerHTML = rooms.map((r, idx) => {
-    const hb = msPickHead('Essential', r.kwRec || 2.0);
-    const hm = msPickHead('Comfort', r.kwRec || 2.0);
-    const hp = msPickHead('Premium', r.kwRec || 2.0);
-
-    return `
-      <div class="card">
-        <div class="card-hdr">
-          <span class="ci">❄️</span>
-          Room ${idx + 1}: ${r.type}
-          <span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">· ${r.kwRec || '—'}kW</span>
-        </div>
-
-        <div class="tier-grid">
-          <div class="tier-card tc-basic">
-            <span class="tier-badge tb-basic">Essential</span>
-            <div class="tier-price">£${Math.round((msHeadPrice(hb) + MS_INDOOR_KIT + ((r.extraPipe || 0) * (PIPE_PM[pipeConfig(hb.kw)] || 15.89)) + fittingsCost(r)) * vatMult()).toLocaleString('en-GB')}</div>
-            <div class="tier-sub">${hb.label}<br>${hb.model}</div>
-          </div>
-          <div class="tier-card tc-mid">
-            <span class="tier-badge tb-mid">Comfort</span>
-            <div class="tier-price">£${Math.round((msHeadPrice(hm) + MS_INDOOR_KIT + ((r.extraPipe || 0) * (PIPE_PM[pipeConfig(hm.kw)] || 15.89)) + fittingsCost(r)) * vatMult()).toLocaleString('en-GB')}</div>
-            <div class="tier-sub">${hm.label}<br>${hm.model}</div>
-          </div>
-          <div class="tier-card tc-prem">
-            <span class="tier-badge tb-prem">Premium</span>
-            <div class="tier-price">£${Math.round((msHeadPrice(hp) + MS_INDOOR_KIT + ((r.extraPipe || 0) * (PIPE_PM[pipeConfig(hp.kw)] || 15.89)) + fittingsCost(r)) * vatMult()).toLocaleString('en-GB')}</div>
-            <div class="tier-sub">${hp.label}<br>${hp.model}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  renderAddons();
-  updateMsTotals();
-}
-
-function updateMsTotals(){
-  const mst = msTotalPrice(rooms);
-  const ext = extrasTotal();
-  const sub = fin.sub || 0;
-  const vm = vatMult();
-
-  const e = (mst.Essential.baseTotal + ext) * (1 + sub) * vm;
-  const c = (mst.Comfort.baseTotal + ext) * (1 + sub) * vm;
-  const p = (mst.Premium.baseTotal + ext) * (1 + sub) * vm;
-
-  document.getElementById('ms-tb-essential').textContent = '£' + e.toFixed(2);
-  document.getElementById('ms-tb-comfort').textContent = '£' + c.toFixed(2);
-  document.getElementById('ms-tb-premium').textContent = '£' + p.toFixed(2);
-
-  return { e, c, p, ext };
-}
-
-function buildReview(){
-  const first = document.getElementById('fn').value.trim();
-  const last = document.getElementById('ln').value.trim();
-  const email = document.getElementById('em').value.trim();
-  const ad1 = document.getElementById('ad1').value.trim();
-  const ad2 = document.getElementById('ad2').value.trim();
-  const ad3 = document.getElementById('ad3').value.trim();
-  const ad4 = document.getElementById('ad4').value.trim();
-  const addr = [ad1,ad2,ad3,ad4].filter(Boolean).join(', ');
-  const date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  const ref = 'AKT-' + Date.now().toString(36).toUpperCase().slice(-6);
-
-  window._ref = ref;
-  window._date = date;
-
-  document.getElementById('rv-who').textContent = first + ' ' + last + ' · ' + addr;
-  document.getElementById('rv-ref').textContent = 'Ref: ' + ref + ' · ' + date;
-  document.getElementById('rv-email').value = email;
-
-  const consumer = document.getElementById('sv-consumer')?.value || '';
-  const wall = document.getElementById('sv-wall')?.value || '';
-
-  document.getElementById('rv-survey').innerHTML = `
-    <div class="survey-box">
-      <strong>Property Survey Notes</strong>
-      <span>Power supply:</span> ${survey.power}<br>
-      <span>Existing unit:</span> ${survey.existing}<br>
-      <span>Consumer unit:</span> ${consumer}<br>
-      <span>Wall construction:</span> ${wall}<br>
-      <span>Install type:</span> ${jobType === 'multi' ? 'Multi-split' : 'Single split'}<br>
-      <span>Finance:</span> ${fin.apr ? `${fin.apr} · ${fin.term} · subsidy ${(fin.sub*100).toFixed(1)}%` : 'No finance'}
-    </div>
-  `;
-
-  const finNote = fin.sub > 0 ? ` <span style="font-size:11px;color:var(--mid);font-weight:400">(inc ${(fin.sub*100).toFixed(1)}% finance subsidy)</span>` : '';
-
-  if(jobType === 'multi'){
-    const mst = updateMsTotals();
-
-    const roomHtml = rooms.map((r,i) => {
-      const hb = msPickHead('Essential', r.kwRec || 2.0);
-      const hm = msPickHead('Comfort', r.kwRec || 2.0);
-      const hp = msPickHead('Premium', r.kwRec || 2.0);
+    function buildFittingsHtml(room){
+      const use100 = jobType === 'multi';
+      const sizeLabel = use100 ? '100mm' : '75mm';
 
       return `
-        <div class="rv-room">
-          <div class="rv-room-hdr">
-            <strong>Room ${i+1}: ${r.type}</strong>
-            <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+        <div class="field">
+          <label>Trunking fittings — ${sizeLabel}</label>
+          <div class="field-grid">
+            ${FITTINGS.map(([name, code, p75, p100]) => {
+              const price = (use100 && p100 !== null) ? p100 : p75;
+              const na = use100 && p100 === null;
+              const qty = (room.fittings && room.fittings[code]) || 0;
+              return `
+                <div class="field">
+                  <label>${name} ${na ? '(N/A)' : `(£${price.toFixed(2)} each)`}</label>
+                  <input type="number" min="0" max="20" ${na ? 'disabled' : ''} value="${qty}" oninput="setFitting(${room.id}, '${code}', this.value)">
+                </div>
+              `;
+            }).join('')}
           </div>
-          <div class="tline"><span>Essential indoor unit</span><span>${hb.label}</span></div>
-          <div class="tline"><span>Comfort indoor unit</span><span>${hm.label}</span></div>
-          <div class="tline"><span>Premium indoor unit</span><span>${hp.label}</span></div>
-          <div class="tline"><span>Indoor position</span><span>${r.pos} · ${r.floor}</span></div>
-          <div class="tline"><span>Outdoor location</span><span>${r.outdoor} · ${r.mount}</span></div>
-          <div class="tline"><span>Route</span><span>${r.route}</span></div>
-          <div class="tline"><span>Access</span><span>${r.access}</span></div>
-          ${r.extraPipe > 0 ? `<div class="tline"><span>Extra pipe</span><span>${r.extraPipe}m</span></div>` : ''}
         </div>
       `;
-    }).join('');
+    }
 
-    document.getElementById('rv-rooms').innerHTML = roomHtml;
+    function renderRooms(){
+      const wrap = document.getElementById('roomList');
 
-    document.getElementById('rv-addons').innerHTML = addons.length ? `
-      <div class="survey-box">
-        <strong>Add-ons & Extras</strong>
-        ${addons.map(a => `${a.name || 'Extra item'} — £${(parseFloat(a.price)||0).toFixed(2)}`).join('<br>')}
-      </div>
-    ` : '';
-
-    document.getElementById('rv-totals').innerHTML = `
-      <div class="grand-line"><span>Essential total${finNote}</span><span>£${mst.e.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Comfort total${finNote}</span><span>£${mst.c.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Premium total${finNote}</span><span>£${mst.p.toFixed(2)}</span></div>
-    `;
-  } else {
-    const totals = updateTotals();
-
-    const roomHtml = rooms.map((r,i) => {
-      const ub = getUnit('Basic', r.kwRec || 2.5);
-      const um = getUnit('Mid', r.kwRec || 2.5);
-      const up = getUnit('Premium', r.kwRec || 2.5);
-
-      return `
-        <div class="rv-room">
-          <div class="rv-room-hdr">
-            <strong>Room ${i+1}: ${r.type}</strong>
-            <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+      wrap.innerHTML = rooms.map((room, idx) => `
+        <div class="room-card">
+          <div class="room-card-top">
+            <div>
+              <h4>Room ${idx + 1}</h4>
+              <p>${room.type} · ${room.kwRec || '—'}kW recommended</p>
+            </div>
+            ${rooms.length > 1 ? `<button class="btn btn-secondary" type="button" onclick="removeRoom(${room.id})">Remove</button>` : ''}
           </div>
-          <div class="tline"><span>Essential unit</span><span>${ub.make} ${ub.series} ${ub.kw}kW</span></div>
-          <div class="tline"><span>Comfort unit</span><span>${um.make} ${um.series} ${um.kw}kW</span></div>
-          <div class="tline"><span>Premium unit</span><span>${up.make} ${up.series} ${up.kw}kW</span></div>
-          <div class="tline"><span>Indoor position</span><span>${r.pos} · ${r.floor}</span></div>
-          <div class="tline"><span>Outdoor location</span><span>${r.outdoor} · ${r.mount}</span></div>
-          <div class="tline"><span>Route</span><span>${r.route}</span></div>
-          <div class="tline"><span>Access</span><span>${r.access}</span></div>
-          ${r.extraPipe > 0 ? `<div class="tline"><span>Extra pipe</span><span>${r.extraPipe}m</span></div>` : ''}
+
+          <div class="field-grid">
+            <div class="field">
+              <label>Room type</label>
+              <select onchange="setRoomField(${room.id}, 'type', this.value)">
+                ${ROOM_TYPES.map(type => `<option value="${type}" ${room.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Height (m)</label>
+              <input type="number" min="1.5" max="6" step="0.1" value="${room.h}" oninput="setRoomNumber(${room.id}, 'h', this.value)">
+            </div>
+
+            <div class="field">
+              <label>Length (m)</label>
+              <input type="number" min="1" max="30" step="0.1" value="${room.l || ''}" oninput="setRoomNumber(${room.id}, 'l', this.value)">
+            </div>
+
+            <div class="field">
+              <label>Width (m)</label>
+              <input type="number" min="1" max="30" step="0.1" value="${room.w || ''}" oninput="setRoomNumber(${room.id}, 'w', this.value)">
+            </div>
+
+            <div class="field full">
+              <label>Orientation</label>
+              <div class="choice-row">${renderOrientationPills(room)}</div>
+            </div>
+
+            <div class="field full">
+              <label>Room conditions</label>
+              <div class="choice-row">${renderConditionPills(room)}</div>
+            </div>
+
+            <div class="field full">
+              <label>Linear metres / extra pipe beyond standard 3m</label>
+              <input type="number" min="0" step="1" value="${room.extraPipe || 0}" oninput="setRoomNumber(${room.id}, 'extraPipe', this.value)">
+              <div class="help">Extra pipe cost is added into the tier price.</div>
+            </div>
+          </div>
+
+          <div class="summary-box" style="margin-top:14px">
+            <h4>Install Details — for job notes</h4>
+
+            <div class="field-grid">
+              <div class="field">
+                <label>Indoor unit position</label>
+                <select onchange="setRoomField(${room.id}, 'pos', this.value)">
+                  ${['Wall mounted — high level','Wall mounted — standard','Ceiling cassette','Floor standing'].map(v => `<option ${room.pos === v ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Floor level</label>
+                <select onchange="setRoomField(${room.id}, 'floor', this.value)">
+                  ${['Ground floor','First floor','Second floor','Loft / top floor'].map(v => `<option ${room.floor === v ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Outdoor unit location</label>
+                <select onchange="setRoomField(${room.id}, 'outdoor', this.value)">
+                  ${['Rear garden — ground','Side of house — ground','Front of house — ground','Wall mounted — rear','Wall mounted — side','Flat roof','Balcony'].map(v => `<option ${room.outdoor === v ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Outdoor mounting</label>
+                <select onchange="setRoomField(${room.id}, 'mount', this.value)">
+                  ${['Feet on ground','Anti-vibration feet','Wall bracket','Flat roof frame','Cantilever bracket'].map(v => `<option ${room.mount === v ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Pipe / trunking route</label>
+                <select onchange="setRoomField(${room.id}, 'route', this.value)">
+                  ${['External trunking — straight run','External trunking — around corners','Internal chase / concealed','Mix internal & external','Through roof space'].map(v => `<option ${room.route === v ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Access</label>
+                <select onchange="setRoomField(${room.id}, 'access', this.value)">
+                  ${['None','Scaffold needed','Restricted access','Neighbour permission','Other — see notes'].map(v => `<option ${room.access === v ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:14px">
+              ${buildFittingsHtml(room)}
+            </div>
+          </div>
         </div>
+      `).join('');
+    }
+
+    function setRoomField(id, field, value){
+      const room = rooms.find(r => r.id === id);
+      if(!room) return;
+      room[field] = value;
+      updateRoomKw(room);
+      updateQuote();
+      renderReview();
+    }
+
+    function setRoomNumber(id, field, value){
+      const room = rooms.find(r => r.id === id);
+      if(!room) return;
+      room[field] = parseFloat(value) || 0;
+      updateRoomKw(room);
+      updateQuote();
+      renderReview();
+    }
+
+    function setRoomOrient(id, value){
+      const room = rooms.find(r => r.id === id);
+      if(!room) return;
+      room.orient = value;
+      updateRoomKw(room);
+      renderRooms();
+      updateQuote();
+      renderReview();
+    }
+
+    function toggleRoomCondition(id, value){
+      const room = rooms.find(r => r.id === id);
+      if(!room) return;
+
+      if(room.conds.includes(value)){
+        room.conds = room.conds.filter(c => c !== value);
+      } else {
+        room.conds.push(value);
+      }
+
+      updateRoomKw(room);
+      renderRooms();
+      updateQuote();
+      renderReview();
+    }
+
+    function setFitting(id, code, value){
+      const room = rooms.find(r => r.id === id);
+      if(!room) return;
+      if(!room.fittings) room.fittings = {};
+      room.fittings[code] = Math.max(0, Math.min(20, parseInt(value) || 0));
+      updateQuote();
+      renderReview();
+    }
+
+    function updateRoomKw(room){
+      if(room.l > 0 && room.w > 0 && room.h > 0){
+        room.kwRec = calcKw(room);
+      } else {
+        room.kwRec = 0;
+      }
+    }
+
+    function updateSingleTotals(){
+      const t = tierTotals();
+      const ext = extrasTotal();
+      const sub = fin.sub || 0;
+      const vm = vatMult();
+
+      const gB = (t.Basic + ext) * (1 + sub) * vm;
+      const gM = (t.Mid + ext) * (1 + sub) * vm;
+      const gP = (t.Premium + ext) * (1 + sub) * vm;
+
+      return { gB, gM, gP, ext };
+    }
+
+    function updateMsTotals(){
+      const mst = msTotalPrice(rooms);
+      const ext = extrasTotal();
+      const sub = fin.sub || 0;
+      const vm = vatMult();
+
+      const e = (mst.Essential.baseTotal + ext) * (1 + sub) * vm;
+      const c = (mst.Comfort.baseTotal + ext) * (1 + sub) * vm;
+      const p = (mst.Premium.baseTotal + ext) * (1 + sub) * vm;
+
+      return { e, c, p, ext, mst };
+    }
+
+    function buildJobNotes(){
+      const power = document.getElementById('powerSupply').value;
+      const existing = document.getElementById('existingUnit').value;
+      const consumer = document.getElementById('consumerUnit').value;
+      const wall = document.getElementById('wallType').value;
+      const reviewNotes = document.getElementById('reviewNotes').value.trim();
+
+      const lines = [
+        'PROPERTY SURVEY',
+        `Power supply: ${power}`,
+        `Existing unit: ${existing}`,
+        `Consumer unit: ${consumer}`,
+        `Wall construction: ${wall}`,
+        `Install type: ${jobType === 'multi' ? 'Multi-split' : 'Single split'}`,
+        fin.apr ? `Finance: ${fin.apr} / ${fin.term} / subsidy ${(fin.sub*100).toFixed(1)}%` : 'Finance: No finance'
+      ];
+
+      if(jobType === 'multi'){
+        const mst = msTotalPrice(rooms);
+
+        lines.push('');
+        lines.push('MULTI-SPLIT OUTDOOR UNITS');
+        lines.push(`Essential outdoor: ${mst.Essential.outdoor ? mst.Essential.outdoor.label : '—'}`);
+        lines.push(`Comfort outdoor: ${mst.Comfort.outdoor ? mst.Comfort.outdoor.label : '—'}`);
+        lines.push(`Premium outdoor: ${mst.Premium.outdoor ? mst.Premium.outdoor.label : '—'}`);
+
+        rooms.forEach((r,i) => {
+          const hb = msPickHead('Essential', r.kwRec || 2.0);
+          const hm = msPickHead('Comfort', r.kwRec || 2.0);
+          const hp = msPickHead('Premium', r.kwRec || 2.0);
+
+          lines.push('');
+          lines.push(`Room ${i+1}: ${r.type} (${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW)`);
+          lines.push(`  Essential indoor unit: ${hb.label} (${hb.model})`);
+          lines.push(`  Comfort indoor unit: ${hm.label} (${hm.model})`);
+          lines.push(`  Premium indoor unit: ${hp.label} (${hp.model})`);
+          lines.push(`  Indoor: ${r.pos} · ${r.floor}`);
+          lines.push(`  Outdoor: ${r.outdoor} · ${r.mount}`);
+          lines.push(`  Route: ${r.route}`);
+          lines.push(`  Access: ${r.access}`);
+          if(r.extraPipe > 0) lines.push(`  Extra pipe: ${r.extraPipe}m`);
+
+          const fitText = FITTINGS.filter(f => r.fittings && r.fittings[f[1]] > 0)
+            .map(f => `${r.fittings[f[1]]}× ${f[0]}`)
+            .join(', ');
+          if(fitText) lines.push(`  Fittings: ${fitText}`);
+        });
+      } else {
+        rooms.forEach((r,i) => {
+          const basicUnit = getUnit('Basic', r.kwRec || 2.5);
+          const midUnit = getUnit('Mid', r.kwRec || 2.5);
+          const premiumUnit = getUnit('Premium', r.kwRec || 2.5);
+
+          lines.push('');
+          lines.push(`Room ${i+1}: ${r.type} (${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW)`);
+          lines.push(`  Essential unit: ${basicUnit.make} ${basicUnit.series} ${basicUnit.kw}kW`);
+          lines.push(`  Comfort unit: ${midUnit.make} ${midUnit.series} ${midUnit.kw}kW`);
+          lines.push(`  Premium unit: ${premiumUnit.make} ${premiumUnit.series} ${premiumUnit.kw}kW`);
+          lines.push(`  Indoor: ${r.pos} · ${r.floor}`);
+          lines.push(`  Outdoor: ${r.outdoor} · ${r.mount}`);
+          lines.push(`  Route: ${r.route}`);
+          lines.push(`  Access: ${r.access}`);
+          if(r.extraPipe > 0) lines.push(`  Extra pipe: ${r.extraPipe}m`);
+
+          const fitText = FITTINGS.filter(f => r.fittings && r.fittings[f[1]] > 0)
+            .map(f => `${r.fittings[f[1]]}× ${f[0]}`)
+            .join(', ');
+          if(fitText) lines.push(`  Fittings: ${fitText}`);
+        });
+      }
+
+      if(addons.length){
+        lines.push('');
+        lines.push('ADD-ONS & EXTRAS');
+        addons.forEach(a => lines.push(`- ${a.name || 'Extra item'}: £${(parseFloat(a.price)||0).toFixed(2)}`));
+      }
+
+      if(reviewNotes){
+        lines.push('');
+        lines.push('SURVEY NOTES');
+        lines.push(reviewNotes);
+      }
+
+      return lines.join('\n');
+    }
+
+    function updateQuote(){
+      document.getElementById('systemLabel').textContent = jobType === 'multi' ? 'Multi-split quote' : 'Single split quote';
+
+      if(jobType === 'multi'){
+        const mt = updateMsTotals();
+        document.getElementById('priceEssential').textContent = formatMoney(mt.e);
+        document.getElementById('priceComfort').textContent = formatMoney(mt.c);
+        document.getElementById('pricePremium').textContent = formatMoney(mt.p);
+
+        const suffix = fin.sub > 0
+          ? `${vatOn ? 'Inc. VAT' : 'Ex VAT'} · finance uplift ${(fin.sub*100).toFixed(1)}% applied`
+          : `${vatOn ? 'Inc. VAT' : 'Ex VAT'} · supply & installation`;
+
+        document.getElementById('subEssential').textContent = suffix;
+        document.getElementById('subComfort').textContent = suffix;
+        document.getElementById('subPremium').textContent = suffix;
+
+        document.getElementById('multiOutdoorBox').style.display = 'block';
+        document.getElementById('multiOutdoorText').textContent =
+`Essential: ${mt.mst.Essential.outdoor ? mt.mst.Essential.outdoor.label : '—'}
+Comfort: ${mt.mst.Comfort.outdoor ? mt.mst.Comfort.outdoor.label : '—'}
+Premium: ${mt.mst.Premium.outdoor ? mt.mst.Premium.outdoor.label : '—'}`;
+      } else {
+        const st = updateSingleTotals();
+        document.getElementById('priceEssential').textContent = formatMoney(st.gB);
+        document.getElementById('priceComfort').textContent = formatMoney(st.gM);
+        document.getElementById('pricePremium').textContent = formatMoney(st.gP);
+
+        const suffix = fin.sub > 0
+          ? `${vatOn ? 'Inc. VAT' : 'Ex VAT'} · finance uplift ${(fin.sub*100).toFixed(1)}% applied`
+          : `${vatOn ? 'Inc. VAT' : 'Ex VAT'} · supply & installation`;
+
+        document.getElementById('subEssential').textContent = suffix;
+        document.getElementById('subComfort').textContent = suffix;
+        document.getElementById('subPremium').textContent = suffix;
+
+        document.getElementById('multiOutdoorBox').style.display = 'none';
+      }
+
+      document.getElementById('jobNotesPreview').textContent = buildJobNotes();
+      renderReview();
+    }
+
+    function renderReview(){
+      const first = document.getElementById('firstName').value.trim();
+      const last = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const address = [
+        document.getElementById('address1').value.trim(),
+        document.getElementById('town').value.trim(),
+        document.getElementById('county').value.trim(),
+        document.getElementById('postcode').value.trim()
+      ].filter(Boolean).join(', ');
+
+      if(!quoteRef){
+        quoteRef = 'AKT-' + Date.now().toString(36).toUpperCase().slice(-6);
+      }
+
+      document.getElementById('reviewWho').textContent = `${first} ${last}`.trim() + (address ? ` · ${address}` : '');
+      document.getElementById('reviewRef').textContent = `Ref: ${quoteRef}`;
+
+      document.getElementById('reviewSurvey').innerHTML = `
+        <div class="review-row"><span>Power supply</span><span>${document.getElementById('powerSupply').value}</span></div>
+        <div class="review-row"><span>Existing unit</span><span>${document.getElementById('existingUnit').value}</span></div>
+        <div class="review-row"><span>Consumer unit</span><span>${document.getElementById('consumerUnit').value}</span></div>
+        <div class="review-row"><span>Wall construction</span><span>${document.getElementById('wallType').value}</span></div>
+        <div class="review-row"><span>Install type</span><span>${jobType === 'multi' ? 'Multi-split' : 'Single split'}</span></div>
+        <div class="review-row"><span>Finance</span><span>${fin.apr ? `${fin.apr} · ${fin.term} · subsidy ${(fin.sub*100).toFixed(1)}%` : 'No finance'}</span></div>
+        <div class="review-row"><span>Customer email</span><span>${email || '—'}</span></div>
       `;
-    }).join('');
 
-    document.getElementById('rv-rooms').innerHTML = roomHtml;
+      if(!rooms.length){
+        document.getElementById('reviewRooms').innerHTML = '<div class="review-row"><span>No rooms added yet.</span><span>—</span></div>';
+      } else if(jobType === 'multi'){
+        document.getElementById('reviewRooms').innerHTML = rooms.map((r,i) => {
+          const hb = msPickHead('Essential', r.kwRec || 2.0);
+          const hm = msPickHead('Comfort', r.kwRec || 2.0);
+          const hp = msPickHead('Premium', r.kwRec || 2.0);
 
-    document.getElementById('rv-addons').innerHTML = addons.length ? `
-      <div class="survey-box">
-        <strong>Add-ons & Extras</strong>
-        ${addons.map(a => `${a.name || 'Extra item'} — £${(parseFloat(a.price)||0).toFixed(2)}`).join('<br>')}
-      </div>
-    ` : '';
+          return `
+            <div class="review-room">
+              <div class="review-row"><span><strong>Room ${i+1}: ${r.type}</strong></span><span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span></div>
+              <div class="review-row"><span>Essential indoor unit</span><span>${hb.label}</span></div>
+              <div class="review-row"><span>Comfort indoor unit</span><span>${hm.label}</span></div>
+              <div class="review-row"><span>Premium indoor unit</span><span>${hp.label}</span></div>
+              <div class="review-row"><span>Indoor</span><span>${r.pos} · ${r.floor}</span></div>
+              <div class="review-row"><span>Outdoor</span><span>${r.outdoor} · ${r.mount}</span></div>
+              <div class="review-row"><span>Route</span><span>${r.route}</span></div>
+              <div class="review-row"><span>Access</span><span>${r.access}</span></div>
+              ${r.extraPipe > 0 ? `<div class="review-row"><span>Extra pipe</span><span>${r.extraPipe}m</span></div>` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        document.getElementById('reviewRooms').innerHTML = rooms.map((r,i) => {
+          const ub = getUnit('Basic', r.kwRec || 2.5);
+          const um = getUnit('Mid', r.kwRec || 2.5);
+          const up = getUnit('Premium', r.kwRec || 2.5);
 
-    document.getElementById('rv-totals').innerHTML = `
-      <div class="grand-line"><span>Essential total${finNote}</span><span>£${totals.gB.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Comfort total${finNote}</span><span>£${totals.gM.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Premium total${finNote}</span><span>£${totals.gP.toFixed(2)}</span></div>
-    `;
-  }
-}
+          return `
+            <div class="review-room">
+              <div class="review-row"><span><strong>Room ${i+1}: ${r.type}</strong></span><span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span></div>
+              <div class="review-row"><span>Essential unit</span><span>${ub.make} ${ub.series} ${ub.kw}kW</span></div>
+              <div class="review-row"><span>Comfort unit</span><span>${um.make} ${um.series} ${um.kw}kW</span></div>
+              <div class="review-row"><span>Premium unit</span><span>${up.make} ${up.series} ${up.kw}kW</span></div>
+              <div class="review-row"><span>Indoor</span><span>${r.pos} · ${r.floor}</span></div>
+              <div class="review-row"><span>Outdoor</span><span>${r.outdoor} · ${r.mount}</span></div>
+              <div class="review-row"><span>Route</span><span>${r.route}</span></div>
+              <div class="review-row"><span>Access</span><span>${r.access}</span></div>
+              ${r.extraPipe > 0 ? `<div class="review-row"><span>Extra pipe</span><span>${r.extraPipe}m</span></div>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
 
-function buildJobNotes(){
-  const consumer = document.getElementById('sv-consumer')?.value || '';
-  const wall = document.getElementById('sv-wall')?.value || '';
-  const reviewNotes = document.getElementById('rv-notes')?.value?.trim() || '';
+      document.getElementById('reviewAddons').innerHTML = addons.length
+        ? addons.map(a => `<div class="review-row"><span>${a.name || 'Extra item'}</span><span>${formatMoney(a.price)}</span></div>`).join('')
+        : '<div class="review-row"><span>No extras added</span><span>—</span></div>';
 
-  const lines = [
-    'PROPERTY SURVEY',
-    `Power supply: ${survey.power}`,
-    `Existing unit: ${survey.existing}`,
-    `Consumer unit: ${consumer}`,
-    `Wall construction: ${wall}`,
-    `Install type: ${jobType === 'multi' ? 'Multi-split' : 'Single split'}`,
-    fin.apr ? `Finance: ${fin.apr} / ${fin.term} / subsidy ${(fin.sub*100).toFixed(1)}%` : 'Finance: No finance'
-  ];
+      if(jobType === 'multi'){
+        const mt = updateMsTotals();
+        document.getElementById('reviewTotals').innerHTML = `
+          <div class="grand-line"><span>Essential total</span><span>${formatMoney(mt.e)}</span></div>
+          <div class="grand-line"><span>Comfort total</span><span>${formatMoney(mt.c)}</span></div>
+          <div class="grand-line"><span>Premium total</span><span>${formatMoney(mt.p)}</span></div>
+        `;
+      } else {
+        const st = updateSingleTotals();
+        document.getElementById('reviewTotals').innerHTML = `
+          <div class="grand-line"><span>Essential total</span><span>${formatMoney(st.gB)}</span></div>
+          <div class="grand-line"><span>Comfort total</span><span>${formatMoney(st.gM)}</span></div>
+          <div class="grand-line"><span>Premium total</span><span>${formatMoney(st.gP)}</span></div>
+        `;
+      }
+    }
 
-  if(jobType === 'multi'){
-    const mst = msTotalPrice(rooms);
-    lines.push('');
-    lines.push('MULTI-SPLIT OUTDOOR UNITS');
-    lines.push(`Essential outdoor: ${mst.Essential.outdoor ? mst.Essential.outdoor.label : '—'}`);
-    lines.push(`Comfort outdoor: ${mst.Comfort.outdoor ? mst.Comfort.outdoor.label : '—'}`);
-    lines.push(`Premium outdoor: ${mst.Premium.outdoor ? mst.Premium.outdoor.label : '—'}`);
+    async function submitQuote(){
+      const submitBtn = document.getElementById('submitBtn');
+      const submitStatus = document.getElementById('submitStatus');
 
-    rooms.forEach((r,i) => {
-      const hb = msPickHead('Essential', r.kwRec || 2.0);
-      const hm = msPickHead('Comfort', r.kwRec || 2.0);
-      const hp = msPickHead('Premium', r.kwRec || 2.0);
+      const first = document.getElementById('firstName').value.trim();
+      const last = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = [
+        document.getElementById('address1').value.trim(),
+        document.getElementById('town').value.trim(),
+        document.getElementById('county').value.trim(),
+        document.getElementById('postcode').value.trim()
+      ].filter(Boolean).join(', ');
 
-      lines.push('');
-      lines.push(`Room ${i+1}: ${r.type} (${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW)`);
-      lines.push(`  Essential indoor unit: ${hb.label} (${hb.model})`);
-      lines.push(`  Comfort indoor unit: ${hm.label} (${hm.model})`);
-      lines.push(`  Premium indoor unit: ${hp.label} (${hp.model})`);
-      lines.push(`  Indoor: ${r.pos} · ${r.floor}`);
-      lines.push(`  Outdoor: ${r.outdoor} · ${r.mount}`);
-      lines.push(`  Route: ${r.route}`);
-      lines.push(`  Access: ${r.access}`);
-      if(r.extraPipe > 0) lines.push(`  Extra pipe: ${r.extraPipe}m`);
+      if(!first || !last){
+        alert('Please enter the customer name.');
+        return;
+      }
 
-      const fitText = FITTINGS.filter(f => r.fittings && r.fittings[f[1]] > 0)
-        .map(f => `${r.fittings[f[1]]}× ${f[0]}`)
-        .join(', ');
+      if(!email || !phone){
+        alert('Please enter both email and phone number.');
+        return;
+      }
 
-      if(fitText) lines.push(`  Fittings: ${fitText}`);
-    });
-  } else {
-    rooms.forEach((r,i) => {
-      const basicUnit = getUnit('Basic', r.kwRec || 2.5);
-      const midUnit = getUnit('Mid', r.kwRec || 2.5);
-      const premiumUnit = getUnit('Premium', r.kwRec || 2.5);
+      if(!rooms.length){
+        alert('Please add at least one room.');
+        return;
+      }
 
-      lines.push('');
-      lines.push(`Room ${i+1}: ${r.type} (${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW)`);
-      lines.push(`  Essential unit: ${basicUnit.make} ${basicUnit.series} ${basicUnit.kw}kW`);
-      lines.push(`  Comfort unit: ${midUnit.make} ${midUnit.series} ${midUnit.kw}kW`);
-      lines.push(`  Premium unit: ${premiumUnit.make} ${premiumUnit.series} ${premiumUnit.kw}kW`);
-      lines.push(`  Indoor: ${r.pos} · ${r.floor}`);
-      lines.push(`  Outdoor: ${r.outdoor} · ${r.mount}`);
-      lines.push(`  Route: ${r.route}`);
-      lines.push(`  Access: ${r.access}`);
-      if(r.extraPipe > 0) lines.push(`  Extra pipe: ${r.extraPipe}m`);
+      if(!quoteRef){
+        quoteRef = 'AKT-' + Date.now().toString(36).toUpperCase().slice(-6);
+      }
 
-      const fitText = FITTINGS.filter(f => r.fittings && r.fittings[f[1]] > 0)
-        .map(f => `${r.fittings[f[1]]}× ${f[0]}`)
-        .join(', ');
+      const jobNotes = buildJobNotes();
 
-      if(fitText) lines.push(`  Fittings: ${fitText}`);
-    });
-  }
+      let payload;
 
-  if(addons.length){
-    lines.push('');
-    lines.push('ADD-ONS & EXTRAS');
-    addons.forEach(a => {
-      lines.push(`- ${a.name || 'Extra item'}: £${(parseFloat(a.price)||0).toFixed(2)}`);
-    });
-  }
+      if(jobType === 'multi'){
+        const mt = updateMsTotals();
+        const mst = mt.mst;
 
-  if(reviewNotes){
-    lines.push('');
-    lines.push('SURVEY NOTES');
-    lines.push(reviewNotes);
-  }
+        payload = {
+          quote_ref: quoteRef,
+          quote_date: new Date().toLocaleDateString('en-GB'),
+          job_type: 'multi',
+          customer_first_name: first,
+          customer_last_name: last,
+          customer_name: `${first} ${last}`.trim(),
+          customer_email: email,
+          customer_phone: phone,
+          customer_address: address,
+          finance_apr: fin.apr || '',
+          finance_term: fin.term || '',
+          finance_subsidy: fin.sub || 0,
+          essential_total: mt.e.toFixed(2),
+          comfort_total: mt.c.toFixed(2),
+          premium_total: mt.p.toFixed(2),
+          essential_outdoor: mst.Essential.outdoor?.label || '',
+          comfort_outdoor: mst.Comfort.outdoor?.label || '',
+          premium_outdoor: mst.Premium.outdoor?.label || '',
+          addons_total: extrasTotal().toFixed(2),
+          vat_on: vatOn ? 'Yes' : 'No',
+          job_notes: jobNotes,
+          survey_notes: document.getElementById('reviewNotes').value.trim()
+        };
+      } else {
+        const st = updateSingleTotals();
 
-  return lines.join('\n');
-}
+        payload = {
+          quote_ref: quoteRef,
+          quote_date: new Date().toLocaleDateString('en-GB'),
+          job_type: 'single',
+          customer_first_name: first,
+          customer_last_name: last,
+          customer_name: `${first} ${last}`.trim(),
+          customer_email: email,
+          customer_phone: phone,
+          customer_address: address,
+          finance_apr: fin.apr || '',
+          finance_term: fin.term || '',
+          finance_subsidy: fin.sub || 0,
+          basic_total: st.gB.toFixed(2),
+          mid_total: st.gM.toFixed(2),
+          premium_total: st.gP.toFixed(2),
+          basic_unit: rooms.map(r => {
+            const u = getUnit('Basic', r.kwRec || 2.5);
+            return `${u.make} ${u.series} ${u.kw}kW`;
+          }).join(' | '),
+          mid_unit: rooms.map(r => {
+            const u = getUnit('Mid', r.kwRec || 2.5);
+            return `${u.make} ${u.series} ${u.kw}kW`;
+          }).join(' | '),
+          premium_unit: rooms.map(r => {
+            const u = getUnit('Premium', r.kwRec || 2.5);
+            return `${u.make} ${u.series} ${u.kw}kW`;
+          }).join(' | '),
+          addons_total: extrasTotal().toFixed(2),
+          vat_on: vatOn ? 'Yes' : 'No',
+          job_notes: jobNotes,
+          survey_notes: document.getElementById('reviewNotes').value.trim()
+        };
+      }
 
-async function sendQuote(){
-  const btn = document.getElementById('send-btn');
-  const status = document.getElementById('send-status');
-  btn.disabled = true;
+      submitBtn.disabled = true;
+      submitStatus.className = 'status show';
+      submitStatus.textContent = 'Submitting quote...';
 
-  status.innerHTML = `
-    <div class="card status-sending">
-      <div class="spinner"></div>
-      <p>Sending quote to customer…</p>
-    </div>
-  `;
+      try {
+        const response = await fetch(WEBHOOK, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-  const first = document.getElementById('fn').value.trim();
-  const last = document.getElementById('ln').value.trim();
-  const email = document.getElementById('em').value.trim();
-  const phone = document.getElementById('ph').value.trim();
-  const ad1 = document.getElementById('ad1').value.trim();
-  const ad2 = document.getElementById('ad2').value.trim();
-  const ad3 = document.getElementById('ad3').value.trim();
-  const ad4 = document.getElementById('ad4').value.trim();
-  const addr = [ad1,ad2,ad3,ad4].filter(Boolean).join(', ');
+        if(!response.ok) throw new Error('Webhook failed');
 
-  const ref = window._ref || ('AKT-' + Date.now().toString(36).toUpperCase().slice(-6));
-  const date = window._date || new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  const notes = buildJobNotes();
+        submitStatus.className = 'status show ok';
+        submitStatus.textContent = 'Quote submitted successfully.';
+        renderReview();
+      } catch (error) {
+        submitStatus.className = 'status show error';
+        submitStatus.textContent = 'Something went wrong while submitting. Please try again.';
+        submitBtn.disabled = false;
+      }
+    }
 
-  let payload;
-
-  if(jobType === 'multi'){
-    const mst = updateMsTotals();
-
-    payload = {
-      quote_ref: ref,
-      quote_date: date,
-      job_type: 'multi',
-      customer_first_name: first,
-      customer_last_name: last,
-      customer_name: `${first} ${last}`.trim(),
-      customer_email: email,
-      customer_phone: phone,
-      customer_address: addr,
-      finance_apr: fin.apr || '',
-      finance_term: fin.term || '',
-      finance_subsidy: fin.sub || 0,
-      essential_total: mst.e.toFixed(2),
-      comfort_total: mst.c.toFixed(2),
-      premium_total: mst.p.toFixed(2),
-      essential_outdoor: msTotalPrice(rooms).Essential.outdoor?.label || '',
-      comfort_outdoor: msTotalPrice(rooms).Comfort.outdoor?.label || '',
-      premium_outdoor: msTotalPrice(rooms).Premium.outdoor?.label || '',
-      addons_total: extrasTotal().toFixed(2),
-      vat_on: vatOn ? 'Yes' : 'No',
-      job_notes: notes,
-      survey_notes: document.getElementById('rv-notes').value.trim()
-    };
-  } else {
-    const totals = updateTotals();
-
-    payload = {
-      quote_ref: ref,
-      quote_date: date,
-      job_type: 'single',
-      customer_first_name: first,
-      customer_last_name: last,
-      customer_name: `${first} ${last}`.trim(),
-      customer_email: email,
-      customer_phone: phone,
-      customer_address: addr,
-      finance_apr: fin.apr || '',
-      finance_term: fin.term || '',
-      finance_subsidy: fin.sub || 0,
-      basic_total: totals.gB.toFixed(2),
-      mid_total: totals.gM.toFixed(2),
-      premium_total: totals.gP.toFixed(2),
-      basic_unit: rooms.map(r => {
-        const u = getUnit('Basic', r.kwRec || 2.5);
-        return `${u.make} ${u.series} ${u.kw}kW`;
-      }).join(' | '),
-      mid_unit: rooms.map(r => {
-        const u = getUnit('Mid', r.kwRec || 2.5);
-        return `${u.make} ${u.series} ${u.kw}kW`;
-      }).join(' | '),
-      premium_unit: rooms.map(r => {
-        const u = getUnit('Premium', r.kwRec || 2.5);
-        return `${u.make} ${u.series} ${u.kw}kW`;
-      }).join(' | '),
-      addons_total: extrasTotal().toFixed(2),
-      vat_on: vatOn ? 'Yes' : 'No',
-      job_notes: notes,
-      survey_notes: document.getElementById('rv-notes').value.trim()
-    };
-  }
-
-  try {
-    const res = await fetch(WEBHOOK, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
+    document.querySelectorAll('input[name="systemType"]').forEach(input => {
+      input.addEventListener('change', e => setJobType(e.target.value));
     });
 
-    if(!res.ok) throw new Error('Webhook failed');
+    document.getElementById('financeSelect').addEventListener('change', updateFinance);
+    document.getElementById('vatToggle').addEventListener('change', toggleVat);
+    document.getElementById('addRoomBtn').addEventListener('click', addRoom);
+    document.getElementById('addAddonBtn').addEventListener('click', addAddon);
+    document.getElementById('recalcBtn').addEventListener('click', updateQuote);
+    document.getElementById('submitBtn').addEventListener('click', submitQuote);
 
-    status.innerHTML = `
-      <div class="card status-ok">
-        <div class="tick">✓</div>
-        <h3>Quote sent successfully</h3>
-        <p>The quote has been submitted to your automation for ${email}.</p>
-      </div>
-    `;
-  } catch (err) {
-    status.innerHTML = `
-      <div class="card status-ok">
-        <div class="tick" style="background:#e74c3c">!</div>
-        <h3>Something went wrong</h3>
-        <p>Please try again. ${err.message}</p>
-      </div>
-    `;
-    btn.disabled = false;
-  }
-}
+    [
+      'firstName','lastName','email','phone','address1','town','county','postcode',
+      'powerSupply','existingUnit','consumerUnit','wallType','reviewNotes'
+    ].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderReview);
+      document.getElementById(id).addEventListener('change', renderReview);
+    });
 
-addRoom();
-renderAddons();
-</script>
+    addRoom();
+    renderAddons();
+    renderReview();
+    updateQuote();
+  </script>
 
 </body>
 </html>
