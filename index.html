@@ -727,6 +727,12 @@
               </div>
 
               <div class="field">
+                <label for="extraPipeMetres">Extra pipe metres beyond standard 3m</label>
+                <input id="extraPipeMetres" type="number" min="0" step="1" value="0" placeholder="0">
+                <div class="help">Use 0 if standard run. Extra metres will go into engineer notes and can lightly affect estimate.</div>
+              </div>
+
+              <div class="field">
                 <label for="access">Access</label>
                 <select id="access">
                   <option value="Easy access">Easy access</option>
@@ -858,7 +864,7 @@
           </div>
 
           <div class="notice">
-            This version keeps the customer quote cleaner and pushes engineer-only items into notes.
+            This version auto-adds the current room when you click “View Quote Options”, so the quote updates properly.
           </div>
         </div>
       </aside>
@@ -903,26 +909,23 @@
 
     function calcRecommendedKw(area, sunlight){
       let kw = 2.5;
-
       if (area > 14) kw = 3.5;
       if (area > 22) kw = 5.0;
       if (area > 32) kw = 6.0;
-
       if (sunlight === 'High') kw += 0.5;
       return kw;
     }
 
     function getSingleBase(kw){
-      if (kw <= 2.5) {
-        return { essential: 1100, comfort: 1450, premium: 1650 };
-      }
-      if (kw <= 3.5) {
-        return { essential: 1250, comfort: 1595, premium: 1825 };
-      }
-      if (kw <= 5.0) {
-        return { essential: 1545, comfort: 1895, premium: 2195 };
-      }
+      if (kw <= 2.5) return { essential: 1100, comfort: 1450, premium: 1650 };
+      if (kw <= 3.5) return { essential: 1250, comfort: 1595, premium: 1825 };
+      if (kw <= 5.0) return { essential: 1545, comfort: 1895, premium: 2195 };
       return { essential: 1795, comfort: 2245, premium: 2595 };
+    }
+
+    function getExtraPipeCost(extraMetres){
+      const metres = Number(extraMetres) || 0;
+      return metres * 35;
     }
 
     function calculateTotals(){
@@ -938,9 +941,10 @@
 
         rooms.forEach(room => {
           const base = getSingleBase(room.kw);
-          e += base.essential;
-          c += base.comfort;
-          p += base.premium;
+          const pipeCost = getExtraPipeCost(room.extraPipeMetres);
+          e += base.essential + pipeCost;
+          c += base.comfort + pipeCost;
+          p += base.premium + pipeCost;
         });
 
         return {
@@ -952,10 +956,11 @@
 
       const totalKw = rooms.reduce((sum, room) => sum + room.kw, 0);
       const heads = rooms.length;
+      const totalExtraPipe = rooms.reduce((sum, room) => sum + getExtraPipeCost(room.extraPipeMetres), 0);
 
-      let essential = 2200 + (heads * 520) + (totalKw * 110);
-      let comfort   = 2700 + (heads * 620) + (totalKw * 140);
-      let premium   = 3250 + (heads * 720) + (totalKw * 165);
+      let essential = 2200 + (heads * 520) + (totalKw * 110) + totalExtraPipe;
+      let comfort   = 2700 + (heads * 620) + (totalKw * 140) + totalExtraPipe;
+      let premium   = 3250 + (heads * 720) + (totalKw * 165) + totalExtraPipe;
 
       return {
         essential: Math.round(essential * multiplier),
@@ -994,6 +999,7 @@
         notes.push(`   Outdoor: ${room.outdoor}`);
         notes.push(`   Route: ${room.route}`);
         notes.push(`   Access: ${room.access}`);
+        notes.push(`   Extra Pipe Metres: ${room.extraPipeMetres}m`);
       });
 
       notes.push('');
@@ -1045,7 +1051,7 @@
             <div class="room-card-top">
               <div>
                 <h4>No rooms added yet</h4>
-                <p>Add at least one room, then view the quote options.</p>
+                <p>Fill out the room details and click “View Quote Options” or “Add Room”.</p>
               </div>
             </div>
           </div>
@@ -1072,10 +1078,93 @@
             <div><strong>Outdoor:</strong> ${room.outdoor}</div>
             <div><strong>Route:</strong> ${room.route}</div>
             <div><strong>Access:</strong> ${room.access}</div>
+            <div><strong>Extra Pipe:</strong> ${room.extraPipeMetres}m</div>
           </div>
         `;
         roomList.appendChild(card);
       });
+    }
+
+    function getCurrentRoomData(){
+      const type = document.getElementById('roomType').value;
+      const labelInput = document.getElementById('roomLabel').value.trim();
+      const label = labelInput || `${type} ${rooms.length + 1}`;
+      const length = Number(document.getElementById('roomLength').value);
+      const width = Number(document.getElementById('roomWidth').value);
+      const height = Number(document.getElementById('roomHeight').value);
+      const sunlight = document.getElementById('sunlight').value;
+      const indoor = document.getElementById('indoorPosition').value;
+      const outdoor = document.getElementById('outdoorPosition').value;
+      const route = document.getElementById('pipeRoute').value;
+      const access = document.getElementById('access').value;
+      const extraPipeMetres = Number(document.getElementById('extraPipeMetres').value) || 0;
+
+      if (!length || !width || !height) return null;
+
+      const area = calcRoomArea(length, width);
+      const kw = calcRecommendedKw(area, sunlight);
+
+      return {
+        type,
+        label,
+        length,
+        width,
+        height,
+        sunlight,
+        area,
+        kw,
+        indoor,
+        outdoor,
+        route,
+        access,
+        extraPipeMetres
+      };
+    }
+
+    function clearCurrentRoomFields(){
+      document.getElementById('roomLabel').value = '';
+      document.getElementById('roomLength').value = '';
+      document.getElementById('roomWidth').value = '';
+      document.getElementById('roomHeight').value = '';
+      document.getElementById('extraPipeMetres').value = '0';
+    }
+
+    function addRoom(){
+      const room = getCurrentRoomData();
+
+      if (!room) {
+        alert('Please enter the room length, width and ceiling height before adding the room.');
+        return false;
+      }
+
+      rooms.push(room);
+      clearCurrentRoomFields();
+      renderRooms();
+      updateQuote();
+      return true;
+    }
+
+    function viewQuoteOptions(){
+      const currentRoom = getCurrentRoomData();
+
+      if (rooms.length === 0 && !currentRoom) {
+        alert('Please enter at least one room before viewing quote options.');
+        return;
+      }
+
+      if (currentRoom) {
+        rooms.push(currentRoom);
+        clearCurrentRoomFields();
+      }
+
+      renderRooms();
+      updateQuote();
+    }
+
+    function removeRoom(index){
+      rooms.splice(index, 1);
+      renderRooms();
+      updateQuote();
     }
 
     function updateQuote(){
@@ -1099,61 +1188,10 @@
       document.getElementById('jobNotesPreview').textContent = buildInstallNotes();
     }
 
-    function addRoom(){
-      const type = document.getElementById('roomType').value;
-      const labelInput = document.getElementById('roomLabel').value.trim();
-      const label = labelInput || `${type} ${rooms.length + 1}`;
-      const length = Number(document.getElementById('roomLength').value);
-      const width = Number(document.getElementById('roomWidth').value);
-      const height = Number(document.getElementById('roomHeight').value);
-      const sunlight = document.getElementById('sunlight').value;
-      const indoor = document.getElementById('indoorPosition').value;
-      const outdoor = document.getElementById('outdoorPosition').value;
-      const route = document.getElementById('pipeRoute').value;
-      const access = document.getElementById('access').value;
-
-      if (!length || !width || !height) {
-        alert('Please enter the room length, width and ceiling height before adding the room.');
-        return;
-      }
-
-      const area = calcRoomArea(length, width);
-      const kw = calcRecommendedKw(area, sunlight);
-
-      rooms.push({
-        type,
-        label,
-        length,
-        width,
-        height,
-        sunlight,
-        area,
-        kw,
-        indoor,
-        outdoor,
-        route,
-        access
-      });
-
-      document.getElementById('roomLabel').value = '';
-      document.getElementById('roomLength').value = '';
-      document.getElementById('roomWidth').value = '';
-      document.getElementById('roomHeight').value = '';
-
-      renderRooms();
-      updateQuote();
-    }
-
-    function removeRoom(index){
-      rooms.splice(index, 1);
-      renderRooms();
-      updateQuote();
-    }
-
     window.removeRoom = removeRoom;
 
     document.getElementById('addRoomBtn').addEventListener('click', addRoom);
-    document.getElementById('recalcBtn').addEventListener('click', updateQuote);
+    document.getElementById('recalcBtn').addEventListener('click', viewQuoteOptions);
 
     [
       'installType',
