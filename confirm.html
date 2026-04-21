@@ -1,58 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Akita Air Conditioning — Confirm your selection</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Barlow',sans-serif;background:#f2f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
-  .card{background:#fff;border-radius:16px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 4px 24px rgba(26,46,74,.12)}
-  .hdr{background:#1a2e4a;padding:24px;text-align:center}
-  .hdr img{height:60px;border-radius:10px}
-  .body{padding:32px 28px;text-align:center}
-  .spinner{width:48px;height:48px;border:3px solid #e8f4fb;border-top-color:#E8612A;border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 20px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .tick{width:64px;height:64px;background:#1B8A4A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
-  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-  .error-icon{width:64px;height:64px;background:#e74c3c;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px}
-  h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;color:#1a2e4a;margin-bottom:8px}
-  p{font-size:14px;color:#7a8fa8;line-height:1.6;margin-bottom:8px}
-  .tier-badge{display:inline-block;padding:8px 22px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.5px;margin-bottom:16px}
-  .essential{background:#E8F5E9;color:#1B5E20}
-  .comfort{background:#FFF8E1;color:#BF6000}
-  .premium{background:#E3F2FD;color:#0D47A1}
-  .ref{font-size:12px;color:#aaa;margin-top:12px}
-  .ftr{background:#f8fafc;border-top:1px solid #eee;padding:16px;text-align:center;font-size:11px;color:#aaa}
-  .ftr a{color:#2e7fbf;text-decoration:none}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akita Air Conditioning — Confirm your selection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 
-  /* Confirm button */
-  .btn-confirm{
-    display:block;width:100%;padding:16px;margin-top:20px;
-    background:#E8612A;color:#fff;border:none;border-radius:10px;
-    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;
-    letter-spacing:.5px;cursor:pointer;transition:background .2s;
-  }
-  .btn-confirm:hover{background:#c94d1f}
-  .btn-back{
-    display:block;width:100%;padding:12px;margin-top:10px;
-    background:transparent;color:#7a8fa8;border:1.5px solid #dde3ea;border-radius:10px;
-    font-family:'Barlow',sans-serif;font-weight:500;font-size:14px;
-    cursor:pointer;transition:border-color .2s;
-  }
-  .btn-back:hover{border-color:#1a2e4a;color:#1a2e4a}
+  <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
 
-  #state-confirm{display:block}
-  #state-processing{display:none}
-  #state-success{display:none}
-  #state-error{display:none}
-</style>
+    body{
+      font-family:'Barlow',sans-serif;
+      background:#f2f5f9;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:16px;
+      max-width:480px;
+      width:100%;
+      overflow:hidden;
+      box-shadow:0 4px 24px rgba(26,46,74,.12);
+    }
+
+    .hdr{
+      background:#1a2e4a;
+      padding:24px 20px;
+      text-align:center;
+    }
+
+    .hdr img{
+      display:block;
+      width:100%;
+      max-width:220px;
+      height:auto;
+      margin:0 auto;
+      border-radius:0;
+    }
+
+    .body{
+      padding:32px 28px;
+      text-align:center;
+    }
+
+    .spinner{
+      width:48px;
+      height:48px;
+      border:3px solid #e8f4fb;
+      border-top-color:#E8612A;
+      border-radius:50%;
+      animation:spin .75s linear infinite;
+      margin:0 auto 20px;
+    }
+
+    @keyframes spin{
+      to{transform:rotate(360deg)}
+    }
+
+    .tick{
+      width:64px;
+      height:64px;
+      background:#1B8A4A;
+      color:#fff;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      margin:0 auto 20px;
+      animation:pop .4s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    @keyframes pop{
+      from{transform:scale(0);opacity:0}
+      to{transform:scale(1);opacity:1}
+    }
+
+    .error-icon{
+      width:64px;
+      height:64px;
+      background:#e74c3c;
+      color:#fff;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      margin:0 auto 20px;
+    }
+
+    h1{
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:800;
+      font-size:28px;
+      line-height:1.1;
+      color:#1a2e4a;
+      margin-bottom:10px;
+    }
+
+    p{
+      font-size:14px;
+      color:#7a8fa8;
+      line-height:1.6;
+      margin-bottom:8px;
+    }
+
+    .tier-badge{
+      display:inline-block;
+      padding:8px 22px;
+      border-radius:20px;
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:700;
+      font-size:16px;
+      letter-spacing:.5px;
+      margin-bottom:16px;
+    }
+
+    .essential{
+      background:#E8F5E9;
+      color:#1B5E20;
+    }
+
+    .comfort{
+      background:#FFF8E1;
+      color:#BF6000;
+    }
+
+    .premium{
+      background:#E3F2FD;
+      color:#0D47A1;
+    }
+
+    .ref{
+      font-size:12px;
+      color:#a0aab6;
+      margin-top:12px;
+      word-break:break-word;
+    }
+
+    .ftr{
+      background:#f8fafc;
+      border-top:1px solid #eee;
+      padding:16px;
+      text-align:center;
+      font-size:11px;
+      color:#9aa7b5;
+      line-height:1.5;
+    }
+
+    .ftr a{
+      color:#2e7fbf;
+      text-decoration:none;
+    }
+
+    .btn-confirm{
+      display:block;
+      width:100%;
+      padding:16px;
+      margin-top:20px;
+      background:#E8612A;
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:800;
+      font-size:20px;
+      letter-spacing:.5px;
+      cursor:pointer;
+      transition:background .2s ease, transform .1s ease;
+    }
+
+    .btn-confirm:hover{
+      background:#c94d1f;
+    }
+
+    .btn-confirm:active{
+      transform:translateY(1px);
+    }
+
+    .btn-confirm:disabled{
+      background:#c8d0d8;
+      cursor:not-allowed;
+    }
+
+    .btn-back{
+      display:block;
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:transparent;
+      color:#7a8fa8;
+      border:1.5px solid #dde3ea;
+      border-radius:10px;
+      font-family:'Barlow',sans-serif;
+      font-weight:500;
+      font-size:14px;
+      cursor:pointer;
+      transition:border-color .2s ease,color .2s ease;
+    }
+
+    .btn-back:hover{
+      border-color:#1a2e4a;
+      color:#1a2e4a;
+    }
+
+    #state-confirm{display:block}
+    #state-processing{display:none}
+    #state-success{display:none}
+    #state-error{display:none}
+
+    @media (max-width:480px){
+      body{
+        padding:14px;
+      }
+
+      .hdr{
+        padding:20px 16px;
+      }
+
+      .hdr img{
+        max-width:180px;
+      }
+
+      .body{
+        padding:24px 18px;
+      }
+
+      h1{
+        font-size:24px;
+      }
+
+      p{
+        font-size:14px;
+      }
+
+      .btn-confirm{
+        font-size:18px;
+        padding:15px;
+      }
+
+      .btn-back{
+        font-size:14px;
+      }
+
+      .tier-badge{
+        font-size:15px;
+        padding:8px 18px;
+      }
+    }
+  </style>
 </head>
 <body>
+
 <div class="card">
   <div class="hdr">
-    <img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Akita%20White.png" alt="Akita">
+    <img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Akita%20White.png" alt="Akita Air Conditioning & Refrigeration">
   </div>
 
   <div class="body">
@@ -60,11 +272,13 @@
     <!-- Step 1: Confirmation prompt -->
     <div id="state-confirm">
       <div class="tier-badge" id="tier-label-confirm">Essential</div>
-      <h1>Confirm your choice</h1>
-      <p>You're about to select the <strong id="tier-name-confirm"></strong> package for your quote.</p>
-      <p style="margin-top:4px">Please confirm this is the option you'd like to proceed with.</p>
-      <button class="btn-confirm" onclick="proceed()">Yes, confirm my selection</button>
+      <h1>Confirm your package</h1>
+      <p>You’ve selected the <strong id="tier-name-confirm"></strong> package for your quote.</p>
+      <p style="margin-top:4px;">Please confirm this is the option you’d like to proceed with.</p>
+
+      <button class="btn-confirm" id="confirmBtn" onclick="proceed()">Yes, confirm my selection</button>
       <button class="btn-back" onclick="goBack()">← Go back and review</button>
+
       <p class="ref" id="quote-ref-confirm"></p>
     </div>
 
@@ -78,10 +292,10 @@
     <!-- Step 3: Success -->
     <div id="state-success">
       <div class="tick">✓</div>
-      <h1>You're all set!</h1>
+      <h1>You’re all set</h1>
       <div class="tier-badge" id="tier-label-success">Essential</div>
-      <p>Thanks <strong id="customer-name"></strong> — we've received your selection and will be in touch shortly to confirm your installation date.</p>
-      <p style="margin-top:12px">Any questions? Call us on <strong style="color:#1a2e4a">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf">hello@akita.ac</a></p>
+      <p>Thanks <strong id="customer-name"></strong> — we’ve received your selection and will be in touch shortly to confirm your installation date.</p>
+      <p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
       <p class="ref" id="quote-ref-success"></p>
     </div>
 
@@ -89,73 +303,106 @@
     <div id="state-error">
       <div class="error-icon">✕</div>
       <h1>Something went wrong</h1>
-      <p>We couldn't process your selection. Please call us on <strong style="color:#1a2e4a">0330 043 7537</strong> and we'll sort it straight away.</p>
+      <p>We couldn’t process your selection. Please call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> and we’ll sort it straight away.</p>
+      <p class="ref" id="quote-ref-error"></p>
     </div>
 
   </div>
 
   <div class="ftr">
-    Akita Air Conditioning &amp; Refrigeration &nbsp;·&nbsp; <a href="https://akita.ac">akita.ac</a> &nbsp;·&nbsp; F-Gas Certified · REFCOM REF1023379
+    Akita Air Conditioning &amp; Refrigeration · <a href="https://akita.ac">akita.ac</a> · F-Gas Certified · REFCOM REF1023379
   </div>
 </div>
 
 <script>
-const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
+  const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
 
-function getParam(name){
-  return new URLSearchParams(window.location.search).get(name) || '';
-}
-
-const ref  = getParam('ref');
-const tier = getParam('tier');
-const name = getParam('name');
-
-const tierMap   = {Basic:'Essential', Mid:'Comfort', Premium:'Premium'};
-const tierClass = {Basic:'essential', Mid:'comfort', Premium:'premium'};
-const tierLabel = tierMap[tier] || tier;
-const tierCls   = tierClass[tier] || 'essential';
-
-// Populate confirm screen
-document.getElementById('tier-label-confirm').textContent = tierLabel;
-document.getElementById('tier-label-confirm').className = 'tier-badge ' + tierCls;
-document.getElementById('tier-name-confirm').textContent = tierLabel;
-document.getElementById('quote-ref-confirm').textContent = 'Ref: ' + ref;
-
-// Populate success screen
-document.getElementById('tier-label-success').textContent = tierLabel;
-document.getElementById('tier-label-success').className = 'tier-badge ' + tierCls;
-document.getElementById('customer-name').textContent = decodeURIComponent(name);
-document.getElementById('quote-ref-success').textContent = 'Ref: ' + ref;
-
-function goBack(){
-  // Can't go back to an email — show a helpful message instead
-  document.getElementById('state-confirm').innerHTML = `
-    <h1 style="margin-bottom:12px">No problem!</h1>
-    <p>Go back to your quote email and tap a different package option.</p>
-    <p style="margin-top:12px">Any questions? Call us on <strong style="color:#1a2e4a">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf">hello@akita.ac</a></p>
-    <p class="ref">Ref: ${ref}</p>
-  `;
-}
-
-async function proceed(){
-  // Show processing
-  document.getElementById('state-confirm').style.display = 'none';
-  document.getElementById('state-processing').style.display = 'block';
-
-  try {
-    await fetch(WEBHOOK + '?cors=true', {
-      method: 'POST',
-      body: JSON.stringify({ref, tier, customer_name: decodeURIComponent(name)}),
-      mode: 'no-cors'
-    });
-    // Show success
-    document.getElementById('state-processing').style.display = 'none';
-    document.getElementById('state-success').style.display = 'block';
-  } catch(e){
-    document.getElementById('state-processing').style.display = 'none';
-    document.getElementById('state-error').style.display = 'block';
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name) || '';
   }
-}
+
+  const ref = getParam('ref');
+  const tier = getParam('tier');
+  const rawName = getParam('name');
+  const safeName = rawName ? decodeURIComponent(rawName) : 'there';
+
+  const tierMap = {
+    Basic: 'Essential',
+    Mid: 'Comfort',
+    Premium: 'Premium'
+  };
+
+  const tierClass = {
+    Basic: 'essential',
+    Mid: 'comfort',
+    Premium: 'premium'
+  };
+
+  const tierLabel = tierMap[tier] || 'Selected';
+  const tierCls = tierClass[tier] || 'essential';
+
+  let sent = false;
+
+  // Populate confirm screen
+  document.getElementById('tier-label-confirm').textContent = tierLabel;
+  document.getElementById('tier-label-confirm').className = 'tier-badge ' + tierCls;
+  document.getElementById('tier-name-confirm').textContent = tierLabel;
+  document.getElementById('quote-ref-confirm').textContent = ref ? 'Ref: ' + ref : '';
+
+  // Populate success screen
+  document.getElementById('tier-label-success').textContent = tierLabel;
+  document.getElementById('tier-label-success').className = 'tier-badge ' + tierCls;
+  document.getElementById('customer-name').textContent = safeName;
+  document.getElementById('quote-ref-success').textContent = ref ? 'Ref: ' + ref : '';
+  document.getElementById('quote-ref-error').textContent = ref ? 'Ref: ' + ref : '';
+
+  function goBack() {
+    document.getElementById('state-confirm').innerHTML = `
+      <h1 style="margin-bottom:12px;">No problem</h1>
+      <p>Go back to your quote email and tap a different package option.</p>
+      <p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+      <p class="ref">${ref ? 'Ref: ' + ref : ''}</p>
+    `;
+  }
+
+  async function proceed() {
+    if (sent) return;
+    sent = true;
+
+    const confirmBtn = document.getElementById('confirmBtn');
+    if (confirmBtn) confirmBtn.disabled = true;
+
+    document.getElementById('state-confirm').style.display = 'none';
+    document.getElementById('state-processing').style.display = 'block';
+
+    try {
+      const response = await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ref: ref,
+          tier: tier,
+          customer_name: safeName,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok && response.type !== 'opaque') {
+        throw new Error('Webhook request failed');
+      }
+
+      document.getElementById('state-processing').style.display = 'none';
+      document.getElementById('state-success').style.display = 'block';
+    } catch (e) {
+      document.getElementById('state-processing').style.display = 'none';
+      document.getElementById('state-error').style.display = 'block';
+      sent = false;
+      if (confirmBtn) confirmBtn.disabled = false;
+    }
+  }
 </script>
+
 </body>
 </html>
