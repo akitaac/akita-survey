@@ -259,7 +259,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
     <div class="field" id="f-trunking">
       <label class="lbl">Trunking colour</label>
-      <select class="inp" id="trunkingColour" onchange="survey.trunkingColour=this.value" style="max-width:220px">
+      <select class="inp" id="trunkingColour" onchange="setTrunkingColour(this.value)" style="max-width:220px">
         <option value="Black" selected>Black</option>
         <option value="White">White</option>
         <option value="Grey">Grey</option>
@@ -671,6 +671,7 @@ function extrasTotal(){ return addons.reduce((s,a)=>s+(parseFloat(a.price)||0),0
 let rooms=[], addons=[], rIdx=0, aIdx=0;
 let fin={apr:'',term:'',sub:0};
 let survey={power:'Yes — existing spur',existing:'No',installType:'single',trunkingColour:'Black'};
+function setTrunkingColour(v){ survey.trunkingColour=v; }
 
 const ROOM_TYPES=['Bedroom','Living Room','Kitchen','Dining Room','Office','Study','Master Bedroom','Open Plan','Conservatory','Other'];
 const ORIENTS=[{v:'south',l:'South ☀️'},{v:'west',l:'West 🌅'},{v:'east',l:'East 🌄'},{v:'north',l:'North 🌧️'}];
@@ -1166,12 +1167,9 @@ function buildReview(){
       <div class="grand-line"><span>Premium Package all-in${finNote}</span><span>£${gP.toFixed(2)}</span></div>`;
   }
 
-  // Add-ons (same for both)
+  // Add-ons folded into totals — not shown to customer
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
-  
-    '<div class="divider"></div>'+filled.map(a=>
-      `<div class="tline"><span>${a.desc}</span><span>£${parseFloat(a.price).toFixed(2)}</span></div>`
-    ).join(''):'';
+  document.getElementById('rv-addons').innerHTML='';
 }
 
 
