@@ -263,11 +263,6 @@
       line-height:1.45;
     }
 
-    .extras-list{
-      display:grid;
-      gap:10px;
-    }
-
     .check{
       display:flex;
       gap:10px;
@@ -328,6 +323,7 @@
       color:var(--navy);
       border:1px solid var(--line);
     }
+
     .btn-secondary:hover{background:#e8eff5}
 
     .btn:disabled{
@@ -459,13 +455,6 @@
       color:#42576b;
     }
 
-    .notice{
-      margin-top:14px;
-      font-size:12px;
-      line-height:1.5;
-      color:var(--muted);
-    }
-
     .status{
       margin-top:12px;
       padding:12px 14px;
@@ -496,6 +485,13 @@
       color:#7b4a31;
       font-size:13px;
       line-height:1.5;
+    }
+
+    .notice{
+      margin-top:14px;
+      font-size:12px;
+      line-height:1.5;
+      color:var(--muted);
     }
 
     .pill{
@@ -549,7 +545,7 @@
       <section class="panel">
         <div class="panel-hd">
           <h2>Survey Input</h2>
-          <p>Customer details, install details and internal engineer notes.</p>
+          <p>Customer details, install details, finance preference and internal pricing adjustments.</p>
         </div>
 
         <div class="panel-bd">
@@ -558,7 +554,7 @@
             <h3 class="section-title">Installation Type</h3>
             <p class="section-sub">Choose the job type first so the survey and pricing stay sensible.</p>
 
-            <div class="choice-row" id="installChoice">
+            <div class="choice-row">
               <label class="choice-card active">
                 <input type="radio" name="systemType" value="single" checked>
                 <strong>Single Split</strong>
@@ -670,6 +666,18 @@
                 </select>
                 <div class="help">Domestic installs stay VAT-free. Commercial jobs add 20% VAT below.</div>
               </div>
+
+              <div class="field">
+                <label for="financeOption">Finance option</label>
+                <select id="financeOption">
+                  <option value="Cash / bank transfer">Cash / bank transfer</option>
+                  <option value="Card payment">Card payment</option>
+                  <option value="12 months finance">12 months finance</option>
+                  <option value="24 months finance">24 months finance</option>
+                  <option value="36 months finance">36 months finance</option>
+                  <option value="Not discussed yet">Not discussed yet</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -753,7 +761,7 @@
               <div class="field">
                 <label for="extraPipeMetres">Linear metres / extra pipe beyond standard 3m</label>
                 <input id="extraPipeMetres" type="number" min="0" step="1" value="0" placeholder="0">
-                <div class="help">This is the linear metre section. Put the extra metres needed beyond the standard included run.</div>
+                <div class="help">Add only the extra metres beyond the standard included run.</div>
               </div>
 
               <div class="field">
@@ -778,55 +786,102 @@
 
           <div class="section">
             <h3 class="section-title">Internal Install Requirements</h3>
-            <p class="section-sub">These are for your engineer notes and ordering, not for the customer-facing quote wording.</p>
 
-            <div class="extras-list">
-              <label class="check">
-                <input type="checkbox" id="condensatePump">
-                <span>
-                  <strong>Condensate pump required</strong>
-                  <small>Add to engineer notes only. Do not show as a separate customer add-on.</small>
-                </span>
-              </label>
+            <div class="field-grid">
+              <div class="field full">
+                <label class="check">
+                  <input type="checkbox" id="condensatePumpRequired">
+                  <span>
+                    <strong>Condensate pump required</strong>
+                    <small>Tick this if one is needed, then add the cost below if applicable.</small>
+                  </span>
+                </label>
+              </div>
 
-              <label class="check">
-                <input type="checkbox" id="longPipeRun">
-                <span>
-                  <strong>Pipe run over standard length (3m+)</strong>
-                  <small>Keep this in survey notes and install prep.</small>
-                </span>
-              </label>
+              <div class="field full">
+                <label class="check">
+                  <input type="checkbox" id="longPipeRun">
+                  <span>
+                    <strong>Pipe run over standard length (3m+)</strong>
+                    <small>Use along with linear metres above where needed.</small>
+                  </span>
+                </label>
+              </div>
 
-              <label class="check">
-                <input type="checkbox" id="electricalWork">
-                <span>
-                  <strong>Additional electrical work required</strong>
-                  <small>For internal planning and install notes.</small>
-                </span>
-              </label>
+              <div class="field full">
+                <label class="check">
+                  <input type="checkbox" id="electricalWork">
+                  <span>
+                    <strong>Additional electrical work required</strong>
+                    <small>For internal planning and install notes.</small>
+                  </span>
+                </label>
+              </div>
 
-              <label class="check">
-                <input type="checkbox" id="difficultAccessFlag">
-                <span>
-                  <strong>Difficult access / specialist equipment needed</strong>
-                  <small>Ladder, tower, awkward elevation or other access issue.</small>
-                </span>
-              </label>
+              <div class="field full">
+                <label class="check">
+                  <input type="checkbox" id="difficultAccessFlag">
+                  <span>
+                    <strong>Difficult access / specialist equipment needed</strong>
+                    <small>Ladder, tower, awkward elevation or other access issue.</small>
+                  </span>
+                </label>
+              </div>
 
-              <label class="check">
-                <input type="checkbox" id="replacementInstall">
-                <span>
-                  <strong>Replacement install / existing system on site</strong>
-                  <small>Only use if relevant. Keeps this out of the standard customer flow.</small>
-                </span>
-              </label>
+              <div class="field full">
+                <label class="check">
+                  <input type="checkbox" id="replacementInstall">
+                  <span>
+                    <strong>Replacement install / existing system on site</strong>
+                    <small>Only use if relevant.</small>
+                  </span>
+                </label>
+              </div>
             </div>
 
             <div style="height:14px"></div>
 
             <div class="field">
               <label for="surveyNotes">Survey notes / internal install notes</label>
-              <textarea id="surveyNotes" placeholder="Anything you need for install day, ordering, route details, drain requirements, trunking notes, awkward access, pump needed to bedroom unit, etc."></textarea>
+              <textarea id="surveyNotes" placeholder="Anything you need for install day, ordering, route details, drain requirements, trunking notes, awkward access, etc."></textarea>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Pricing Adjustments</h3>
+            <p class="section-sub">These are internal price add-ons and will be added to the package totals.</p>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="scaffoldingCost">Scaffolding cost (£)</label>
+                <input id="scaffoldingCost" type="number" min="0" step="1" value="0">
+              </div>
+
+              <div class="field">
+                <label for="extraLabourDays">Extra labour days</label>
+                <input id="extraLabourDays" type="number" min="0" step="1" value="0">
+              </div>
+
+              <div class="field">
+                <label for="extraLabourDayRate">Extra labour day rate (£)</label>
+                <input id="extraLabourDayRate" type="number" min="0" step="1" value="250">
+              </div>
+
+              <div class="field">
+                <label for="condensatePumpCost">Condensate pump cost (£)</label>
+                <input id="condensatePumpCost" type="number" min="0" step="1" value="0">
+              </div>
+
+              <div class="field">
+                <label for="otherMaterialsCost">Other materials / misc cost (£)</label>
+                <input id="otherMaterialsCost" type="number" min="0" step="1" value="0">
+              </div>
+
+              <div class="field">
+                <label for="miscAdjustment">Other adjustment (£)</label>
+                <input id="miscAdjustment" type="number" step="1" value="0">
+                <div class="help">Can be positive or negative.</div>
+              </div>
             </div>
           </div>
 
@@ -886,11 +941,11 @@
           </div>
 
           <div class="footer-note">
-            Customer-facing emails should stay clean. Items like condensate pumps, long runs and awkward access should live in your internal survey / Jobber notes instead.
+            Internal pricing adjustments such as scaffolding, extra labour and condensate pumps will be added to the totals, while your customer-facing quote can still stay clean.
           </div>
 
           <div class="notice">
-            Submit Quote will send the full payload straight to your Zapier Catch Hook.
+            Replace the webhook URL in the script before publishing.
           </div>
         </div>
       </aside>
@@ -922,6 +977,10 @@
       }).format(value || 0);
     }
 
+    function getNumber(id){
+      return Number(document.getElementById(id).value) || 0;
+    }
+
     function getSystemType(){
       return document.querySelector('input[name="systemType"]:checked')?.value || 'single';
     }
@@ -951,21 +1010,32 @@
     }
 
     function getExtraPipeCost(extraMetres){
-      const metres = Number(extraMetres) || 0;
-      return metres * 35;
+      return (Number(extraMetres) || 0) * 35;
+    }
+
+    function getAdjustmentsTotal(){
+      const scaffolding = getNumber('scaffoldingCost');
+      const extraLabourDays = getNumber('extraLabourDays');
+      const extraLabourDayRate = getNumber('extraLabourDayRate');
+      const condensatePumpCost = getNumber('condensatePumpCost');
+      const otherMaterialsCost = getNumber('otherMaterialsCost');
+      const miscAdjustment = getNumber('miscAdjustment');
+
+      return scaffolding + (extraLabourDays * extraLabourDayRate) + condensatePumpCost + otherMaterialsCost + miscAdjustment;
     }
 
     function calculateTotals(){
       const systemType = getSystemType();
       const multiplier = getCommercialMultiplier();
+      const adjustmentsTotal = getAdjustmentsTotal();
 
       if (!rooms.length) {
         return { essential: 0, comfort: 0, premium: 0 };
       }
 
-      if (systemType === 'single') {
-        let e = 0, c = 0, p = 0;
+      let e = 0, c = 0, p = 0;
 
+      if (systemType === 'single') {
         rooms.forEach(room => {
           const base = getSingleBase(room.kw);
           const pipeCost = getExtraPipeCost(room.extraPipeMetres);
@@ -973,26 +1043,24 @@
           c += base.comfort + pipeCost;
           p += base.premium + pipeCost;
         });
+      } else {
+        const totalKw = rooms.reduce((sum, room) => sum + room.kw, 0);
+        const heads = rooms.length;
+        const totalExtraPipe = rooms.reduce((sum, room) => sum + getExtraPipeCost(room.extraPipeMetres), 0);
 
-        return {
-          essential: Math.round(e * multiplier),
-          comfort: Math.round(c * multiplier),
-          premium: Math.round(p * multiplier)
-        };
+        e = 2200 + (heads * 520) + (totalKw * 110) + totalExtraPipe;
+        c = 2700 + (heads * 620) + (totalKw * 140) + totalExtraPipe;
+        p = 3250 + (heads * 720) + (totalKw * 165) + totalExtraPipe;
       }
 
-      const totalKw = rooms.reduce((sum, room) => sum + room.kw, 0);
-      const heads = rooms.length;
-      const totalExtraPipe = rooms.reduce((sum, room) => sum + getExtraPipeCost(room.extraPipeMetres), 0);
-
-      let essential = 2200 + (heads * 520) + (totalKw * 110) + totalExtraPipe;
-      let comfort   = 2700 + (heads * 620) + (totalKw * 140) + totalExtraPipe;
-      let premium   = 3250 + (heads * 720) + (totalKw * 165) + totalExtraPipe;
+      e += adjustmentsTotal;
+      c += adjustmentsTotal;
+      p += adjustmentsTotal;
 
       return {
-        essential: Math.round(essential * multiplier),
-        comfort: Math.round(comfort * multiplier),
-        premium: Math.round(premium * multiplier)
+        essential: Math.round(e * multiplier),
+        comfort: Math.round(c * multiplier),
+        premium: Math.round(p * multiplier)
       };
     }
 
@@ -1003,6 +1071,7 @@
       const consumerUnit = document.getElementById('consumerUnit').value;
       const wallType = document.getElementById('wallType').value;
       const trunkingColour = document.getElementById('trunkingColour').value;
+      const financeOption = document.getElementById('financeOption').value;
       const surveyNotes = document.getElementById('surveyNotes').value.trim();
 
       notes.push('Install Summary');
@@ -1013,6 +1082,7 @@
       notes.push(`Consumer Unit: ${consumerUnit}`);
       notes.push(`Wall Type: ${wallType}`);
       notes.push(`Trunking Colour: ${trunkingColour}`);
+      notes.push(`Finance Option: ${financeOption}`);
       notes.push('');
 
       notes.push('Rooms:');
@@ -1031,33 +1101,22 @@
 
       notes.push('');
       notes.push('Internal Install Requirements:');
+      notes.push(`- Condensate pump required: ${document.getElementById('condensatePumpRequired').checked ? 'Yes' : 'No'}`);
+      notes.push(`- Long pipe run: ${document.getElementById('longPipeRun').checked ? 'Yes' : 'No'}`);
+      notes.push(`- Additional electrical work: ${document.getElementById('electricalWork').checked ? 'Yes' : 'No'}`);
+      notes.push(`- Difficult access: ${document.getElementById('difficultAccessFlag').checked ? 'Yes' : 'No'}`);
+      notes.push(`- Replacement install: ${document.getElementById('replacementInstall').checked ? 'Yes' : 'No'}`);
 
-      let anyInternal = false;
-
-      if (document.getElementById('condensatePump').checked) {
-        notes.push('- Condensate pump required');
-        anyInternal = true;
-      }
-      if (document.getElementById('longPipeRun').checked) {
-        notes.push('- Pipe run over standard length (3m+)');
-        anyInternal = true;
-      }
-      if (document.getElementById('electricalWork').checked) {
-        notes.push('- Additional electrical work required');
-        anyInternal = true;
-      }
-      if (document.getElementById('difficultAccessFlag').checked) {
-        notes.push('- Difficult access / specialist equipment needed');
-        anyInternal = true;
-      }
-      if (document.getElementById('replacementInstall').checked) {
-        notes.push('- Replacement install / existing system on site');
-        anyInternal = true;
-      }
-
-      if (!anyInternal) {
-        notes.push('- None noted');
-      }
+      notes.push('');
+      notes.push('Pricing Adjustments:');
+      notes.push(`- Scaffolding: ${formatMoney(getNumber('scaffoldingCost'))}`);
+      notes.push(`- Extra labour days: ${getNumber('extraLabourDays')}`);
+      notes.push(`- Extra labour day rate: ${formatMoney(getNumber('extraLabourDayRate'))}`);
+      notes.push(`- Extra labour total: ${formatMoney(getNumber('extraLabourDays') * getNumber('extraLabourDayRate'))}`);
+      notes.push(`- Condensate pump cost: ${formatMoney(getNumber('condensatePumpCost'))}`);
+      notes.push(`- Other materials / misc cost: ${formatMoney(getNumber('otherMaterialsCost'))}`);
+      notes.push(`- Other adjustment: ${formatMoney(getNumber('miscAdjustment'))}`);
+      notes.push(`- Total adjustments: ${formatMoney(getAdjustmentsTotal())}`);
 
       if (surveyNotes) {
         notes.push('');
@@ -1158,7 +1217,6 @@
 
     function addRoom(){
       const room = getCurrentRoomData();
-
       if (!room) {
         alert('Please enter the room length, width and ceiling height before adding the room.');
         return false;
@@ -1214,16 +1272,27 @@
           consumer_unit: document.getElementById('consumerUnit').value,
           wall_type: document.getElementById('wallType').value,
           trunking_colour: document.getElementById('trunkingColour').value,
-          commercial_job: document.getElementById('commercialJob').value
+          commercial_job: document.getElementById('commercialJob').value,
+          finance_option: document.getElementById('financeOption').value
         },
         rooms: rooms,
         internal_requirements: {
-          condensate_pump: document.getElementById('condensatePump').checked,
+          condensate_pump_required: document.getElementById('condensatePumpRequired').checked,
           long_pipe_run: document.getElementById('longPipeRun').checked,
           electrical_work: document.getElementById('electricalWork').checked,
           difficult_access: document.getElementById('difficultAccessFlag').checked,
           replacement_install: document.getElementById('replacementInstall').checked,
           survey_notes: document.getElementById('surveyNotes').value.trim()
+        },
+        adjustments: {
+          scaffolding_cost: getNumber('scaffoldingCost'),
+          extra_labour_days: getNumber('extraLabourDays'),
+          extra_labour_day_rate: getNumber('extraLabourDayRate'),
+          extra_labour_total: getNumber('extraLabourDays') * getNumber('extraLabourDayRate'),
+          condensate_pump_cost: getNumber('condensatePumpCost'),
+          other_materials_cost: getNumber('otherMaterialsCost'),
+          misc_adjustment: getNumber('miscAdjustment'),
+          total_adjustments: getAdjustmentsTotal()
         },
         pricing: {
           essential: totals.essential,
@@ -1312,6 +1381,7 @@
     function updateQuote(){
       const totals = calculateTotals();
       const systemType = getSystemType();
+      const commercial = document.getElementById('commercialJob').value === 'Yes';
 
       document.getElementById('systemLabel').textContent =
         systemType === 'single' ? 'Single split quote' : 'Multi-split quote';
@@ -1320,9 +1390,7 @@
       document.getElementById('priceComfort').textContent = formatMoney(totals.comfort);
       document.getElementById('pricePremium').textContent = formatMoney(totals.premium);
 
-      const commercial = document.getElementById('commercialJob').value === 'Yes';
       const suffix = commercial ? 'Inc. VAT for commercial job' : 'Supply & installation';
-
       document.getElementById('subEssential').textContent = suffix;
       document.getElementById('subComfort').textContent = suffix;
       document.getElementById('subPremium').textContent = suffix;
@@ -1343,15 +1411,23 @@
       'wallType',
       'trunkingColour',
       'commercialJob',
-      'condensatePump',
+      'financeOption',
+      'condensatePumpRequired',
       'longPipeRun',
       'electricalWork',
       'difficultAccessFlag',
       'replacementInstall',
-      'surveyNotes'
+      'surveyNotes',
+      'scaffoldingCost',
+      'extraLabourDays',
+      'extraLabourDayRate',
+      'condensatePumpCost',
+      'otherMaterialsCost',
+      'miscAdjustment'
     ].forEach(id => {
-      document.getElementById(id).addEventListener('change', updateQuote);
-      document.getElementById(id).addEventListener('input', updateQuote);
+      const el = document.getElementById(id);
+      el.addEventListener('change', updateQuote);
+      el.addEventListener('input', updateQuote);
     });
 
     renderRooms();
