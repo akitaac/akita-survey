@@ -257,6 +257,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
     </div>
 
+    <div class="field" id="f-trunking">
+      <label class="lbl">Trunking colour</label>
+      <select class="inp" id="trunkingColour" onchange="survey.trunkingColour=this.value" style="max-width:220px">
+        <option value="Black" selected>Black</option>
+        <option value="White">White</option>
+        <option value="Grey">Grey</option>
+      </select>
+    </div>
+
     <div class="field">
       <label class="lbl">Power supply / fused spur near outdoor location?</label>
       <div class="pills" id="pills-power">
@@ -321,7 +330,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div id="quote-wrap"></div>
 
   <div class="card">
-    <div class="card-hdr"><span class="ci">🔧</span> Add-ons & Extras</div>
+    <div class="card-hdr"><span class="ci">🔧</span> Additional Costs</div>
+    <p style="font-size:11px;color:var(--mid);margin-bottom:10px">Added silently to all tier totals — not shown to customer</p>
     <div id="addons-wrap"></div>
     <button class="btn-add" style="margin-bottom:0" onclick="addAddon()">
       <span style="font-size:18px">＋</span> Add Extra Item
@@ -370,10 +380,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="tb-row"><span>Essential Package all-in</span><b id="tb-b">—</b></div>
     <div class="tb-row"><span>Comfort Package all-in</span><b id="tb-m">—</b></div>
     <div class="tb-row"><span>Premium Package all-in</span><b id="tb-p">—</b></div>
-    <div class="tb-row" style="border-top:1px solid rgba(255,255,255,.12);margin-top:6px;padding-top:8px">
-      <span style="font-size:11px;color:rgba(255,255,255,.4)">Extras</span>
-      <span id="tb-ext" style="font-size:12px;color:rgba(255,255,255,.45)">—</span>
-    </div>
   </div>
 
   <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
@@ -664,7 +670,7 @@ function extrasTotal(){ return addons.reduce((s,a)=>s+(parseFloat(a.price)||0),0
 // ── State ────────────────────────────────────────────────
 let rooms=[], addons=[], rIdx=0, aIdx=0;
 let fin={apr:'',term:'',sub:0};
-let survey={power:'Yes — existing spur',existing:'No',installType:'single'};
+let survey={power:'Yes — existing spur',existing:'No',installType:'single',trunkingColour:'Black'};
 
 const ROOM_TYPES=['Bedroom','Living Room','Kitchen','Dining Room','Office','Study','Master Bedroom','Open Plan','Conservatory','Other'];
 const ORIENTS=[{v:'south',l:'South ☀️'},{v:'west',l:'West 🌅'},{v:'east',l:'East 🌄'},{v:'north',l:'North 🌧️'}];
@@ -1052,7 +1058,6 @@ function updateTotals(){
   document.getElementById('tb-b').textContent=f(gB);
   document.getElementById('tb-m').textContent=f(gM);
   document.getElementById('tb-p').textContent=f(gP);
-  document.getElementById('tb-ext').textContent=ext>0?f(ext*vm):'—';
   if(fin.sub>0){
     document.getElementById('fin-sub-lbl').textContent=(fin.sub*100).toFixed(1)+'% added';
     const mo=fin.term==='Pay in 3'?3:parseInt(fin.term);
@@ -1163,7 +1168,7 @@ function buildReview(){
 
   // Add-ons (same for both)
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
-  document.getElementById('rv-addons').innerHTML=filled.length?
+  
     '<div class="divider"></div>'+filled.map(a=>
       `<div class="tline"><span>${a.desc}</span><span>£${parseFloat(a.price).toFixed(2)}</span></div>`
     ).join(''):'';
@@ -1213,6 +1218,7 @@ async function sendQuote(){
     'Existing unit: '+survey.existing,
     'Consumer unit: '+consumer,
     'Wall type: '+wall,
+    'Trunking colour: '+(survey.trunkingColour||'Black'),
     '',
     '=== PRICING ===',
     'Essential Package: £'+gB.toFixed(2),
@@ -1236,7 +1242,9 @@ async function sendQuote(){
         }).join(', '):null,
       ].filter(Boolean).join('\n');
     })
-  ).concat([notes?'\n=== NOTES ===\n'+notes:null]).filter(Boolean).join('\n');
+  ).concat([notes?'\n=== NOTES ===\n'+notes:null])
+   .concat(filled.length>0?['\n=== ADDITIONAL COSTS ==='].concat(filled.map(a=>'  '+a.desc+': £'+parseFloat(a.price).toFixed(2))):[])
+   .filter(Boolean).join('\n');
 
   const payload={
     customer_name:first+' '+last, customer_email:email,
@@ -1359,12 +1367,7 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP}
   }).join('');
   } // end single-split else
 
-  const addonRows=filled.length>0?`<tr style="background:#f8fafc">
-    <td colspan="3" style="padding:10px 14px 4px;border-top:2px solid #eef0f3">
-      <strong style="font-size:12px;color:#1a2e4a">Additional items</strong>
-    </td></tr>`+filled.map(a=>`
-    <tr><td colspan="2" style="padding:7px 14px;border-bottom:1px solid #eef0f3;font-size:12px;color:#555">+ ${a.desc}</td>
-    <td style="padding:7px 10px;text-align:right;font-size:12px;font-weight:600;color:#1a2e4a;border-bottom:1px solid #eef0f3">£${parseFloat(a.price).toFixed(0)}</td></tr>`).join(''):'';
+  const addonRows='';
 
   const finNote=sub>0?`<p style="font-size:11px;color:#8a9bb0;margin:6px 0 0">
     Finance: ${fin.apr} over ${fin.term} — subsidy included in totals.${(()=>{
@@ -1421,7 +1424,6 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP}
   </table>
 
   <!-- ALL-IN TOTALS — stacked cards for mobile -->
-  ${ext>0?`<p style="font-size:11px;color:#8a9bb0;margin:0 0 10px">Extras (£${ext.toFixed(0)}) included in all totals below.</p>`:''}
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px">
     <tr>
       <td style="background:#f4f6f9;border-radius:6px;padding:14px;text-align:center;width:32%">
