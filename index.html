@@ -11,13 +11,11 @@
       --navy:#1a2e4a;
       --navy-2:#22395a;
       --blue:#2e7fbf;
-      --sky:#eaf4fb;
       --bg:#f3f6fa;
       --white:#ffffff;
       --line:#dce5ee;
       --text:#213245;
       --muted:#6f8093;
-      --green:#1b8a4a;
       --orange:#e8612a;
       --shadow:0 10px 30px rgba(26,46,74,.08);
       --radius:18px;
@@ -332,6 +330,11 @@
     }
     .btn-secondary:hover{background:#e8eff5}
 
+    .btn:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+    }
+
     .room-list{
       display:grid;
       gap:12px;
@@ -463,6 +466,27 @@
       color:var(--muted);
     }
 
+    .status{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:13px;
+      line-height:1.5;
+      display:none;
+    }
+
+    .status.show{display:block}
+    .status.ok{
+      background:#eef9f1;
+      border:1px solid #bfe2c8;
+      color:#216738;
+    }
+    .status.error{
+      background:#fff1f0;
+      border:1px solid #f1c4bf;
+      color:#8a2f25;
+    }
+
     .footer-note{
       margin-top:14px;
       padding:12px 14px;
@@ -535,13 +559,13 @@
             <p class="section-sub">Choose the job type first so the survey and pricing stay sensible.</p>
 
             <div class="choice-row" id="installChoice">
-              <label class="choice-card active" data-choice="single">
+              <label class="choice-card active">
                 <input type="radio" name="systemType" value="single" checked>
                 <strong>Single Split</strong>
                 <span>One outdoor unit per room · 75mm trunking · per-room pricing</span>
               </label>
 
-              <label class="choice-card" data-choice="multi">
+              <label class="choice-card">
                 <input type="radio" name="systemType" value="multi">
                 <strong>Multi-Split</strong>
                 <span>One outdoor unit, multiple indoor heads · 100mm trunking · system pricing</span>
@@ -727,9 +751,9 @@
               </div>
 
               <div class="field">
-                <label for="extraPipeMetres">Extra pipe metres beyond standard 3m</label>
+                <label for="extraPipeMetres">Linear metres / extra pipe beyond standard 3m</label>
                 <input id="extraPipeMetres" type="number" min="0" step="1" value="0" placeholder="0">
-                <div class="help">Use 0 if standard run. Extra metres will go into engineer notes and can lightly affect estimate.</div>
+                <div class="help">This is the linear metre section. Put the extra metres needed beyond the standard included run.</div>
               </div>
 
               <div class="field">
@@ -744,9 +768,11 @@
 
             <div class="room-actions">
               <button class="btn btn-secondary" type="button" id="addRoomBtn">＋ Add Room</button>
-              <button class="btn btn-primary" type="button" id="recalcBtn">View Quote Options</button>
+              <button class="btn btn-secondary" type="button" id="recalcBtn">View Quote Options</button>
+              <button class="btn btn-primary" type="button" id="submitBtn">Submit Quote</button>
             </div>
 
+            <div id="submitStatus" class="status"></div>
             <div class="room-list" id="roomList"></div>
           </div>
 
@@ -864,7 +890,7 @@
           </div>
 
           <div class="notice">
-            This version auto-adds the current room when you click “View Quote Options”, so the quote updates properly.
+            Submit Quote will send the full payload straight to your Zapier Catch Hook.
           </div>
         </div>
       </aside>
@@ -873,6 +899,7 @@
   </div>
 
   <script>
+    const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/23936589/ujispc2/";
     const rooms = [];
 
     const systemTypeInputs = document.querySelectorAll('input[name="systemType"]');
@@ -1167,6 +1194,121 @@
       updateQuote();
     }
 
+    function buildPayload(){
+      const totals = calculateTotals();
+
+      return {
+        customer: {
+          first_name: document.getElementById('firstName').value.trim(),
+          last_name: document.getElementById('lastName').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          address_1: document.getElementById('address1').value.trim(),
+          town: document.getElementById('town').value.trim(),
+          postcode: document.getElementById('postcode').value.trim()
+        },
+        property: {
+          system_type: getSystemType(),
+          install_type: document.getElementById('installType').value,
+          power_supply: document.getElementById('powerSupply').value,
+          consumer_unit: document.getElementById('consumerUnit').value,
+          wall_type: document.getElementById('wallType').value,
+          trunking_colour: document.getElementById('trunkingColour').value,
+          commercial_job: document.getElementById('commercialJob').value
+        },
+        rooms: rooms,
+        internal_requirements: {
+          condensate_pump: document.getElementById('condensatePump').checked,
+          long_pipe_run: document.getElementById('longPipeRun').checked,
+          electrical_work: document.getElementById('electricalWork').checked,
+          difficult_access: document.getElementById('difficultAccessFlag').checked,
+          replacement_install: document.getElementById('replacementInstall').checked,
+          survey_notes: document.getElementById('surveyNotes').value.trim()
+        },
+        pricing: {
+          essential: totals.essential,
+          comfort: totals.comfort,
+          premium: totals.premium
+        },
+        install_notes: buildInstallNotes(),
+        submitted_at: new Date().toISOString()
+      };
+    }
+
+    function validateForm(){
+      const firstName = document.getElementById('firstName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      if (!firstName) {
+        alert('Please enter the customer first name.');
+        return false;
+      }
+
+      if (!email && !phone) {
+        alert('Please enter at least an email address or phone number.');
+        return false;
+      }
+
+      if (rooms.length === 0) {
+        const currentRoom = getCurrentRoomData();
+        if (currentRoom) {
+          rooms.push(currentRoom);
+          clearCurrentRoomFields();
+          renderRooms();
+          updateQuote();
+        } else {
+          alert('Please add at least one room before submitting.');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    async function submitQuote(){
+      const submitBtn = document.getElementById('submitBtn');
+      const submitStatus = document.getElementById('submitStatus');
+
+      if (!validateForm()) return;
+
+      if (!WEBHOOK_URL || WEBHOOK_URL.includes('https://hooks.zapier.com/hooks/catch/23936589/ujispc2/')) {
+        alert('Paste your Zapier webhook URL into the WEBHOOK_URL line first.');
+        return;
+      }
+
+      const payload = buildPayload();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      submitStatus.className = 'status show';
+      submitStatus.textContent = 'Submitting quote...';
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error('Submission failed');
+        }
+
+        submitStatus.className = 'status show ok';
+        submitStatus.textContent = 'Quote submitted successfully.';
+        submitBtn.textContent = 'Submitted';
+      } catch (error) {
+        console.error(error);
+        submitStatus.className = 'status show error';
+        submitStatus.textContent = 'Something went wrong while submitting. Please try again.';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Quote';
+      }
+    }
+
     function updateQuote(){
       const totals = calculateTotals();
       const systemType = getSystemType();
@@ -1192,6 +1334,7 @@
 
     document.getElementById('addRoomBtn').addEventListener('click', addRoom);
     document.getElementById('recalcBtn').addEventListener('click', viewQuoteOptions);
+    document.getElementById('submitBtn').addEventListener('click', submitQuote);
 
     [
       'installType',
