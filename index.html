@@ -508,6 +508,8 @@ const UNITS = {
 
 // Pipe cost per extra metre (inc 20% markup) — pipe + drain + CY cable + trunking + clips
 const PIPE_PM = {'1/4" & 3/8"':15.89,'1/4" & 1/2"':17.07,'1/4" & 5/8"':19.37,'3/8" & 5/8"':21.50};
+// Loft pipe rates — pipe + lagging only, no trunking/clips/cable (inc 20% markup)
+const LOFT_PIPE_PM = {'1/4" & 3/8"':7.54,'1/4" & 1/2"':8.71,'1/4" & 5/8"':11.02,'3/8" & 5/8"':12.53};
 
 // Inaba Denko trunking fittings (ex VAT, Kooltech prices)
 // [description, code, p75, p100]
@@ -601,6 +603,7 @@ function msTierTotal(tier, rooms){
   var indoorCost = heads.reduce(function(s,h,i){
     return s + msHeadPrice(h) + MS_INDOOR_KIT
       + (rooms[i].extraPipe||0) * (PIPE_PM[pipeConfig(h.kw,'Mitsubishi',tier==='Essential'?'AP Series':tier==='Comfort'?'EF Zen':'LN Premium')]||15.89)
+      + (rooms[i].loftPipe||0)  * (LOFT_PIPE_PM[pipeConfig(h.kw,'Mitsubishi',tier==='Essential'?'AP Series':tier==='Comfort'?'EF Zen':'LN Premium')]||7.54)
       + fittingsCost(rooms[i]);
   }, 0);
   var extraLabour = MS_EXTRA_LABOUR * (rooms.length - 1);
@@ -671,7 +674,10 @@ function calcKw(r){
 
 function pipeCost(r,tier){
   const u=getUnit(tier,r.kwRec||2.5);
-  return r.extraPipe*(PIPE_PM[pipeConfig(u.kw,u.make,u.series)]||15.89) + fittingsCost(r);
+  var cfg = pipeConfig(u.kw,u.make,u.series);
+  var trunkCost = (r.extraPipe||0) * (PIPE_PM[cfg]||15.89);
+  var loftCost  = (r.loftPipe||0)  * (LOFT_PIPE_PM[cfg]||7.54);
+  return trunkCost + loftCost + fittingsCost(r);
 }
 
 function tierTotals(){
@@ -749,7 +755,7 @@ function pickPill(field, val, el){
 // ── Rooms ────────────────────────────────────────────────
 function addRoom(){
   rooms.push({id:rIdx++,type:'Bedroom',l:0,w:0,h:2.4,
-              orient:'south',conds:[],kwRec:0,extraPipe:0,fittings:{},
+              orient:'south',conds:[],kwRec:0,extraPipe:0,loftPipe:0,fittings:{},
               pos:'Wall mounted — high level',floor:'Ground floor',
               outdoor:'Rear garden — ground',mount:'Feet on ground',
               route:'External trunking — straight run',access:'None'});
@@ -770,6 +776,7 @@ function saveRooms(){
     r.outdoor=g('ri-out-'+r.id)||r.outdoor;
     r.mount=g('ri-mount-'+r.id)||r.mount;
     r.route=g('ri-route-'+r.id)||r.route;
+    r.loftPipe=parseFloat(document.getElementById('loft-'+r.id)?.value)||r.loftPipe||0;
   });
 }
 
@@ -810,6 +817,15 @@ function setPipe(id,v){
   r.extraPipe=parseFloat(v)||0;
   document.getElementById('pipecost-'+id).textContent=r.extraPipe>0?
     '≈ +£'+(r.extraPipe*15.89).toFixed(0)+' (varies by unit)':'';
+  if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
+  else { refreshTierPrices(); updateTotals(); }
+}
+
+function setLoftPipe(id,v){
+  const r=rooms.find(r=>r.id===id); if(!r) return;
+  r.loftPipe=parseFloat(v)||0;
+  document.getElementById('loftcost-'+id).textContent=r.loftPipe>0?
+    '≈ +£'+(r.loftPipe*7.54).toFixed(0)+' (varies by unit)':'';
   if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
   else { refreshTierPrices(); updateTotals(); }
 }
@@ -1024,10 +1040,16 @@ function buildQuote(){
         }).join('')}
       </div>
       <div class="pipe-row">
-        <span class="lbl2">Extra pipe (m beyond 3m)</span>
+        <span class="lbl2">Extra pipe (m beyond 3m — trunked/external)</span>
         <input type="number" value="${r.extraPipe||0}" min="0" max="50" step="1"
           oninput="setPipe(${r.id},this.value)" style="width:72px;text-align:center">
         <span class="pipe-note" id="pipecost-${r.id}"></span>
+      </div>
+      <div class="pipe-row" style="background:#f0f7ff;border:1px solid #b8d9f0">
+        <span class="lbl2">Loft pipe run (m — pipe &amp; lagging only, no trunking)</span>
+        <input type="number" value="${r.loftPipe||0}" min="0" max="50" step="1"
+          oninput="setLoftPipe(${r.id},this.value)" style="width:72px;text-align:center">
+        <span class="pipe-note" id="loftcost-${r.id}" style="color:#2e7fbf"></span>
       </div>
       ${buildFittingsHtml(r)}
     </div>`).join('');
@@ -1216,7 +1238,12 @@ function buildOrderSummary(tier, totalPrice, ref, customerName, addr){
     var u = getUnit(tier, r.kwRec);
     var pc = pipeConfig(u.kw, u.make, u.series);
     var ep = r.extraPipe || 0;
+    var lp = r.loftPipe  || 0;
     var fc = fittingsCost(r);
+    var pipeDesc = ep>0&&lp>0 ? ' — 3m std + '+ep+'m trunked + '+lp+'m loft' :
+                  ep>0        ? ' — standard 3m + '+ep+'m trunked' :
+                  lp>0        ? ' — standard 3m + '+lp+'m loft (lagging only)' :
+                                ' — standard 3m run';
 
     lines.push('Room ' + (idx+1) + ': ' + r.type + ' (' + r.l + 'x' + r.w + 'x' + r.h + 'm · ' + r.kwRec + 'kW)');
     if(tier === 'Premium' && !u.series.includes('LN') && u.kw >= 7.1){
@@ -1226,7 +1253,7 @@ function buildOrderSummary(tier, totalPrice, ref, customerName, addr){
       lines.push('  Model:   ' + u.model);
       lines.push('  Price:   £' + u.price.toFixed(2) + ' (customer price inc labour)');
     }
-    lines.push('  Pipe:    ' + pc + (ep > 0 ? ' — standard 3m + ' + ep + 'm extra' : ' — standard 3m run'));
+    lines.push('  Pipe:    ' + pc + pipeDesc);
     if(fc > 0){
       var fittingsList = FITTINGS
         .filter(function(f){ return r.fittings && r.fittings[f[1]] > 0; })
@@ -1328,7 +1355,8 @@ async function sendQuote(){
         '  Outdoor: '+r.outdoor+' · '+r.mount,
         '  Route: '+r.route,
         '  Access: '+r.access,
-        r.extraPipe>0?'  Extra pipe: '+r.extraPipe+'m':null,
+        r.extraPipe>0?'  Extra pipe (trunked): '+r.extraPipe+'m':null,
+    r.loftPipe>0?'  Loft pipe (lagging only): '+r.loftPipe+'m':null,
         fittingsCost(r)>0?'  Fittings: '+FITTINGS.filter(function(f){return r.fittings&&r.fittings[f[1]]>0;}).map(function(f){
           var use100=survey.installType==='multi'; var price=(use100&&f[3]!==null)?f[3]:f[2];
           return r.fittings[f[1]]+'× '+f[0]+' (£'+(r.fittings[f[1]]*price).toFixed(2)+')';
@@ -1365,6 +1393,7 @@ async function sendQuote(){
       mid_price:(getUnit('Mid',r.kwRec||2.5).price+pipeCost(r,'Mid')).toFixed(2),
       premium_price:(getUnit('Premium',r.kwRec||2.5).price+pipeCost(r,'Premium')).toFixed(2),
       extra_pipe_m:r.extraPipe,
+      loft_pipe_m:r.loftPipe||0,
       fittings_cost:fittingsCost(r).toFixed(2),
       fittings_detail:FITTINGS.filter(([,code])=>(r.fittings&&r.fittings[code]>0)).map(([name,code])=>r.fittings[code]+'× '+name).join(', '),
       indoor_pos:r.pos, floor:r.floor, outdoor:r.outdoor,
