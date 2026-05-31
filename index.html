@@ -1248,7 +1248,9 @@ function buildReview(){
           ${['Essential','Comfort','Premium'].map(tier=>{
             const head=msPickHead(tier,r.kwRec||2.0);
             const hp=msHeadPrice(head)*vm;
-            const pc=pipeCost(r,tier);
+            // pipeCost uses UNITS keys (Basic/Mid/Premium) not display names
+            const tierKey={Essential:'Basic',Comfort:'Mid',Premium:'Premium'}[tier];
+            const pc=pipeCost(r,tierKey);
             const tb={Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
             return `<div class="tline">
               <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tier}</span>
