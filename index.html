@@ -409,7 +409,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <!-- Auto-selected outdoor units per tier -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-hdr"><span class="ci">🏗️</span> Outdoor Units — auto-selected per tier</div>
-    <div style="font-size:11px;color:var(--mid);margin-bottom:10px">Based on ${rooms.length} rooms and total kW required. Override by adjusting room dimensions if needed.</div>
+    <div style="font-size:11px;color:var(--mid);margin-bottom:10px">Auto-selected based on number of rooms and total kW required. Override by adjusting room dimensions if needed.</div>
     <div style="display:flex;flex-direction:column;gap:8px" id="ms-ou-summary">
       <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
         <span class="tier-badge tb-basic" style="font-size:10px;padding:2px 8px;flex-shrink:0">Essential</span>
@@ -534,55 +534,51 @@ const FITTINGS = [
 // ── Multi-split data ─────────────────────────────────────────
 // Outdoor units by brand
 const MS_DAIKIN_OUTDOORS = [
-  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:1256.24},
-  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1296.53},
-  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1559.60},
-  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1661.51},
+  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:950},
+  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1000},
+  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1350},
+  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1475},
 ];
 
 const MS_MITSUBISHI_OUTDOORS = [
-  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:1275.31},
-  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1397.62},
-  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1554.76},
-  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1711.09},
-  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:2107.99},
-  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2246.50},
+  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:975},
+  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1100},
+  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1275},
+  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1475},
+  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:1950},
+  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2125},
 ];
 
-// Indoor heads per tier — net price (indoor head only, no outdoor unit)
+// Indoor heads — sell price per head (inc labour, kit, margin)
+// Each head = 1 full day install so £400 labour + overhead + margin built in
 const MS_HEADS = {
-  // Essential: Daikin CTXF dedicated multi-split heads only
   Essential: [
-    {kw:2.0, label:'Daikin CTXF 2.0kW', model:'CTXF20F',  net:117.71},
-    {kw:2.5, label:'Daikin CTXF 2.5kW', model:'CTXF25F',  net:133.51},
-    {kw:3.5, label:'Daikin CTXF 3.5kW', model:'CTXF35F',  net:147.73},
+    {kw:2.0, label:'Daikin CTXF 2.0kW', model:'CTXF20F',  net:117.71, sell:800},
+    {kw:2.5, label:'Daikin CTXF 2.5kW', model:'CTXF25F',  net:133.51, sell:850},
+    {kw:3.5, label:'Daikin CTXF 3.5kW', model:'CTXF35F',  net:147.73, sell:925},
   ],
-  // Comfort: MSZ-EF indoor heads — net price from Kooltech pricelist (indoor unit only)
   Comfort: [
-    {kw:1.8, label:'Mitsubishi EF 1.8kW', model:'MSZ-EF18VGKB-E2',  net:284.31},
-    {kw:2.2, label:'Mitsubishi EF 2.2kW', model:'MSZ-EF22VGK2B-E2', net:298.89},
-    {kw:2.5, label:'Mitsubishi EF 2.5kW', model:'MSZ-EF25VGKB-E2',  net:328.05},
-    {kw:3.5, label:'Mitsubishi EF 3.5kW', model:'MSZ-EF35VGKB-E2',  net:391.23},
-    {kw:5.0, label:'Mitsubishi EF 5.0kW', model:'MSZ-EF50VGK2B-E1', net:426.87},
+    {kw:1.8, label:'Mitsubishi EF 1.8kW', model:'MSZ-EF18VGKB-E2',  net:284.31, sell:975},
+    {kw:2.2, label:'Mitsubishi EF 2.2kW', model:'MSZ-EF22VGK2B-E2', net:298.89, sell:1000},
+    {kw:2.5, label:'Mitsubishi EF 2.5kW', model:'MSZ-EF25VGKB-E2',  net:328.05, sell:1100},
+    {kw:3.5, label:'Mitsubishi EF 3.5kW', model:'MSZ-EF35VGKB-E2',  net:391.23, sell:1250},
+    {kw:5.0, label:'Mitsubishi EF 5.0kW', model:'MSZ-EF50VGK2B-E1', net:426.87, sell:1450},
   ],
-  // Premium: MSZ-LN indoor heads — net price from Kooltech pricelist (indoor unit only)
   Premium: [
-    {kw:1.8, label:'Mitsubishi LN 1.8kW', model:'MSZ-LN18VG2B-E5',  net:358.02},
-    {kw:2.5, label:'Mitsubishi LN 2.5kW', model:'MSZ-LN25VG2B-E3',  net:382.32},
-    {kw:3.5, label:'Mitsubishi LN 3.5kW', model:'MSZ-LN35VG2B-E3',  net:457.65},
-    {kw:5.0, label:'Mitsubishi LN 5.0kW', model:'MSZ-LN50VG2B-E3',  net:623.70},
-    {kw:6.0, label:'Mitsubishi LN 6.0kW', model:'MSZ-LN60VG2B-E3',  net:714.42},
+    {kw:1.8, label:'Mitsubishi LN 1.8kW', model:'MSZ-LN18VG2B-E5',  net:358.02, sell:1025},
+    {kw:2.5, label:'Mitsubishi LN 2.5kW', model:'MSZ-LN25VG2B-E3',  net:382.32, sell:1200},
+    {kw:3.5, label:'Mitsubishi LN 3.5kW', model:'MSZ-LN35VG2B-E3',  net:457.65, sell:1375},
+    {kw:5.0, label:'Mitsubishi LN 5.0kW', model:'MSZ-LN50VG2B-E3',  net:623.70, sell:1700},
+    {kw:6.0, label:'Mitsubishi LN 6.0kW', model:'MSZ-LN60VG2B-E3',  net:714.42, sell:1750},
   ],
 };
 
-// Tier → outdoor range mapping
 const MS_OUTDOOR_BY_TIER = {
   Essential: MS_DAIKIN_OUTDOORS,
   Comfort:   MS_MITSUBISHI_OUTDOORS,
   Premium:   MS_MITSUBISHI_OUTDOORS,
 };
 
-// Kit & labour constants
 const MS_INDOOR_KIT   = 67.52;
 const MS_EXTRA_LABOUR = 400.00;
 const MS_MARKUP       = 1.20;
@@ -599,25 +595,23 @@ function msPickOutdoor(tier, numRooms, totalKw){
   return sorted.find(function(ou){ return ou.ports >= numRooms && ou.maxKw >= totalKw; }) || outdoors[outdoors.length-1];
 }
 
-function msHeadPrice(head){ return head.net * MS_MARKUP; }
+function msHeadPrice(head){ return head.sell || (head.net * MS_MARKUP); }
 
 function msTierTotal(tier, rooms){
-  // Pick heads for each room
   var heads = rooms.map(function(r){ return msPickHead(tier, r.kwRec||2.0); });
   var totalHeadKw = heads.reduce(function(s,h){ return s+h.kw; }, 0);
   var ou = msPickOutdoor(tier, rooms.length, totalHeadKw);
   var indoorCost = heads.reduce(function(s,h,i){
-    return s + msHeadPrice(h) + MS_INDOOR_KIT
+    return s + msHeadPrice(h)
       + (rooms[i].extraPipe||0) * (PIPE_PM[pipeConfig(h.kw,'Mitsubishi',tier==='Essential'?'AP Series':tier==='Comfort'?'EF Zen':'LN Premium')]||15.89)
       + (rooms[i].loftPipe||0)  * (LOFT_PIPE_PM[pipeConfig(h.kw,'Mitsubishi',tier==='Essential'?'AP Series':tier==='Comfort'?'EF Zen':'LN Premium')]||7.54)
       + fittingsCost(rooms[i]);
   }, 0);
-  var extraLabour = MS_EXTRA_LABOUR * (rooms.length - 1);
   return {
     tier: tier,
     outdoor: ou,
     heads: heads,
-    total: (ou.price + indoorCost + extraLabour) * vatMult(),
+    total: (ou.price + indoorCost) * vatMult(),
   };
 }
 
