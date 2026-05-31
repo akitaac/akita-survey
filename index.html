@@ -1801,6 +1801,28 @@ function refreshMsHeadPrices(){
 }
 
 // ── Init ─────────────────────────────────────────────────
+// Pre-fill from URL parameters (passed from Zapier/Jobber links)
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  set('fn',  p.get('fn')   || p.get('first_name')     || p.get('customer-name')?.split(' ')[0] || '');
+  set('ln',  p.get('ln')   || p.get('last_name')       || p.get('customer-name')?.split(' ').slice(1).join(' ') || '');
+  set('em',  p.get('em')   || p.get('email')           || p.get('email-address') || '');
+  set('ph',  p.get('ph')   || p.get('phone')           || p.get('phone-number')  || '');
+  set('ad1', p.get('ad1')  || p.get('street')          || '');
+  set('ad2', p.get('ad2')  || p.get('city')            || '');
+  set('ad3', p.get('ad3')  || p.get('county')          || '');
+  set('ad4', p.get('ad4')  || p.get('postcode')        || '');
+  // Also support a combined address param
+  const fullAddr = p.get('address') || p.get('installation-address') || '';
+  if(fullAddr && !p.get('ad1')){
+    const parts = fullAddr.split(',').map(s => s.trim());
+    set('ad1', parts[0] || '');
+    set('ad2', parts[1] || '');
+    set('ad3', parts[2] || '');
+    set('ad4', parts[3] || '');
+  }
+})();
 // Start on job type screen
 document.getElementById('pjt').classList.add('on');
 document.getElementById('p0').classList.remove('on');
