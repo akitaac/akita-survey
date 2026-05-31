@@ -1175,6 +1175,7 @@ function updateReviewTotals(){
 
 // ── Review ───────────────────────────────────────────────
 function buildReview(){
+  try {
   const first=document.getElementById('fn').value.trim();
   const last=document.getElementById('ln').value.trim();
   const email=document.getElementById('em').value.trim();
@@ -1292,6 +1293,10 @@ function buildReview(){
   // Add-ons folded into totals — not shown to customer
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
   document.getElementById('rv-addons').innerHTML='';
+  } catch(e) {
+    console.error('buildReview error:', e);
+    alert('Something went wrong loading the review. Please check all rooms have dimensions entered.');
+  }
 }
 
 
