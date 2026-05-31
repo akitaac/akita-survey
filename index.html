@@ -1473,7 +1473,9 @@ async function sendQuote(){
    .concat(filled.length>0?['\n=== ADDITIONAL COSTS ==='].concat(filled.map(a=>'  '+a.desc+': £'+parseFloat(a.price).toFixed(2))):[])
    .filter(Boolean).join('\n');
 
-  const payload={
+  let payload;
+  try {
+    payload={
     customer_name:first+' '+last, customer_email:email,
     customer_phone:phone, customer_address:addr,
     customer_street:ad1, customer_city:ad2, customer_county:ad3, customer_postcode:ad4,
@@ -1505,7 +1507,12 @@ async function sendQuote(){
       indoor_pos:r.pos, floor:r.floor, outdoor:r.outdoor,
       mount:r.mount, route:r.route, access:r.access,
     }))),
-  };
+    };
+  } catch(e) {
+    document.getElementById('send-status').innerHTML='<div class="card" style="border:2px solid #e74c3c;padding:18px;text-align:center"><p style="color:#e74c3c;font-weight:600">Error building quote: '+e.message+'</p></div>';
+    btn.disabled=false;
+    return;
+  }
 
   try{
     const controller = new AbortController();
