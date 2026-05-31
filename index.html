@@ -1136,7 +1136,9 @@ function updateReviewTotals(){
   const sel = getSelectedRooms();
   if(!sel.length) return;
   const vm = vatMult(); const ext = extrasTotal(); const sub = fin.sub;
-  if(jobType==='multi'){
+  // If multi-split job but only 1 room selected — price as single split silently
+  const treatAsSingle = (jobType==='multi' && sel.length === 1);
+  if(jobType==='multi' && !treatAsSingle){
     const mst = msTotalPrice(sel);
     document.getElementById('rv-totals').innerHTML=
       ['Essential','Comfort','Premium'].map(t=>`
@@ -1148,9 +1150,9 @@ function updateReviewTotals(){
     });
     const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
     document.getElementById('rv-totals').innerHTML=`
-      <div class="tline"><span>Essential</span><span>£${gB.toFixed(2)}</span></div>
-      <div class="tline"><span>Comfort</span><span>£${gM.toFixed(2)}</span></div>
-      <div class="tline"><span>Premium</span><span>£${gP.toFixed(2)}</span></div>`;
+      <div class="tline"><span>Essential${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gB.toFixed(2)}</span></div>
+      <div class="tline"><span>Comfort${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gM.toFixed(2)}</span></div>
+      <div class="tline"><span>Premium${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gP.toFixed(2)}</span></div>`;
   }
 }
 
@@ -1391,7 +1393,8 @@ async function sendQuote(){
   const sub=fin.sub;
   const vm=vatMult();
   var gB, gM, gP;
-  if(jobType==='multi'){
+  const treatAsSingle = (jobType==='multi' && activeRooms.length === 1);
+  if(jobType==='multi' && !treatAsSingle){
     const mst=msTotalPrice(activeRooms);
     gB=mst.Essential.total; gM=mst.Comfort.total; gP=mst.Premium.total;
   } else {
@@ -1404,8 +1407,8 @@ async function sendQuote(){
     gP=(t.Premium+ext)*(1+sub)*vm;
   }
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
-  const jobTypeLabel = jobType==='multi' ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
-  const ouLabel = jobType==='multi' ? (function(){
+  const jobTypeLabel = treatAsSingle ? 'SINGLE SPLIT' : jobType==='multi' ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
+  const ouLabel = (jobType==='multi' && !treatAsSingle) ? (function(){
     var t=msTotalPrice(activeRooms);
     return 'Essential: '+t.Essential.outdoor.label+' | Comfort/Premium: '+t.Comfort.outdoor.label;
   })() : '';
@@ -1459,7 +1462,7 @@ async function sendQuote(){
     gs_basic_job_notes:'=== OPTION SELECTED: ESSENTIAL PACKAGE ===\n£'+gB.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_mid_job_notes:'=== OPTION SELECTED: COMFORT PACKAGE ===\n£'+gM.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_premium_job_notes:'=== OPTION SELECTED: PREMIUM PACKAGE ===\n£'+gP.toFixed(2)+' all-in\n\n'+jobNotes,
-    email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms}),
+    email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}),
     order_summary_essential:buildOrderSummary('Basic',gB,ref,first+' '+last,addr,activeRooms),
     order_summary_comfort:buildOrderSummary('Mid',gM,ref,first+' '+last,addr,activeRooms),
     order_summary_premium:buildOrderSummary('Premium',gP,ref,first+' '+last,addr,activeRooms),
@@ -1511,8 +1514,9 @@ async function sendQuote(){
 }
 
 // ── Email builder ────────────────────────────────────────
-function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms}){
+function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}){
   activeRooms = activeRooms || rooms;
+  const effectiveJobType = (jobType==='multi' && !treatAsSingle) ? 'multi' : 'single';
 
   // Selection button URLs — hit SELECTION_WEBHOOK with ref + chosen tier
   // Encoded as query params on a redirect URL so it works as a plain href in email
@@ -1523,7 +1527,7 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
 
   // Room rows — different layout for single vs multi-split
   var roomRows;
-  if(jobType==='multi'){
+  if(effectiveJobType==='multi'){
     const mstEmail = msTotalPrice(activeRooms);
     const ouLine = ['Essential','Comfort','Premium'].map(tier=>{
       const ou = mstEmail[tier].outdoor;
