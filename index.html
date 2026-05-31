@@ -154,8 +154,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <header class="hdr">
   <img src="https://cdn.shopify.com/s/files/1/0906/1780/7181/files/akita-logo-cartoon-husky-sunglasses-coat.png?v=1773353080" alt="Akita">
   <div><h1>AKITA AIR CONDITIONING</h1><p>Site Survey Quote Tool</p></div>
-  <span class="hdr-badge">On-Site</span>
+  <button onclick="openRecent()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Recent
+  </button>
 </header>
+
+<!-- RECENT QUOTES DRAWER -->
+<div id="recent-overlay" onclick="closeRecent()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200"></div>
+<div id="recent-drawer" style="display:none;position:fixed;top:0;right:0;width:92%;max-width:380px;height:100%;background:#fff;z-index:201;box-shadow:-4px 0 24px rgba(0,0,0,.2);overflow-y:auto;transition:transform .25s">
+  <div style="background:#1a2e4a;padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+    <div style="color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.3px">Recent Quotes</div>
+    <button onclick="closeRecent()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;line-height:1;padding:0 4px">✕</button>
+  </div>
+  <div style="padding:14px">
+    <p style="font-size:12px;color:#8a9bb0;margin-bottom:14px">Tap a quote to reload all fields. Last 10 quotes saved on this device.</p>
+    <div id="recent-list"></div>
+    <button onclick="clearAllSaved()" style="width:100%;margin-top:16px;padding:10px;background:none;border:1.5px solid #dde3ea;border-radius:8px;color:#8a9bb0;font-size:12px;font-family:'Barlow',sans-serif;cursor:pointer">Clear all saved quotes</button>
+  </div>
+</div>
 
 <div class="prog">
   <div class="prog-dots">
@@ -713,7 +730,7 @@ function goPage(n){
     if(jobType==='multi'){ buildMsQuote(); }
     else { buildQuote(); }
   }
-  if(n===3) buildReview();
+  if(n===3){ saveRooms(); buildReview(); }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   var pageId = (n===2 && jobType==='multi') ? 'p2m' : 'p'+n;
   document.getElementById(pageId).classList.add('on');
@@ -1494,6 +1511,7 @@ async function sendQuote(){
       mode:'no-cors'
     });
     clearTimeout(timeout);
+    saveQuote(); // auto-save to recent quotes
     document.getElementById('send-status').innerHTML=`
       <div class="card status-ok">
         <div class="tick">✓</div>
@@ -1796,6 +1814,144 @@ function refreshMsHeadPrices(){
     });
   });
   updateMsTotals();
+}
+
+// ── Quote Save / Load ─────────────────────────────────────
+const STORAGE_KEY = 'akita_saved_quotes';
+const MAX_SAVED = 10;
+
+function buildSnapshot(){
+  return {
+    saved_at: new Date().toISOString(),
+    saved_label: (document.getElementById('fn')?.value||'') + ' ' + (document.getElementById('ln')?.value||'') +
+      ' — ' + (document.getElementById('ad2')?.value||'') +
+      ' — ' + new Date().toLocaleDateString('en-GB'),
+    jobType: jobType,
+    survey: Object.assign({}, survey),
+    fin: Object.assign({}, fin),
+    vatOn: vatOn,
+    customer: {
+      fn:  document.getElementById('fn')?.value||'',
+      ln:  document.getElementById('ln')?.value||'',
+      em:  document.getElementById('em')?.value||'',
+      ph:  document.getElementById('ph')?.value||'',
+      ad1: document.getElementById('ad1')?.value||'',
+      ad2: document.getElementById('ad2')?.value||'',
+      ad3: document.getElementById('ad3')?.value||'',
+      ad4: document.getElementById('ad4')?.value||'',
+    },
+    consumer: document.getElementById('sv-consumer')?.value||'',
+    wall:     document.getElementById('sv-wall')?.value||'',
+    finSel:   document.getElementById('fin-sel')?.value||'',
+    trunking: document.getElementById('trunkingColour')?.value||'Black',
+    rooms: rooms.map(r => Object.assign({}, r)),
+    addons: addons.map(a => Object.assign({}, a)),
+  };
+}
+
+function saveQuote(){
+  try {
+    saveRooms();
+    const snap = buildSnapshot();
+    const existing = getSaved();
+    // Remove duplicate same customer+address if exists
+    const filtered = existing.filter(q => q.saved_label !== snap.saved_label);
+    const updated = [snap, ...filtered].slice(0, MAX_SAVED);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  } catch(e) { console.warn('Save failed:', e); }
+}
+
+function getSaved(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+
+function loadSnapshot(snap){
+  // Customer details
+  const c = snap.customer || {};
+  ['fn','ln','em','ph','ad1','ad2','ad3','ad4'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el && c[id] !== undefined) el.value = c[id];
+  });
+  // Property survey
+  if(snap.consumer){ const el=document.getElementById('sv-consumer'); if(el) el.value=snap.consumer; }
+  if(snap.wall){ const el=document.getElementById('sv-wall'); if(el) el.value=snap.wall; }
+  if(snap.trunking){
+    const el=document.getElementById('trunkingColour');
+    if(el){ el.value=snap.trunking; survey.trunkingColour=snap.trunking; }
+  }
+  // Survey pills
+  if(snap.survey){
+    survey = Object.assign(survey, snap.survey);
+    // Re-apply pill UI
+    document.querySelectorAll('.pills .pill').forEach(p => {
+      const grp = p.closest('.pills');
+      const field = grp?.id?.replace('pills-','');
+      if(field && survey[field]) p.classList.toggle('on', p.textContent.trim()===survey[field]);
+    });
+  }
+  // VAT
+  if(snap.vatOn !== undefined && snap.vatOn !== vatOn) toggleVat();
+  // Finance
+  if(snap.finSel !== undefined){
+    const el = document.getElementById('fin-sel');
+    if(el){ el.value=snap.finSel; updateFin(); }
+  }
+  // Rooms
+  if(snap.rooms && snap.rooms.length){
+    rooms = snap.rooms.map(r => Object.assign({
+      id:0,type:'Bedroom',l:0,w:0,h:2.4,orient:'south',conds:[],kwRec:0,
+      extraPipe:0,loftPipe:0,fittings:{},pos:'Wall mounted — high level',
+      floor:'Ground floor',outdoor:'Rear garden — ground',mount:'Feet on ground',
+      route:'External trunking — straight run',access:'None'
+    }, r));
+    rIdx = Math.max(...rooms.map(r=>r.id)) + 1;
+    renderRooms();
+    rooms.forEach(r => { if(r.l&&r.w&&r.h) liveCalc(r.id); });
+  }
+  // Add-ons
+  if(snap.addons){
+    addons = snap.addons.map(a => Object.assign({}, a));
+    aIdx = addons.length ? Math.max(...addons.map(a=>a.id)) + 1 : 0;
+    renderAddons();
+  }
+  // Job type
+  if(snap.jobType) setJobType(snap.jobType);
+  // Go to page 1
+  goPage(1);
+  closeRecent();
+}
+
+function openRecent(){
+  const saved = getSaved();
+  const list = document.getElementById('recent-list');
+  if(!saved.length){
+    list.innerHTML = '<p style="text-align:center;color:#8a9bb0;padding:30px 0;font-size:13px">No saved quotes yet.<br>Quotes save automatically when you send.</p>';
+  } else {
+    list.innerHTML = saved.map((q,i) => `
+      <div onclick="loadSnapshot(getSaved()[${i}])" style="border:1.5px solid #dde3ea;border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;background:#fafbfc;active:background:#f0f7ff">
+        <div style="font-size:14px;font-weight:700;color:#1a2e4a;margin-bottom:4px">${q.customer?.fn||''} ${q.customer?.ln||''}</div>
+        <div style="font-size:12px;color:#8a9bb0;margin-bottom:2px">${q.customer?.ad1||''}, ${q.customer?.ad2||''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="font-size:11px;background:${q.jobType==='multi'?'#e3f2fd':'#e8f5e9'};color:${q.jobType==='multi'?'#0d47a1':'#1b5e20'};padding:2px 8px;border-radius:4px;font-weight:700">${q.jobType==='multi'?'Multi-Split':'Single Split'} · ${q.rooms?.length||0} room${q.rooms?.length!==1?'s':''}</span>
+          <span style="font-size:11px;color:#8a9bb0">${new Date(q.saved_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('recent-overlay').style.display='block';
+  document.getElementById('recent-drawer').style.display='block';
+}
+
+function closeRecent(){
+  document.getElementById('recent-overlay').style.display='none';
+  document.getElementById('recent-drawer').style.display='none';
+}
+
+function clearAllSaved(){
+  if(confirm('Clear all saved quotes?')){
+    localStorage.removeItem(STORAGE_KEY);
+    openRecent();
+  }
 }
 
 // ── Init ─────────────────────────────────────────────────
