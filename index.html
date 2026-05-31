@@ -1567,7 +1567,8 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
     roomRows = ouLine + activeRooms.map((r,i)=>{
       const tierBlocks=['Essential','Comfort','Premium'].map(tier=>{
         const head=msPickHead(tier,r.kwRec||2.0);
-        const pc=pipeCost(r,tier);
+        const tierKey={'Essential':'Basic','Comfort':'Mid','Premium':'Premium'}[tier];
+        const pc=pipeCost(r,tierKey);
         const hp=msHeadPrice(head)*vatMult();
         const tbg={'Essential':'#f4f6f9','Comfort':'#fff4ef','Premium':'#1a2e4a'}[tier];
         const ttc={'Essential':'#1a2e4a','Comfort':'#E8612A','Premium':'#C5E8F5'}[tier];
