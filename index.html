@@ -551,19 +551,19 @@ const FITTINGS = [
 // ── Multi-split data ─────────────────────────────────────────
 // Outdoor units by brand
 const MS_DAIKIN_OUTDOORS = [
-  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:950},
-  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1000},
-  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1350},
-  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1475},
+  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:950,  pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1000, pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1350, pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1475, pipeConfig:'3/8" & 5/8"'},
 ];
 
 const MS_MITSUBISHI_OUTDOORS = [
-  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:975},
-  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1100},
-  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1275},
-  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1475},
-  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:1950},
-  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2125},
+  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:975,  pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1100, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1275, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1475, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:1950, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2125, pipeConfig:'3/8" & 5/8"'},
 ];
 
 // Indoor heads — sell price per head (inc labour, kit, margin)
@@ -602,7 +602,15 @@ const MS_MARKUP       = 1.20;
 
 function msPickHead(tier, kwRec){
   var heads = MS_HEADS[tier];
-  return heads.find(function(h){ return h.kw >= (kwRec||2.0); }) || heads[heads.length-1];
+  var match = heads.find(function(h){ return h.kw >= (kwRec||2.0); });
+  var head = match || heads[heads.length-1];
+  head._undersized = !match && kwRec > heads[heads.length-1].kw;
+  return head;
+}
+
+function msHeadUndersized(tier, kwRec){
+  var heads = MS_HEADS[tier];
+  return kwRec > heads[heads.length-1].kw;
 }
 
 function msPickOutdoor(tier, numRooms, totalKw){
@@ -619,9 +627,11 @@ function msTierTotal(tier, rooms){
   var totalHeadKw = heads.reduce(function(s,h){ return s+h.kw; }, 0);
   var ou = msPickOutdoor(tier, rooms.length, totalHeadKw);
   var indoorCost = heads.reduce(function(s,h,i){
+    // Both Daikin MXF and Mitsubishi MXZ outdoor units = 3/8" & 5/8" (confirmed from Akita_Price_Reference spreadsheet)
+    var msCfg = '3/8" & 5/8"';
     return s + msHeadPrice(h)
-      + (rooms[i].extraPipe||0) * (PIPE_PM[pipeConfig(h.kw,'Mitsubishi',tier==='Essential'?'AP Series':tier==='Comfort'?'EF Zen':'LN Premium')]||15.89)
-      + (rooms[i].loftPipe||0)  * (LOFT_PIPE_PM[pipeConfig(h.kw,'Mitsubishi',tier==='Essential'?'AP Series':tier==='Comfort'?'EF Zen':'LN Premium')]||7.54)
+      + (rooms[i].extraPipe||0) * (PIPE_PM[msCfg]||21.50)
+      + (rooms[i].loftPipe||0)  * (LOFT_PIPE_PM[msCfg]||12.53)
       + fittingsCost(rooms[i]);
   }, 0);
   return {
@@ -1248,15 +1258,19 @@ function buildReview(){
           ${['Essential','Comfort','Premium'].map(tier=>{
             const head=msPickHead(tier,r.kwRec||2.0);
             const hp=msHeadPrice(head)*vm;
-            // pipeCost uses UNITS keys (Basic/Mid/Premium) not display names
             const tierKey={Essential:'Basic',Comfort:'Mid',Premium:'Premium'}[tier];
             const pc=pipeCost(r,tierKey);
             const tb={Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+            const undersized=msHeadUndersized(tier,r.kwRec||0);
+            const headDesc = undersized
+              ? '<span style="color:#e67e22;font-size:11px">⚠ Undersized — max '+head.kw+'kW, room needs '+r.kwRec+'kW</span>'
+              : head.label+(pc>0?' +'+r.extraPipe+'m pipe':'');
+            const priceStr = undersized ? '—' : '£'+(hp+pc).toFixed(2);
             return `<div class="tline">
               <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tier}</span>
-                ${head.label}${pc>0?' +'+r.extraPipe+'m pipe':''}
+                ${headDesc}
               </span>
-              <strong>£${(hp+pc).toFixed(2)}</strong>
+              <strong>${priceStr}</strong>
             </div>`;
           }).join('')}
         </div>`).join('');
@@ -1789,10 +1803,16 @@ function buildMsRooms(){
       var hp = msHeadPrice(head) * vatMult();
       var tc = {Essential:'tc-basic',Comfort:'tc-mid',Premium:'tc-prem'}[tier];
       var tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
-      html += '<div class="tier-card '+tc+'">';
+      var undersized = msHeadUndersized(tier, r.kwRec||0);
+      html += '<div class="tier-card '+tc+(undersized?' tier-card-warn':'')+'">';
       html += '<div class="tier-badge '+tb+'">'+tier+'</div>';
-      html += '<div class="tier-price" id="ms-tp-'+r.id+'-'+tier+'">£'+Math.round(hp)+'</div>';
-      html += '<div class="tier-sub">'+head.label+'</div>';
+      if(undersized){
+        html += '<div class="tier-price" style="font-size:13px;color:#e67e22">⚠ Undersized</div>';
+        html += '<div class="tier-sub" style="color:#e67e22">Max '+head.kw+'kW — room needs '+r.kwRec+'kW<br>Use single split or upgrade tier</div>';
+      } else {
+        html += '<div class="tier-price" id="ms-tp-'+r.id+'-'+tier+'">£'+Math.round(hp)+'</div>';
+        html += '<div class="tier-sub">'+head.label+'</div>';
+      }
       html += '</div>';
     });
     html += '</div>';
