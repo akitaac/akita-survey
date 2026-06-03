@@ -506,26 +506,26 @@ const SELECTION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr
 // ── Unit data ────────────────────────────────────────────
 const UNITS = {
   Basic: [
-    {kw:2.0,price:1175, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
-    {kw:2.5,price:1225, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
-    {kw:3.5,price:1275, make:'Daikin',     series:'Sensira',    model:'FTXF35F + RXF35F'},
-    {kw:4.2,price:1350, make:'Daikin',     series:'Sensira',    model:'FTXF42F + RXF42F'},
-    {kw:5.0,price:1425, make:'Daikin',     series:'Sensira',    model:'FTXF50F + RXF50F'},
-    {kw:6.0,price:1550, make:'Daikin',     series:'Sensira',    model:'FTXF60F + RXF60D9'},
-    {kw:7.1,price:1750, make:'Daikin',     series:'Sensira',    model:'FTXF71F + RXF71D9'},
+    {kw:2.0,price:1175, net:380.78, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
+    {kw:2.5,price:1225, net:408.43, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
+    {kw:3.5,price:1275, net:473.21, make:'Daikin',     series:'Sensira',    model:'FTXF35F + RXF35F'},
+    {kw:4.2,price:1350, net:544.31, make:'Daikin',     series:'Sensira',    model:'FTXF42F + RXF42F'},
+    {kw:5.0,price:1425, net:617.78, make:'Daikin',     series:'Sensira',    model:'FTXF50F + RXF50F'},
+    {kw:6.0,price:1550, net:727.59, make:'Daikin',     series:'Sensira',    model:'FTXF60F + RXF60D9'},
+    {kw:7.1,price:1750, net:925.09, make:'Daikin',     series:'Sensira',    model:'FTXF71F + RXF71D9'},
   ],
   Mid: [
-    {kw:2.5,price:1550, make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
-    {kw:3.5,price:1675, make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
-    {kw:5.0,price:1975, make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
-    {kw:6.0,price:1900, make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP60VGK2 + MUZ-AP60VG'},
-    {kw:7.1,price:2325, make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP71VGK2 + MUZ-AP71VG'},
+    {kw:2.5,price:1550, net:725.76,  make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
+    {kw:3.5,price:1675, net:854.55,  make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
+    {kw:5.0,price:1975, net:1128.33, make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
+    {kw:6.0,price:1900, net:1056.24, make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP60VGK2 + MUZ-AP60VG'},
+    {kw:7.1,price:2325, net:1453.14, make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP71VGK2 + MUZ-AP71VG'},
   ],
   Premium: [
-    {kw:2.5,price:1650, make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN25VG2B + MUZ-LN25VG'},
-    {kw:3.5,price:1800, make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN35VG2B + MUZ-LN35VG'},
-    {kw:5.0,price:2250, make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN50VG2B + MUZ-LN50VG'},
-    {kw:6.0,price:2425, make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN60VG2B + MUZ-LN60VG'},
+    {kw:2.5,price:1650, net:823.77,  make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN25VG2B + MUZ-LN25VG'},
+    {kw:3.5,price:1800, net:976.86,  make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN35VG2B + MUZ-LN35VG'},
+    {kw:5.0,price:2250, net:1395.63, make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN50VG2B + MUZ-LN50VG'},
+    {kw:6.0,price:2425, net:1556.82, make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN60VG2B + MUZ-LN60VG'},
   ],
 };
 
@@ -551,19 +551,19 @@ const FITTINGS = [
 // ── Multi-split data ─────────────────────────────────────────
 // Outdoor units by brand
 const MS_DAIKIN_OUTDOORS = [
-  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:950,  pipeConfig:'3/8" & 5/8"'},
-  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1000, pipeConfig:'3/8" & 5/8"'},
-  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1350, pipeConfig:'3/8" & 5/8"'},
-  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1475, pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:950,  net:657.28, pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1000, net:697.57, pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1350, net:960.64, pipeConfig:'3/8" & 5/8"'},
+  {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1475, net:1062.55,pipeConfig:'3/8" & 5/8"'},
 ];
 
 const MS_MITSUBISHI_OUTDOORS = [
-  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:975,  pipeConfig:'3/8" & 5/8"'},
-  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1100, pipeConfig:'3/8" & 5/8"'},
-  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1275, pipeConfig:'3/8" & 5/8"'},
-  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1475, pipeConfig:'3/8" & 5/8"'},
-  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:1950, pipeConfig:'3/8" & 5/8"'},
-  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2125, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:975,  net:676.00, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1100, net:799.00, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1275, net:956.00, pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-3F54 3-port 5.4kW', model:'MXZ-3F54VF4', ports:3, maxKw:5.4, price:1475, net:1112.00,pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-3F68 3-port 6.8kW', model:'MXZ-3F68VF4', ports:3, maxKw:6.8, price:1950, net:1509.00,pipeConfig:'3/8" & 5/8"'},
+  {label:'Mitsubishi MXZ-4F72 4-port 7.2kW', model:'MXZ-4F72VF4', ports:4, maxKw:7.2, price:2125, net:1648.00,pipeConfig:'3/8" & 5/8"'},
 ];
 
 // Indoor heads — sell price per head (inc labour, kit, margin)
@@ -1133,6 +1133,54 @@ function updateTotals(){
   }
 }
 
+// ── Profit calculator ────────────────────────────────────
+const OVERHEAD_PER_JOB = 148; // £148 flat per job (annual overhead / estimated installs)
+const LABOUR_PER_ROOM  = 400; // £400/day per room
+
+function calcProfit(tier, selRooms, totalRevenue){
+  // Unit net costs
+  const tierKey = {Essential:'Basic', Comfort:'Mid', Premium:'Premium'}[tier] || tier;
+  let unitNetTotal = 0;
+  let kitAtCost = 0;
+  let labourTotal = 0;
+
+  selRooms.forEach(r => {
+    if(!r.kwRec) return;
+    if(jobType==='multi'){
+      const head = msPickHead(tier==='Essential'?'Essential':tier==='Comfort'?'Comfort':'Premium', r.kwRec);
+      unitNetTotal += head.net || 0;
+    } else {
+      const u = getUnit(tierKey, r.kwRec||2.5);
+      unitNetTotal += u ? (u.net || 0) : 0;
+    }
+    // Kit at cost = kit charged / 1.20 markup
+    const kitCharged = jobType==='multi' ? MS_INDOOR_KIT : (
+      r.kwRec<=4.2 ? 171.456 : r.kwRec<=5.0 ? 174.984 : 181.896
+    );
+    kitAtCost += kitCharged / 1.20;
+    labourTotal += LABOUR_PER_ROOM; // kept for reference only
+  });
+
+  // Add outdoor unit net cost for multi-split
+  if(jobType==='multi'){
+    const totalKw = selRooms.reduce((s,r)=>s+(r.kwRec||0),0);
+    const tierMs = tier==='Essential'?'Essential':tier==='Comfort'?'Comfort':'Premium';
+    const ou = msPickOutdoor(tierMs, selRooms.length, totalKw);
+    unitNetTotal += ou ? (ou.net || ou.price * 0.70) : 0;
+  }
+
+  const totalCost = unitNetTotal + kitAtCost + OVERHEAD_PER_JOB;
+  const profit = totalRevenue - totalCost;
+  const margin = totalRevenue > 0 ? (profit / totalRevenue * 100) : 0;
+  return { cost: totalCost, profit, margin };
+}
+
+function profitBadge(profit, margin){
+  const col = margin >= 20 ? '#27ae60' : margin >= 12 ? '#e67e22' : '#e74c3c';
+  return '<span style="font-size:11px;font-weight:700;color:'+col+';margin-left:8px">'+
+    (profit>=0?'+':'')+' £'+Math.round(profit)+' ('+margin.toFixed(1)+'%)</span>';
+}
+
 // ── Selected rooms helper ────────────────────────────────
 var deselectedRooms = new Set();
 
@@ -1168,18 +1216,22 @@ function updateReviewTotals(){
   if(jobType==='multi' && !treatAsSingle){
     const mst = msTotalPrice(sel);
     document.getElementById('rv-totals').innerHTML=
-      ['Essential','Comfort','Premium'].map(t=>`
-        <div class="tline"><span>${t}</span><span>£${mst[t].total.toFixed(2)}</span></div>`).join('');
+      ['Essential','Comfort','Premium'].map(t=>{
+        const p = calcProfit(t, sel, mst[t].total);
+        return `<div class="tline"><span>${t}</span><span>£${mst[t].total.toFixed(2)}${profitBadge(p.profit,p.margin)}</span></div>`;
+      }).join('');
   } else {
     const t={Basic:0,Mid:0,Premium:0};
     ['Basic','Mid','Premium'].forEach(tier=>{
       sel.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
     const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
+    const tierLabel = {Basic:'Essential', Mid:'Comfort', Premium:'Premium'};
+    const pB=calcProfit('Essential',sel,gB), pM=calcProfit('Comfort',sel,gM), pP=calcProfit('Premium',sel,gP);
     document.getElementById('rv-totals').innerHTML=`
-      <div class="tline"><span>Essential${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gB.toFixed(2)}</span></div>
-      <div class="tline"><span>Comfort${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gM.toFixed(2)}</span></div>
-      <div class="tline"><span>Premium${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gP.toFixed(2)}</span></div>`;
+      <div class="tline"><span>Essential${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gB.toFixed(2)}${profitBadge(pB.profit,pB.margin)}</span></div>
+      <div class="tline"><span>Comfort${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gM.toFixed(2)}${profitBadge(pM.profit,pM.margin)}</span></div>
+      <div class="tline"><span>Premium${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gP.toFixed(2)}${profitBadge(pP.profit,pP.margin)}</span></div>`;
   }
 }
 
