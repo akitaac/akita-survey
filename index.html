@@ -1327,9 +1327,9 @@ function buildReview(){
           }).join('')}
         </div>`).join('');
     document.getElementById('rv-totals').innerHTML=`
-      <div class="grand-line"><span>Essential all-in${finNote}</span><span>£${mst.Essential.total.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Comfort all-in${finNote}</span><span>£${mst.Comfort.total.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Premium all-in${finNote}</span><span>£${mst.Premium.total.toFixed(2)}</span></div>`;
+      <div class="grand-line"><span>Essential all-in${finNote}</span><span>£${mst.Essential.total.toFixed(2)}${profitBadge(calcProfit('Essential',rooms,mst.Essential.total).profit,calcProfit('Essential',rooms,mst.Essential.total).margin)}</span></div>
+      <div class="grand-line"><span>Comfort all-in${finNote}</span><span>£${mst.Comfort.total.toFixed(2)}${profitBadge(calcProfit('Comfort',rooms,mst.Comfort.total).profit,calcProfit('Comfort',rooms,mst.Comfort.total).margin)}</span></div>
+      <div class="grand-line"><span>Premium all-in${finNote}</span><span>£${mst.Premium.total.toFixed(2)}${profitBadge(calcProfit('Premium',rooms,mst.Premium.total).profit,calcProfit('Premium',rooms,mst.Premium.total).margin)}</span></div>`;
   } else {
     document.getElementById('rv-rooms').innerHTML=rooms.map((r,idx)=>`
       <div class="rv-room">
@@ -1352,10 +1352,11 @@ function buildReview(){
       </div>`).join('');
     const t=tierTotals(); const ext=extrasTotal(); const sub=fin.sub;
     const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
+    const pB=calcProfit('Essential',rooms,gB), pM=calcProfit('Comfort',rooms,gM), pP=calcProfit('Premium',rooms,gP);
     document.getElementById('rv-totals').innerHTML=`
-      <div class="grand-line"><span>Essential Package all-in${finNote}</span><span>£${gB.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Comfort Package all-in${finNote}</span><span>£${gM.toFixed(2)}</span></div>
-      <div class="grand-line"><span>Premium Package all-in${finNote}</span><span>£${gP.toFixed(2)}</span></div>`;
+      <div class="grand-line"><span>Essential Package all-in${finNote}</span><span>£${gB.toFixed(2)}${profitBadge(pB.profit,pB.margin)}</span></div>
+      <div class="grand-line"><span>Comfort Package all-in${finNote}</span><span>£${gM.toFixed(2)}${profitBadge(pM.profit,pM.margin)}</span></div>
+      <div class="grand-line"><span>Premium Package all-in${finNote}</span><span>£${gP.toFixed(2)}${profitBadge(pP.profit,pP.margin)}</span></div>`;
   }
 
   // Add-ons folded into totals — not shown to customer
