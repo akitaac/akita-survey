@@ -147,6 +147,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 .page-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:var(--navy);margin-bottom:3px}
 .page-sub{font-size:13px;color:var(--mid);margin-bottom:18px}
+.photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.photo-thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid #dde3ea}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb .rm-photo{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.photo-add-btn{width:80px;height:80px;border:2px dashed #b8d9f0;border-radius:8px;background:#f0f7ff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#2e7fbf;font-size:10px;font-weight:600;gap:4px}
 </style>
 </head>
 <body>
@@ -185,27 +190,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- PAGE 0 — Customer Details -->
-<div class="page on" id="pjt">
-  <div style="text-align:center;padding:40px 20px 20px">
-    <div style="font-size:48px;margin-bottom:12px">❄️</div>
-    <p class="page-title" style="margin-bottom:6px">New Quote</p>
-    <p class="page-sub" style="margin-bottom:32px">What type of installation?</p>
-
-    <div onclick="setJobType('single')" style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 18px;margin-bottom:12px;text-align:left;cursor:pointer;transition:border-color .2s" id="jt-single-card">
-      <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">SINGLE SPLIT</div>
-      <div style="font-size:13px;color:var(--mid);margin-top:3px">One outdoor unit per room</div>
-      <div style="font-size:11px;color:var(--sky);margin-top:6px;font-weight:600">75mm trunking · per-room pricing</div>
-    </div>
-
-    <div onclick="setJobType('multi')" style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 18px;text-align:left;cursor:pointer;transition:border-color .2s" id="jt-multi-card">
-      <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">MULTI-SPLIT</div>
-      <div style="font-size:13px;color:var(--mid);margin-top:3px">One outdoor unit, multiple indoor heads</div>
-      <div style="font-size:11px;color:var(--sky);margin-top:6px;font-weight:600">100mm trunking · system pricing</div>
-    </div>
-  </div>
-</div>
-
-<div class="page" id="p0">
+<div class="page on" id="p0">
   <p class="page-title">Customer Details</p>
   <p class="page-sub">Enter details before the survey</p>
   <div class="card">
@@ -356,6 +341,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 
   <div class="card">
+    <div class="card-hdr"><span class="ci">📷</span> Site Photos</div>
+    <p style="font-size:11px;color:#8a9bb0;margin-bottom:12px">Consumer unit, outside of property, access points, existing system. Up to 5 photos.</p>
+    <div id="general-photos-wrap"></div>
+  </div>
+
+  <div class="card">
     <div class="card-hdr"><span class="ci">💳</span> Finance</div>
     <p class="hint" style="margin-bottom:10px">Optional — subsidy added to customer total automatically</p>
     <div class="field">
@@ -404,58 +395,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- PAGE 3 — Review -->
-<!-- MULTI-SPLIT QUOTE PAGE -->
-<div class="page" id="p2m">
-  <p class="page-title">Multi-Split Quote</p>
-  <p class="page-sub">Outdoor unit auto-selected per tier based on rooms and kW</p>
-
-  <!-- VAT toggle -->
-  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;margin-bottom:14px">
-    <div>
-      <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px">COMMERCIAL JOB</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:1px">Toggle to add 20% VAT</div>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-      <div id="vat-track-m" onclick="toggleVat()" style="width:44px;height:26px;background:rgba(255,255,255,.2);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
-        <div id="vat-knob-m" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
-      </div>
-      <span id="vat-lbl-m" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Ex VAT</span>
-    </label>
-  </div>
-
-  <!-- Auto-selected outdoor units per tier -->
-  <div class="card" style="margin-bottom:14px">
-    <div class="card-hdr"><span class="ci">🏗️</span> Outdoor Units — auto-selected per tier</div>
-    <div style="font-size:11px;color:var(--mid);margin-bottom:10px">Auto-selected based on number of rooms and total kW required. Override by adjusting room dimensions if needed.</div>
-    <div style="display:flex;flex-direction:column;gap:8px" id="ms-ou-summary">
-      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
-        <span class="tier-badge tb-basic" style="font-size:10px;padding:2px 8px;flex-shrink:0">Essential</span>
-        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-essential">—</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
-        <span class="tier-badge tb-mid" style="font-size:10px;padding:2px 8px;flex-shrink:0">Comfort</span>
-        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-comfort">—</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:6px;padding:8px 10px">
-        <span class="tier-badge tb-prem" style="font-size:10px;padding:2px 8px;flex-shrink:0">Premium</span>
-        <span style="font-size:12px;color:var(--navy);flex:1" id="ms-ou-premium">—</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Rooms -->
-  <div id="ms-rooms-wrap"></div>
-
-  <!-- Totals bar -->
-  <div class="total-bar" style="margin-top:14px">
-    <div class="tb-row"><span>Essential all-in</span><b id="ms-tb-essential">—</b></div>
-    <div class="tb-row"><span>Comfort all-in</span><b id="ms-tb-comfort">—</b></div>
-    <div class="tb-row"><span>Premium all-in</span><b id="ms-tb-premium">—</b></div>
-  </div>
-
-  <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
-  <button class="btn btn-ghost" onclick="goPage(1)">← Back</button>
-</div>
 
 <div class="page" id="p3">
   <p class="page-title">Review & Send</p>
@@ -502,6 +441,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 // ── Config ───────────────────────────────────────────────
 const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujispc2/?cors=true';
 const SELECTION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
+// Set this to your deployed Apps Script URL after deployment:
+const SURVEY_REPORT_SCRIPT = 'https://script.google.com/macros/s/AKfycbwPZPZCl1emzTgsLeGv3ns-i1f_gt8fmOoh6JCt0D35o_v4BJVuNzHwK9dNcHfAxEaF/exec';
 
 // ── Unit data ────────────────────────────────────────────
 const UNITS = {
@@ -625,7 +566,7 @@ function msHeadPrice(head){ return head.sell || (head.net * MS_MARKUP); }
 function msTierTotal(tier, rooms){
   var heads = rooms.map(function(r){ return msPickHead(tier, r.kwRec||2.0); });
   var totalHeadKw = heads.reduce(function(s,h){ return s+h.kw; }, 0);
-  var ou = msPickOutdoor(tier, rooms.length, totalHeadKw);
+  var ou = msOutdoorOverride[tier] || msPickOutdoor(tier, rooms.length, totalHeadKw);
   var indoorCost = heads.reduce(function(s,h,i){
     // Both Daikin MXF and Mitsubishi MXZ outdoor units = 3/8" & 5/8" (confirmed from Akita_Price_Reference spreadsheet)
     var msCfg = '3/8" & 5/8"';
@@ -718,6 +659,7 @@ function extrasTotal(){ return addons.reduce((s,a)=>s+(parseFloat(a.price)||0),0
 
 // ── State ────────────────────────────────────────────────
 let rooms=[], addons=[], rIdx=0, aIdx=0;
+let generalPhotos=[];
 let fin={apr:'',term:'',sub:0};
 let survey={power:'Yes — existing spur',existing:'No',installType:'single',trunkingColour:'Black'};
 function setTrunkingColour(v){ survey.trunkingColour=v; }
@@ -737,12 +679,11 @@ function goPage(n){
   if(n===2){
     saveRooms();
     if(!validateP1()) return;
-    if(jobType==='multi'){ buildMsQuote(); }
-    else { buildQuote(); }
+    buildQuote(); // builds unified quote page
   }
   if(n===3){ saveRooms(); buildReview(); }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  var pageId = (n===2 && jobType==='multi') ? 'p2m' : 'p'+n;
+  var pageId = 'p'+n;
   document.getElementById(pageId).classList.add('on');
   window.scrollTo(0,0);
   ['d0','d1','d2','d3'].forEach((id,i)=>{
@@ -785,10 +726,28 @@ function addRoom(){
               orient:'south',conds:[],kwRec:0,extraPipe:0,loftPipe:0,fittings:{},
               pos:'Wall mounted — high level',floor:'Ground floor',
               outdoor:'Rear garden — ground',mount:'Feet on ground',
-              route:'External trunking — straight run',access:'None'});
+              route:'External trunking — straight run',access:'None',
+              splitType:'single', photos:[]});
   renderRooms();
 }
-function removeRoom(id){ rooms=rooms.filter(r=>r.id!==id); renderRooms(); }
+function removeRoom(id){ rooms=rooms.filter(r=>r.id!==id); renderRooms(); updateTotals(); }
+
+function setSplitType(id, type){
+  const r = rooms.find(r=>r.id===id);
+  if(!r) return;
+  r.splitType = type;
+  // Reset outdoor override when multi rooms change
+  msOutdoorOverride = {Essential:null, Comfort:null, Premium:null};
+  renderRooms();
+  // recalc prices
+  rooms.forEach(r=>{ if(r.l&&r.w) liveCalc(r.id); });
+  updateTotals();
+}
+
+function getMultiRooms(){ return rooms.filter(r=>r.splitType==='multi'); }
+function getSingleRooms(){ return rooms.filter(r=>r.splitType!=='multi'); }
+function hasMixedTypes(){ return getMultiRooms().length>0 && getSingleRooms().length>0; }
+function hasMulti(){ return getMultiRooms().length>0; }
 
 function saveRooms(){
   rooms.forEach(r=>{
@@ -844,8 +803,8 @@ function setPipe(id,v){
   r.extraPipe=parseFloat(v)||0;
   document.getElementById('pipecost-'+id).textContent=r.extraPipe>0?
     '≈ +£'+(r.extraPipe*15.89).toFixed(0)+' (varies by unit)':'';
-  if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
-  else { refreshTierPrices(); updateTotals(); }
+  refreshTierPrices(); updateTotals();
+  if(hasMulti()){ refreshMsHeadPrices(); }
 }
 
 function setLoftPipe(id,v){
@@ -853,8 +812,8 @@ function setLoftPipe(id,v){
   r.loftPipe=parseFloat(v)||0;
   document.getElementById('loftcost-'+id).textContent=r.loftPipe>0?
     '≈ +£'+(r.loftPipe*7.54).toFixed(0)+' (varies by unit)':'';
-  if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
-  else { refreshTierPrices(); updateTotals(); }
+  refreshTierPrices(); updateTotals();
+  if(hasMulti()){ refreshMsHeadPrices(); }
 }
 
 function renderRooms(){
@@ -862,7 +821,13 @@ function renderRooms(){
     <div class="room-card">
       <div class="room-card-hdr">
         <span class="room-num">Room ${idx+1}</span>
-        ${rooms.length>1?`<button class="rm-btn" onclick="removeRoom(${r.id})">Remove</button>`:''}
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid #dde3ea;font-size:11px;font-weight:700">
+            <div onclick="setSplitType(${r.id},'single')" style="padding:5px 10px;cursor:pointer;background:${r.splitType==='single'?'#1a2e4a':'#f7f9fc'};color:${r.splitType==='single'?'#fff':'#8a9bb0'};transition:all .15s">SINGLE</div>
+            <div onclick="setSplitType(${r.id},'multi')" style="padding:5px 10px;cursor:pointer;background:${r.splitType==='multi'?'#2e7fbf':'#f7f9fc'};color:${r.splitType==='multi'?'#fff':'#8a9bb0'};transition:all .15s">MULTI</div>
+          </div>
+          ${rooms.length>1?`<button class="rm-btn" onclick="removeRoom(${r.id})">✕</button>`:''}
+        </div>
       </div>
 
       <div class="field">
@@ -939,12 +904,18 @@ function renderRooms(){
         </div>
 
       </div>
+      <div style="padding:12px 14px 14px;border-top:1px solid #f0f2f5;margin-top:4px">
+        <div class="lbl" style="margin-bottom:8px">📷 Room Photos <span style="font-weight:400;color:#8a9bb0;font-size:11px">(up to 3 — indoor position, outdoor, pipe route)</span></div>
+        <div class="photo-grid" id="room-photos-${r.id}"></div>
+      </div>
     </div>`).join('');
   // update fitting cost displays after render
   rooms.forEach(r=>{
     const fc=fittingsCost(r);
     const el=document.getElementById('fittingcost-'+r.id);
     if(el) el.textContent=fc>0?'Fittings: +£'+fc.toFixed(2):'';
+    // Initialise photo grids
+    renderRoomPhotos(r.id);
   });
 }
 
@@ -1010,8 +981,9 @@ function setFitting(id,code,val){
 }
 
 let vatOn = false;
-let jobType = 'single'; // 'single' or 'multi'
-let msOutdoor = null;   // selected outdoor unit object for multi-split
+let jobType = 'single'; // legacy — now derived from room splitTypes
+let msOutdoor = null;   // legacy
+let msOutdoorOverride = {Essential:null, Comfort:null, Premium:null}; // manual override per tier
 
 function toggleVat(){
   vatOn = !vatOn;
@@ -1024,8 +996,8 @@ function toggleVat(){
     if(knob)  knob.style.left = vatOn ? '20px' : '2px';
     if(lbl)   lbl.textContent = vatOn ? '+VAT (inc)' : 'Ex VAT';
   });
-  if(jobType==='multi'){ refreshMsHeadPrices(); updateMsTotals(); }
-  else { refreshTierPrices(); updateTotals(); }
+  refreshTierPrices(); updateTotals();
+  if(hasMulti()){ refreshMsHeadPrices(); }
 }
 
 function vatMult(){ return vatOn ? 1.2 : 1; }
@@ -1042,10 +1014,100 @@ function refreshTierPrices(){
   });
 }
 
+// ── Multi-split outdoor panel ─────────────────────────────
+function setOutdoorOverride(tier, idx){
+  var ouList = tier==='Essential' ? MS_DAIKIN_OUTDOORS : MS_MITSUBISHI_OUTDOORS;
+  msOutdoorOverride[tier] = idx==='' ? null : ouList[parseInt(idx)];
+  updateTotals();
+  buildQuote();
+}
+
+function buildMsOutdoorPanel(multiRooms){
+  if(!multiRooms.length) return '';
+  var vm = vatMult();
+  var mst = msTotalPrice(multiRooms);
+  var totalKw = multiRooms.reduce(function(s,r){ return s+(r.kwRec||0); }, 0);
+  var html = '<div class="card" style="background:#f0f7ff;border:1.5px solid #2e7fbf">';
+  html += '<div class="card-hdr" style="color:#1a2e4a"><span class="ci">🔗</span> Multi-Split Outdoor Units</div>';
+  html += '<p style="font-size:11px;color:#8a9bb0;margin-bottom:10px">Auto-selected based on '+multiRooms.length+' rooms · '+totalKw.toFixed(1)+'kW total. Override below if needed.</p>';
+
+  ['Essential','Comfort','Premium'].forEach(function(tier){
+    var t = mst[tier];
+    var ou = t.outdoor;
+    var ouList = tier==='Essential' ? MS_DAIKIN_OUTDOORS : MS_MITSUBISHI_OUTDOORS;
+    var currentIdx = ouList.indexOf(ou);
+    var tbg = {Essential:'#f4f6f9',Comfort:'#fff4ef',Premium:'#1a2e4a'}[tier];
+    var ttc = {Essential:'#1a2e4a',Comfort:'#E8612A',Premium:'#C5E8F5'}[tier];
+    var overload = ou.maxKw < totalKw;
+    var isOverride = msOutdoorOverride[tier] !== null;
+
+    html += '<div style="padding:10px;margin-bottom:8px;background:#fff;border-radius:8px;border:1px solid '+(overload?'#e74c3c':isOverride?'#e67e22':'#dde3ea')+'">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+    html += '<span style="background:'+tbg+';color:'+ttc+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">'+tier+'</span>';
+    if(overload){
+      html += '<span style="color:#e74c3c;font-size:11px;font-weight:700">⚠ Overload — '+totalKw.toFixed(1)+'kW > '+ou.maxKw+'kW max</span>';
+    } else if(isOverride){
+      html += '<span style="color:#e67e22;font-size:11px;font-weight:600">✏ Overridden</span>';
+    }
+    html += '</div>';
+    html += '<div style="font-size:13px;color:#1a2e4a;font-weight:600;margin-bottom:6px">'+ou.label+' · '+ou.ports+'-port</div>';
+    // Override dropdown
+    html += '<select onchange="setOutdoorOverride(\''+tier+'\',this.value)" style="width:100%;font-size:12px;padding:5px 8px;border:1px solid #dde3ea;border-radius:6px;color:#1a2e4a">';
+    html += '<option value="">Auto-select (recommended)</option>';
+    ouList.forEach(function(u, i){
+      var flag = u.maxKw < totalKw ? ' ⚠' : u.ports < multiRooms.length ? ' ⚠ ports' : '';
+      html += '<option value="'+i+'"'+(i===currentIdx&&isOverride?' selected':'')+'>'+u.label+flag+'</option>';
+    });
+    html += '</select>';
+    html += '</div>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
 // ── Quote page ───────────────────────────────────────────
 function buildQuote(){
-  document.getElementById('quote-wrap').innerHTML=rooms.map((r,idx)=>`
-    <div class="card">
+  var html = '';
+  var singleRooms = getSingleRooms();
+  var multiRooms  = getMultiRooms();
+
+  // Single split rooms
+  if(singleRooms.length > 0){
+    if(multiRooms.length > 0){
+      html += '<div style="font-size:11px;font-weight:700;color:#8a9bb0;letter-spacing:.8px;padding:4px 0 8px;text-transform:uppercase">Single Split Rooms</div>';
+    }
+    html += singleRooms.map(function(r,idx){
+      var globalIdx = rooms.indexOf(r);
+      return buildRoomCard(r, globalIdx, 'single');
+    }).join('');
+  }
+
+  // Multi split rooms
+  if(multiRooms.length > 0){
+    if(singleRooms.length > 0){
+      html += '<div style="font-size:11px;font-weight:700;color:#2e7fbf;letter-spacing:.8px;padding:12px 0 8px;text-transform:uppercase">Multi-Split Group</div>';
+    }
+    // Outdoor unit auto-selection
+    html += buildMsOutdoorPanel(multiRooms);
+    html += multiRooms.map(function(r,idx){
+      var globalIdx = rooms.indexOf(r);
+      return buildRoomCard(r, globalIdx, 'multi');
+    }).join('');
+  }
+
+  document.getElementById('quote-wrap').innerHTML = html;
+  renderAddons();
+  updateFin();
+  // Initialise photo grids for all rooms
+  rooms.forEach(function(r){ renderRoomPhotos(r.id); });
+  renderGeneralPhotos();
+}
+
+function buildRoomCard(r, idx, type){
+  var vm = vatMult();
+  if(type === 'single'){
+    return `<div class="card">
       <div class="card-hdr"><span class="ci">❄️</span>
         Room ${idx+1}: ${r.type}
         <span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">
@@ -1061,7 +1123,7 @@ function buildQuote(){
           const fullCost = u.price + pipeCost(r, tier);
           return `<div class="tier-card ${tc}">
             <div class="tier-badge ${tb}">${tLabel}</div>
-            <div class="tier-price" id="tp-${r.id}-${tier}">£${Math.round(fullCost).toLocaleString('en-GB')}</div>
+            <div class="tier-price" id="tp-${r.id}-${tier}">£${Math.round(fullCost*vm).toLocaleString('en-GB')}</div>
             <div class="tier-sub">${u.make}<br>${u.series}<br>${u.kw}kW</div>
           </div>`;
         }).join('')}
@@ -1079,10 +1141,55 @@ function buildQuote(){
         <span class="pipe-note" id="loftcost-${r.id}" style="color:#2e7fbf"></span>
       </div>
       ${buildFittingsHtml(r)}
-    </div>`).join('');
-
-  renderAddons();
-  updateFin();
+      <div style="margin-top:10px">
+        <div class="lbl" style="margin-bottom:6px">📷 Room Photos <span style="font-weight:400;color:#8a9bb0;font-size:11px">(up to ${MAX_ROOM_PHOTOS} — indoor position, outdoor position, pipe route)</span></div>
+        <div class="photo-grid" id="room-photos-${r.id}"></div>
+      </div>
+    </div>`;
+  } else {
+    // Multi-split room card
+    var multiRooms = getMultiRooms();
+    return `<div class="card" style="border-left:3px solid #2e7fbf">
+      <div class="card-hdr"><span class="ci">🔗</span>
+        Room ${idx+1}: ${r.type}
+        <span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">
+          · ${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW
+        </span>
+      </div>
+      <div class="tier-grid">
+        ${['Essential','Comfort','Premium'].map(tier=>{
+          const head = msPickHead(tier, r.kwRec||2.0);
+          const hp = msHeadPrice(head) * vm;
+          const tc = {Essential:'tc-basic',Comfort:'tc-mid',Premium:'tc-prem'}[tier];
+          const tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+          const undersized = msHeadUndersized(tier, r.kwRec||0);
+          return `<div class="tier-card ${tc}${undersized?' tier-card-warn':''}">
+            <div class="tier-badge ${tb}">${tier}</div>
+            ${undersized
+              ? `<div class="tier-price" style="font-size:12px;color:#e67e22">⚠ Max ${head.kw}kW</div><div class="tier-sub" style="color:#e67e22">Room needs ${r.kwRec}kW</div>`
+              : `<div class="tier-price" id="ms-tp-${r.id}-${tier}">£${Math.round(hp)}</div><div class="tier-sub">${head.label}<br><span style="font-size:10px;color:#8a9bb0">${head.model||''}</span></div>`}
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="pipe-row">
+        <span class="lbl2">Extra pipe (m beyond 3m — trunked/external)</span>
+        <input type="number" value="${r.extraPipe||0}" min="0" max="50" step="1"
+          oninput="setPipe(${r.id},this.value)" style="width:72px;text-align:center">
+        <span class="pipe-note" id="pipecost-${r.id}"></span>
+      </div>
+      <div class="pipe-row" style="background:#f0f7ff;border:1px solid #b8d9f0">
+        <span class="lbl2">Loft pipe run (m — pipe &amp; lagging only, no trunking)</span>
+        <input type="number" value="${r.loftPipe||0}" min="0" max="50" step="1"
+          oninput="setLoftPipe(${r.id},this.value)" style="width:72px;text-align:center">
+        <span class="pipe-note" id="loftcost-${r.id}" style="color:#2e7fbf"></span>
+      </div>
+      ${buildFittingsHtml(r)}
+      <div style="margin-top:10px">
+        <div class="lbl" style="margin-bottom:6px">📷 Room Photos <span style="font-weight:400;color:#8a9bb0;font-size:11px">(up to ${MAX_ROOM_PHOTOS})</span></div>
+        <div class="photo-grid" id="room-photos-${r.id}"></div>
+      </div>
+    </div>`;
+  }
 }
 
 // ── Add-ons ──────────────────────────────────────────────
@@ -1113,23 +1220,46 @@ function updateFin(){
 }
 
 function updateTotals(){
-  const t=tierTotals();
-  const ext=extrasTotal();
-  const sub=fin.sub;
-  const vm=vatMult();
-  const gB=(t.Basic+ext)*(1+sub)*vm;
-  const gM=(t.Mid+ext)*(1+sub)*vm;
-  const gP=(t.Premium+ext)*(1+sub)*vm;
-  const f=n=>'£'+n.toFixed(2);
-  document.getElementById('tb-b').textContent=f(gB);
-  document.getElementById('tb-m').textContent=f(gM);
-  document.getElementById('tb-p').textContent=f(gP);
+  // Mixed pricing: singles priced per room, multi-split as a group
+  const ext = extrasTotal();
+  const sub = fin.sub;
+  const vm  = vatMult();
+  const sRooms = getSingleRooms();
+  const mRooms = getMultiRooms();
+
+  // Single split totals
+  const st = {Basic:0, Mid:0, Premium:0};
+  ['Basic','Mid','Premium'].forEach(function(tier){
+    sRooms.forEach(function(r){
+      if(r.kwRec){ st[tier] += getUnit(tier,r.kwRec||2.5).price + pipeCost(r,tier); }
+    });
+  });
+
+  // Multi-split group totals (if any)
+  var mt = {Essential:0, Comfort:0, Premium:0};
+  if(mRooms.length > 0){
+    const mst = msTotalPrice(mRooms);
+    mt.Essential = mst.Essential.total / vm; // remove VAT for now, add back below
+    mt.Comfort   = mst.Comfort.total   / vm;
+    mt.Premium   = mst.Premium.total   / vm;
+  }
+
+  // Grand totals — single by tier + multi by tier + extras
+  const gB = (st.Basic   + mt.Essential + ext) * (1+sub) * vm;
+  const gM = (st.Mid     + mt.Comfort   + ext) * (1+sub) * vm;
+  const gP = (st.Premium + mt.Premium   + ext) * (1+sub) * vm;
+
+  const f = n => '£'+n.toFixed(2);
+  document.getElementById('tb-b').textContent = f(gB);
+  document.getElementById('tb-m').textContent = f(gM);
+  document.getElementById('tb-p').textContent = f(gP);
+
   if(fin.sub>0){
-    document.getElementById('fin-sub-lbl').textContent=(fin.sub*100).toFixed(1)+'% added';
-    const mo=fin.term==='Pay in 3'?3:parseInt(fin.term);
-    document.getElementById('fin-mo-lbl').textContent='Monthly — Essential ('+fin.term+')';
-    document.getElementById('fin-mo-val').textContent='£'+(gB/mo).toFixed(2)+'/mo';
-    document.getElementById('fin-info').style.display='block';
+    document.getElementById('fin-sub-lbl').textContent = (fin.sub*100).toFixed(1)+'% added';
+    const mo = fin.term==='Pay in 3' ? 3 : parseInt(fin.term);
+    document.getElementById('fin-mo-lbl').textContent = 'Monthly — Essential ('+fin.term+')';
+    document.getElementById('fin-mo-val').textContent = '£'+(gB/mo).toFixed(2)+'/mo';
+    document.getElementById('fin-info').style.display = 'block';
   }
 }
 
@@ -1181,6 +1311,115 @@ function profitBadge(profit, margin){
     (profit>=0?'+':'')+' £'+Math.round(profit)+' ('+margin.toFixed(1)+'%)</span>';
 }
 
+// ── Photo capture ─────────────────────────────────────────
+const MAX_PHOTO_PX = 1200;
+const PHOTO_QUALITY = 0.75;
+const MAX_ROOM_PHOTOS = 3;
+const MAX_GENERAL_PHOTOS = 5;
+
+function compressPhoto(file, callback){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if(w > MAX_PHOTO_PX || h > MAX_PHOTO_PX){
+        if(w > h){ h = Math.round(h * MAX_PHOTO_PX / w); w = MAX_PHOTO_PX; }
+        else { w = Math.round(w * MAX_PHOTO_PX / h); h = MAX_PHOTO_PX; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', PHOTO_QUALITY));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addRoomPhoto(roomId){
+  const r = rooms.find(r=>r.id===roomId);
+  if(!r || r.photos.length >= MAX_ROOM_PHOTOS) return;
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+  input.onchange = function(){
+    if(!input.files[0]) return;
+    compressPhoto(input.files[0], function(data){
+      r.photos.push(data);
+      renderRoomPhotos(roomId);
+    });
+  };
+  input.click();
+}
+
+function removeRoomPhoto(roomId, idx){
+  const r = rooms.find(r=>r.id===roomId);
+  if(r){ r.photos.splice(idx,1); renderRoomPhotos(roomId); }
+}
+
+function renderRoomPhotos(roomId){
+  const r = rooms.find(r=>r.id===roomId);
+  const el = document.getElementById('room-photos-'+roomId);
+  if(!el || !r) return;
+  if(!r.photos) r.photos = []; // ensure photos array exists
+  let html = r.photos.map((p,i)=>
+    `<div class="photo-thumb"><img src="${p}"><button class="rm-photo" onclick="removeRoomPhoto(${roomId},${i})">✕</button></div>`
+  ).join('');
+  if(r.photos.length < MAX_ROOM_PHOTOS){
+    html += `<div class="photo-add-btn" onclick="addRoomPhoto(${roomId})">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      ${r.photos.length===0?'Add photo':'Add more'}
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function addGeneralPhoto(){
+  if(generalPhotos.length >= MAX_GENERAL_PHOTOS) return;
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+  input.onchange = function(){
+    if(!input.files[0]) return;
+    compressPhoto(input.files[0], function(data){
+      generalPhotos.push({data, label:''});
+      renderGeneralPhotos();
+    });
+  };
+  input.click();
+}
+
+function removeGeneralPhoto(idx){
+  generalPhotos.splice(idx,1);
+  renderGeneralPhotos();
+}
+
+function setGeneralPhotoLabel(idx, val){
+  if(generalPhotos[idx]) generalPhotos[idx].label = val;
+}
+
+function renderGeneralPhotos(){
+  const el = document.getElementById('general-photos-wrap');
+  if(!el) return;
+  let html = generalPhotos.map((p,i)=>
+    `<div style="margin-bottom:10px">
+      <div class="photo-thumb" style="width:100%;height:120px;border-radius:10px">
+        <img src="${p.data}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">
+        <button class="rm-photo" onclick="removeGeneralPhoto(${i})" style="top:6px;right:6px;width:24px;height:24px;font-size:13px">✕</button>
+      </div>
+      <input type="text" value="${p.label}" placeholder="Label (e.g. Consumer unit, Front of house...)"
+        oninput="setGeneralPhotoLabel(${i},this.value)"
+        style="width:100%;margin-top:6px;padding:6px 10px;border:1px solid #dde3ea;border-radius:6px;font-size:12px">
+    </div>`
+  ).join('');
+  if(generalPhotos.length < MAX_GENERAL_PHOTOS){
+    html += `<div class="photo-add-btn" style="width:100%;height:80px;border-radius:10px" onclick="addGeneralPhoto()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Add site photo
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
 // ── Selected rooms helper ────────────────────────────────
 var deselectedRooms = new Set();
 
@@ -1212,13 +1451,21 @@ function updateReviewTotals(){
   if(!sel.length) return;
   const vm = vatMult(); const ext = extrasTotal(); const sub = fin.sub;
   // If multi-split job but only 1 room selected — price as single split silently
-  const treatAsSingle = (jobType==='multi' && sel.length === 1);
-  if(jobType==='multi' && !treatAsSingle){
-    const mst = msTotalPrice(sel);
+  const mSel = sel.filter(r=>r.splitType==='multi');
+  const sSel = sel.filter(r=>r.splitType!=='multi');
+  const treatAsSingle = (mSel.length===1 && sSel.length===0);
+  if(mSel.length>0 && !treatAsSingle){
+    const mst = msTotalPrice(mSel);
+    const vm3=vatMult();const ext3=extrasTotal();const sub3=fin.sub;
+    const stRev={Basic:0,Mid:0,Premium:0};
+    ['Basic','Mid','Premium'].forEach(tier=>{sSel.forEach(r=>{if(r.kwRec){stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier);}});});
+    const gBR=(stRev.Basic+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3;
+    const gMR=(stRev.Mid+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3;
+    const gPR=(stRev.Premium+mst.Premium.total/vm3+ext3)*(1+sub3)*vm3;
     document.getElementById('rv-totals').innerHTML=
-      ['Essential','Comfort','Premium'].map(t=>{
-        const p = calcProfit(t, sel, mst[t].total);
-        return `<div class="tline"><span>${t}</span><span>£${mst[t].total.toFixed(2)}${profitBadge(p.profit,p.margin)}</span></div>`;
+      [['Essential',gBR],['Comfort',gMR],['Premium',gPR]].map(([t,total])=>{
+        const p = calcProfit(t, sel, total);
+        return `<div class="tline"><span>${t}</span><span>£${total.toFixed(2)}${profitBadge(p.profit,p.margin)}</span></div>`;
       }).join('');
   } else {
     const t={Basic:0,Mid:0,Premium:0};
@@ -1287,8 +1534,10 @@ function buildReview(){
   const finNote=fin.sub>0?` <span style="font-size:11px;color:var(--mid);font-weight:400">(inc ${(fin.sub*100).toFixed(1)}% finance subsidy)</span>`:'';
   const vm=vatMult();
 
-  if(jobType==='multi'){
-    const mst = msTotalPrice(rooms);
+  const mRoomsRev = getMultiRooms();
+  const sRoomsRev = getSingleRooms();
+  if(mRoomsRev.length>0){
+    const mst = msTotalPrice(mRoomsRev);
     // Outdoor unit lines per tier
     const ouLines = ['Essential','Comfort','Premium'].map(tier=>{
       const t = mst[tier];
@@ -1301,10 +1550,10 @@ function buildReview(){
     }).join('');
     document.getElementById('rv-rooms').innerHTML=
       `<div class="rv-room"><div class="rv-room-hdr"><strong>Outdoor Units (auto-selected)</strong></div>${ouLines}</div>`+
-      rooms.map((r,idx)=>`
-        <div class="rv-room">
+      mRoomsRev.map((r,idx)=>`
+        <div class="rv-room" style="border-left:3px solid #2e7fbf">
           <div class="rv-room-hdr">
-            <strong>Room ${idx+1}: ${r.type}</strong>
+            <strong>🔗 Multi Room ${idx+1}: ${r.type}</strong>
             <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
           </div>
           ${['Essential','Comfort','Premium'].map(tier=>{
@@ -1484,10 +1733,21 @@ async function sendQuote(){
   const sub=fin.sub;
   const vm=vatMult();
   var gB, gM, gP;
-  const treatAsSingle = (jobType==='multi' && activeRooms.length === 1);
-  if(jobType==='multi' && !treatAsSingle){
-    const mst=msTotalPrice(activeRooms);
-    gB=mst.Essential.total; gM=mst.Comfort.total; gP=mst.Premium.total;
+  const mActive = activeRooms.filter(r=>r.splitType==='multi');
+  const sActive  = activeRooms.filter(r=>r.splitType!=='multi');
+  const isMixed  = mActive.length>0 && sActive.length>0;
+  const treatAsSingle = (mActive.length===1 && sActive.length===0);
+  if(mActive.length>0 && !treatAsSingle){
+    // Mixed or pure multi — calculate separately
+    const mst = msTotalPrice(mActive);
+    const vm2 = vatMult(); const ext2 = extrasTotal(); const sub2 = fin.sub;
+    const stLocal = {Basic:0,Mid:0,Premium:0};
+    ['Basic','Mid','Premium'].forEach(function(tier){
+      sActive.forEach(function(r){ if(r.kwRec){ stLocal[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } });
+    });
+    gB = (stLocal.Basic   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2;
+    gM = (stLocal.Mid     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2;
+    gP = (stLocal.Premium + mst.Premium.total/vm2   + ext2) * (1+sub2) * vm2;
   } else {
     const t={Basic:0,Mid:0,Premium:0};
     ['Basic','Mid','Premium'].forEach(tier=>{
@@ -1498,9 +1758,9 @@ async function sendQuote(){
     gP=(t.Premium+ext)*(1+sub)*vm;
   }
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
-  const jobTypeLabel = treatAsSingle ? 'SINGLE SPLIT' : jobType==='multi' ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
-  const ouLabel = (jobType==='multi' && !treatAsSingle) ? (function(){
-    var t=msTotalPrice(activeRooms);
+  const jobTypeLabel = isMixed ? 'MIXED INSTALL' : mActive.length>0 && !treatAsSingle ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
+  const ouLabel = (mActive.length>0 && !treatAsSingle) ? (function(){
+    var t=msTotalPrice(mActive);
     return 'Essential: '+t.Essential.outdoor.label+' | Comfort/Premium: '+t.Comfort.outdoor.label;
   })() : '';
   const jobNotes = [
@@ -1582,6 +1842,51 @@ async function sendQuote(){
   }
 
   try{
+    // Step 1 — send survey data + photos to Apps Script to generate hosted report + customer quote
+    let survey_report_url = '';
+    let customer_quote_url = '';
+    if(SURVEY_REPORT_SCRIPT){
+      try {
+        const reportPayload = {
+          quote_ref: ref,
+          quote_date: date,
+          customer_name: first+' '+last,
+          customer_email: email,
+          customer_phone: phone,
+          customer_address: addr,
+          consumer_unit: document.getElementById('sv-consumer')?.value||'',
+          wall_type: document.getElementById('sv-wall')?.value||'',
+          survey_notes: survey,
+          survey_notes_text: notes,
+          basic_total: '£'+gB.toFixed(2),
+          mid_total:   '£'+gM.toFixed(2),
+          premium_total:'£'+gP.toFixed(2),
+          extras_total: '£'+ext.toFixed(2),
+          rooms: activeRooms.map(r=>({
+            type:r.type, l:r.l, w:r.w, h:r.h, kwRec:r.kwRec,
+            splitType:r.splitType||'single',
+            pos:r.pos, floor:r.floor, outdoor:r.outdoor, mount:r.mount,
+            route:r.route, access:r.access,
+            extraPipe:r.extraPipe||0, loftPipe:r.loftPipe||0,
+            photos:r.photos||[]
+          })),
+          general_photos: generalPhotos
+        };
+        const rr = await fetch(SURVEY_REPORT_SCRIPT, {
+          method:'POST',
+          body: JSON.stringify(reportPayload),
+          mode:'cors'
+        });
+        const rd = await rr.json();
+        if(rd.success){
+          survey_report_url  = rd.survey_url  || '';
+          customer_quote_url = rd.quote_url   || '';
+        }
+      } catch(re){ console.warn('Report generation failed:', re); }
+    }
+    payload.survey_report_url  = survey_report_url;
+    payload.customer_quote_url = customer_quote_url;
+
     const controller = new AbortController();
     const timeout = setTimeout(()=>controller.abort(), 10000);
     await fetch(WEBHOOK,{
@@ -1615,7 +1920,9 @@ async function sendQuote(){
 // ── Email builder ────────────────────────────────────────
 function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}){
   activeRooms = activeRooms || rooms;
-  const effectiveJobType = (jobType==='multi' && !treatAsSingle) ? 'multi' : 'single';
+  const mActEmail = activeRooms.filter(r=>r.splitType==='multi');
+  const sActEmail  = activeRooms.filter(r=>r.splitType!=='multi');
+  const effectiveJobType = (mActEmail.length>1 || (mActEmail.length>0&&!treatAsSingle)) ? 'multi' : 'single';
 
   // Selection button URLs — hit SELECTION_WEBHOOK with ref + chosen tier
   // Encoded as query params on a redirect URL so it works as a plain href in email
@@ -1822,6 +2129,8 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
 // ── Job type selection ───────────────────────────────────
 function setJobType(type){
   jobType = type;
+  // Update all existing rooms splitType for backward compat
+  rooms.forEach(function(r){ r.splitType = type==='multi'?'multi':'single'; });
   survey.installType = (type === 'multi') ? 'multi' : 'single';
   // Reset rooms so old job doesn't bleed into new
   rooms = []; rIdx = 0; msOutdoor = null;
@@ -1864,7 +2173,7 @@ function buildMsRooms(){
         html += '<div class="tier-sub" style="color:#e67e22">Max '+head.kw+'kW — room needs '+r.kwRec+'kW<br>Use single split or upgrade tier</div>';
       } else {
         html += '<div class="tier-price" id="ms-tp-'+r.id+'-'+tier+'">£'+Math.round(hp)+'</div>';
-        html += '<div class="tier-sub">'+head.label+'</div>';
+        html += '<div class="tier-sub">'+head.label+'<br><span style="font-size:10px;color:#8a9bb0">'+( head.model||'')+'</span></div>';
       }
       html += '</div>';
     });
@@ -2020,7 +2329,7 @@ function openRecent(){
         <div style="font-size:14px;font-weight:700;color:#1a2e4a;margin-bottom:4px">${q.customer?.fn||''} ${q.customer?.ln||''}</div>
         <div style="font-size:12px;color:#8a9bb0;margin-bottom:2px">${q.customer?.ad1||''}, ${q.customer?.ad2||''}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
-          <span style="font-size:11px;background:${q.jobType==='multi'?'#e3f2fd':'#e8f5e9'};color:${q.jobType==='multi'?'#0d47a1':'#1b5e20'};padding:2px 8px;border-radius:4px;font-weight:700">${q.jobType==='multi'?'Multi-Split':'Single Split'} · ${q.rooms?.length||0} room${q.rooms?.length!==1?'s':''}</span>
+          <span style="font-size:11px;background:${q.jobType==='multi'?'#e3f2fd':'#e8f5e9'};color:${q.jobType==='multi'?'#0d47a1':'#1b5e20'};padding:2px 8px;border-radius:4px;font-weight:700">${q.rooms?.some(r=>r.splitType==='multi')&&q.rooms?.some(r=>r.splitType!=='multi')?'Mixed':(q.rooms?.some(r=>r.splitType==='multi')?'Multi-Split':'Single Split')} · ${q.rooms?.length||0} room${q.rooms?.length!==1?'s':''}</span>
           <span style="font-size:11px;color:#8a9bb0">${new Date(q.saved_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
         </div>
       </div>`).join('');
@@ -2069,6 +2378,8 @@ document.getElementById('pjt').classList.add('on');
 document.getElementById('p0').classList.remove('on');
 addRoom();
 addons=[{id:aIdx++,desc:'Condensate pump',price:''},{id:aIdx++,desc:'Electrician / sparky (day rate)',price:''}];
+renderAddons();
+renderGeneralPhotos();
 </script>
 </body>
 </html>
