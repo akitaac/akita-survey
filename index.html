@@ -1870,7 +1870,8 @@ async function sendQuote(){
             extraPipe:r.extraPipe||0, loftPipe:r.loftPipe||0,
             photos:r.photos||[]
           })),
-          general_photos: generalPhotos
+          general_photos: generalPhotos,
+          email_html: payload.email_html
         };
         const rr = await fetch(SURVEY_REPORT_SCRIPT, {
           method:'POST',
