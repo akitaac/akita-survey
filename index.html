@@ -459,8 +459,6 @@ const UNITS = {
     {kw:2.5,price:1550, net:725.76,  make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
     {kw:3.5,price:1675, net:854.55,  make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
     {kw:5.0,price:1975, net:1128.33, make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
-    {kw:6.0,price:1900, net:1056.24, make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP60VGK2 + MUZ-AP60VG'},
-    {kw:7.1,price:2325, net:1453.14, make:'Mitsubishi', series:'AP Series',  model:'MSZ-AP71VGK2 + MUZ-AP71VG'},
   ],
   Premium: [
     {kw:2.5,price:1650, net:823.77,  make:'Mitsubishi', series:'LN Premium', model:'MSZ-LN25VG2B + MUZ-LN25VG'},
@@ -621,6 +619,7 @@ function pipeConfig(kw,make,series){
   return kw<=4.2?'1/4" & 3/8"':kw<=5.0?'1/4" & 1/2"':'1/4" & 5/8"';
 }
 function getUnit(tier,kw){ const l=UNITS[tier]; return l.find(u=>u.kw>=kw)||l[l.length-1]; }
+function unitUndersized(tier,kw){ const l=UNITS[tier]; return kw > l[l.length-1].kw; }
 
 // ── kW calculation ───────────────────────────────────────
 function calcKw(r){
@@ -651,7 +650,10 @@ function pipeCost(r,tier){
 function tierTotals(){
   const t={Basic:0,Mid:0,Premium:0};
   ['Basic','Mid','Premium'].forEach(tier=>{
-    rooms.forEach(r=>{ t[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); });
+    getSingleRooms().forEach(r=>{
+      if(!r.kwRec) return;
+      t[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier);
+    });
   });
   return t;
 }
@@ -1116,15 +1118,18 @@ function buildRoomCard(r, idx, type){
       </div>
       <div class="tier-grid">
         ${['Basic','Mid','Premium'].map(tier=>{
-          const u=getUnit(tier,r.kwRec||2.5);
           const tc={'Basic':'tc-basic','Mid':'tc-mid','Premium':'tc-prem'}[tier];
           const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
           const tLabel={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+          const u=getUnit(tier,r.kwRec||2.5);
+          const undersized=unitUndersized(tier,r.kwRec||0);
           const fullCost = u.price + pipeCost(r, tier);
-          return `<div class="tier-card ${tc}">
+          return `<div class="tier-card ${tc}${undersized?' tier-card-warn':''}">
             <div class="tier-badge ${tb}">${tLabel}</div>
             <div class="tier-price" id="tp-${r.id}-${tier}">£${Math.round(fullCost*vm).toLocaleString('en-GB')}</div>
-            <div class="tier-sub">${u.make}<br>${u.series}<br>${u.kw}kW</div>
+            <div class="tier-sub">${u.make}<br>${u.series}<br>${u.kw}kW
+              ${undersized?`<br><span style="color:#e67e22;font-size:9px;font-weight:700">⚠ Undersized (${r.kwRec}kW needed)</span>`:''}
+            </div>
           </div>`;
         }).join('')}
       </div>
@@ -1231,7 +1236,7 @@ function updateTotals(){
   const st = {Basic:0, Mid:0, Premium:0};
   ['Basic','Mid','Premium'].forEach(function(tier){
     sRooms.forEach(function(r){
-      if(r.kwRec){ st[tier] += getUnit(tier,r.kwRec||2.5).price + pipeCost(r,tier); }
+      if(r.kwRec){ st[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); }
     });
   });
 
@@ -1268,34 +1273,36 @@ const OVERHEAD_PER_JOB = 148; // £148 flat per job (annual overhead / estimated
 const LABOUR_PER_ROOM  = 400; // £400/day per room
 
 function calcProfit(tier, selRooms, totalRevenue){
-  // Unit net costs
   const tierKey = {Essential:'Basic', Comfort:'Mid', Premium:'Premium'}[tier] || tier;
+  const mRooms = selRooms.filter(r=>r.splitType==='multi');
+  const sRooms = selRooms.filter(r=>r.splitType!=='multi');
+  const isMixed = mRooms.length>0;
+
   let unitNetTotal = 0;
   let kitAtCost = 0;
-  let labourTotal = 0;
 
-  selRooms.forEach(r => {
+  // Single split rooms
+  sRooms.forEach(r => {
     if(!r.kwRec) return;
-    if(jobType==='multi'){
-      const head = msPickHead(tier==='Essential'?'Essential':tier==='Comfort'?'Comfort':'Premium', r.kwRec);
-      unitNetTotal += head.net || 0;
-    } else {
-      const u = getUnit(tierKey, r.kwRec||2.5);
-      unitNetTotal += u ? (u.net || 0) : 0;
-    }
-    // Kit at cost = kit charged / 1.20 markup
-    const kitCharged = jobType==='multi' ? MS_INDOOR_KIT : (
-      r.kwRec<=4.2 ? 171.456 : r.kwRec<=5.0 ? 174.984 : 181.896
-    );
+    const u = getUnit(tierKey, r.kwRec||2.5);
+    unitNetTotal += u ? (u.net || 0) : 0;
+    const kitCharged = r.kwRec<=4.2 ? 171.456 : r.kwRec<=5.0 ? 174.984 : 181.896;
     kitAtCost += kitCharged / 1.20;
-    labourTotal += LABOUR_PER_ROOM; // kept for reference only
   });
 
-  // Add outdoor unit net cost for multi-split
-  if(jobType==='multi'){
-    const totalKw = selRooms.reduce((s,r)=>s+(r.kwRec||0),0);
-    const tierMs = tier==='Essential'?'Essential':tier==='Comfort'?'Comfort':'Premium';
-    const ou = msPickOutdoor(tierMs, selRooms.length, totalKw);
+  // Multi split rooms
+  mRooms.forEach(r => {
+    if(!r.kwRec) return;
+    const head = msPickHead(tier, r.kwRec);
+    unitNetTotal += head.net || 0;
+    // Multi-split indoor kit cost (3/8 & 5/8 pipe config)
+    kitAtCost += 198.96 / 1.20;
+  });
+
+  // Outdoor unit net cost for multi rooms
+  if(isMixed){
+    const totalKw = mRooms.reduce((s,r)=>s+(r.kwRec||0),0);
+    const ou = msPickOutdoor(tier, mRooms.length, totalKw);
     unitNetTotal += ou ? (ou.net || ou.price * 0.70) : 0;
   }
 
@@ -1458,7 +1465,7 @@ function updateReviewTotals(){
     const mst = msTotalPrice(mSel);
     const vm3=vatMult();const ext3=extrasTotal();const sub3=fin.sub;
     const stRev={Basic:0,Mid:0,Premium:0};
-    ['Basic','Mid','Premium'].forEach(tier=>{sSel.forEach(r=>{if(r.kwRec){stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier);}});});
+    ['Basic','Mid','Premium'].forEach(tier=>{sSel.forEach(r=>{if(r.kwRec){if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); }}});});
     const gBR=(stRev.Basic+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3;
     const gMR=(stRev.Mid+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3;
     const gPR=(stRev.Premium+mst.Premium.total/vm3+ext3)*(1+sub3)*vm3;
@@ -1470,7 +1477,7 @@ function updateReviewTotals(){
   } else {
     const t={Basic:0,Mid:0,Premium:0};
     ['Basic','Mid','Premium'].forEach(tier=>{
-      sel.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
+      sSel.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
     const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
     const tierLabel = {Basic:'Essential', Mid:'Comfort', Premium:'Premium'};
@@ -1538,6 +1545,15 @@ function buildReview(){
   const sRoomsRev = getSingleRooms();
   if(mRoomsRev.length>0){
     const mst = msTotalPrice(mRoomsRev);
+    // Single room totals for mixed job
+    const stRev = {Basic:0, Mid:0, Premium:0};
+    ['Basic','Mid','Premium'].forEach(tier=>{
+      sRoomsRev.forEach(r=>{ if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } });
+    });
+    const ext=extrasTotal(); const sub=fin.sub;
+    const gBR=(stRev.Basic+mst.Essential.total/vm+ext)*(1+sub)*vm;
+    const gMR=(stRev.Mid+mst.Comfort.total/vm+ext)*(1+sub)*vm;
+    const gPR=(stRev.Premium+mst.Premium.total/vm+ext)*(1+sub)*vm;
     // Outdoor unit lines per tier
     const ouLines = ['Essential','Comfort','Premium'].map(tier=>{
       const t = mst[tier];
@@ -1549,7 +1565,31 @@ function buildReview(){
       </div>`;
     }).join('');
     document.getElementById('rv-rooms').innerHTML=
+      // Single split rooms first
+      (sRoomsRev.length>0 ? '<div class="rv-room"><div class="rv-room-hdr"><strong>Single Split Rooms</strong></div></div>' +
+      sRoomsRev.map((r,idx)=>`
+        <div class="rv-room">
+          <div class="rv-room-hdr">
+            <strong>Room ${rooms.indexOf(r)+1}: ${r.type}</strong>
+            <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
+          </div>
+          ${['Basic','Mid','Premium'].map(tier=>{
+            const u=getUnit(tier,r.kwRec||2.5);
+            const pc=pipeCost(r,tier);
+            const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
+            const tl={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+            const undersized=unitUndersized(tier,r.kwRec||0);
+            return `<div class="tline">
+              <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tl}</span>
+                ${undersized?'⚠ Undersized ('+u.kw+'kW max)':u.make+' '+u.series+' '+u.kw+'kW'+(pc>0?' +'+r.extraPipe+'m pipe':'')}
+              </span>
+              <strong>£${((u.price+pc)*vm).toFixed(2)}</strong>
+            </div>`;
+          }).join('')}
+        </div>`).join('') : '') +
+      // Outdoor units
       `<div class="rv-room"><div class="rv-room-hdr"><strong>Outdoor Units (auto-selected)</strong></div>${ouLines}</div>`+
+      // Multi rooms
       mRoomsRev.map((r,idx)=>`
         <div class="rv-room" style="border-left:3px solid #2e7fbf">
           <div class="rv-room-hdr">
@@ -1576,9 +1616,9 @@ function buildReview(){
           }).join('')}
         </div>`).join('');
     document.getElementById('rv-totals').innerHTML=`
-      <div class="grand-line"><span>Essential all-in${finNote}</span><span>£${mst.Essential.total.toFixed(2)}${profitBadge(calcProfit('Essential',rooms,mst.Essential.total).profit,calcProfit('Essential',rooms,mst.Essential.total).margin)}</span></div>
-      <div class="grand-line"><span>Comfort all-in${finNote}</span><span>£${mst.Comfort.total.toFixed(2)}${profitBadge(calcProfit('Comfort',rooms,mst.Comfort.total).profit,calcProfit('Comfort',rooms,mst.Comfort.total).margin)}</span></div>
-      <div class="grand-line"><span>Premium all-in${finNote}</span><span>£${mst.Premium.total.toFixed(2)}${profitBadge(calcProfit('Premium',rooms,mst.Premium.total).profit,calcProfit('Premium',rooms,mst.Premium.total).margin)}</span></div>`;
+      <div class="grand-line"><span>Essential all-in${finNote}</span><span>£${gBR.toFixed(2)}${profitBadge(calcProfit('Essential',rooms,gBR).profit,calcProfit('Essential',rooms,gBR).margin)}</span></div>
+      <div class="grand-line"><span>Comfort all-in${finNote}</span><span>£${gMR.toFixed(2)}${profitBadge(calcProfit('Comfort',rooms,gMR).profit,calcProfit('Comfort',rooms,gMR).margin)}</span></div>
+      <div class="grand-line"><span>Premium all-in${finNote}</span><span>£${gPR.toFixed(2)}${profitBadge(calcProfit('Premium',rooms,gPR).profit,calcProfit('Premium',rooms,gPR).margin)}</span></div>`;
   } else {
     document.getElementById('rv-rooms').innerHTML=rooms.map((r,idx)=>`
       <div class="rv-room">
@@ -1599,8 +1639,19 @@ function buildReview(){
           </div>`;
         }).join('')}
       </div>`).join('');
-    const t=tierTotals(); const ext=extrasTotal(); const sub=fin.sub;
-    const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
+    const st=tierTotals(); const ext=extrasTotal(); const sub=fin.sub;
+    const mRoomsRv = getMultiRooms();
+    let gB, gM, gP;
+    if(mRoomsRv.length > 0){
+      const mst = msTotalPrice(mRoomsRv);
+      gB = (st.Basic   + mst.Essential.total/vm + ext) * (1+sub) * vm;
+      gM = (st.Mid     + mst.Comfort.total/vm   + ext) * (1+sub) * vm;
+      gP = (st.Premium + mst.Premium.total/vm   + ext) * (1+sub) * vm;
+    } else {
+      gB=(st.Basic+ext)*(1+sub)*vm;
+      gM=(st.Mid+ext)*(1+sub)*vm;
+      gP=(st.Premium+ext)*(1+sub)*vm;
+    }
     const pB=calcProfit('Essential',rooms,gB), pM=calcProfit('Comfort',rooms,gM), pP=calcProfit('Premium',rooms,gP);
     document.getElementById('rv-totals').innerHTML=`
       <div class="grand-line"><span>Essential Package all-in${finNote}</span><span>£${gB.toFixed(2)}${profitBadge(pB.profit,pB.margin)}</span></div>
@@ -1743,7 +1794,7 @@ async function sendQuote(){
     const vm2 = vatMult(); const ext2 = extrasTotal(); const sub2 = fin.sub;
     const stLocal = {Basic:0,Mid:0,Premium:0};
     ['Basic','Mid','Premium'].forEach(function(tier){
-      sActive.forEach(function(r){ if(r.kwRec){ stLocal[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } });
+      sActive.forEach(function(r){ if(r.kwRec){ if(r.kwRec){ stLocal[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } } });
     });
     gB = (stLocal.Basic   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2;
     gM = (stLocal.Mid     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2;
