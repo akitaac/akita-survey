@@ -2176,12 +2176,12 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
 }
 
 // ── Selection handler (fires when customer taps tier button) ──
-// Called by Zapier Zap 3 — receives ref + tier, creates Jobber job
-// The SELECTION_WEBHOOK URL is embedded in each button href in the email.
-// When customer taps, it hits Zapier with: ref, tier, customer_name
-// Zapier then looks up full quote data from Google Sheets by ref and creates the Jobber job.
-// Payload stored in Google Sheets when quote is first sent (Zap 1 writes a row).
-// Zap 3 reads that row by ref, pulls Basic/Mid/Premium totals + job notes, creates job.
+// Each package button below links to confirm.html with ref + tier + name in the URL.
+// confirm.html calls the Akita/GoHighLevel Apps Script backend directly: it looks up
+// the real quote server-side, shows the verified price/deposit/remaining balance, and
+// (once the customer ticks both required confirmations) submits an acceptance that
+// creates/updates the GoHighLevel contact + opportunity, raises the deposit invoice,
+// and records the acceptance. This replaces the old Jobber/Zapier selection flow.
 
 // ── Job type selection ───────────────────────────────────
 function setJobType(type){
