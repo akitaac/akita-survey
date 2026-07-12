@@ -1,407 +1,614 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Akita Air Conditioning — Confirm your selection</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akita Air Conditioning — Confirm your selection</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <style>
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-    body{
-      font-family:'Barlow',sans-serif;
-      background:#f2f5f9;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-    }
+body{
+  font-family:'Barlow',sans-serif;
+  background:#f2f5f9;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
 
-    .card{
-      background:#fff;
-      border-radius:16px;
-      max-width:480px;
-      width:100%;
-      overflow:hidden;
-      box-shadow:0 4px 24px rgba(26,46,74,.12);
-    }
+.card{
+  background:#fff;
+  border-radius:16px;
+  max-width:480px;
+  width:100%;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(26,46,74,.12);
+}
 
-    .hdr{
-      background:#1a2e4a;
-      padding:24px 20px;
-      text-align:center;
-    }
+.hdr{
+  background:#1a2e4a;
+  padding:24px 20px;
+  text-align:center;
+}
 
-    .hdr img{
-      display:block;
-      width:100%;
-      max-width:220px;
-      height:auto;
-      margin:0 auto;
-      border-radius:0;
-    }
+.hdr img{
+  display:block;
+  width:100%;
+  max-width:220px;
+  height:auto;
+  margin:0 auto;
+  border-radius:0;
+}
 
-    .body{
-      padding:32px 28px;
-      text-align:center;
-    }
+.body{
+  padding:32px 28px;
+  text-align:center;
+}
 
-    .spinner{
-      width:48px;
-      height:48px;
-      border:3px solid #e8f4fb;
-      border-top-color:#E8612A;
-      border-radius:50%;
-      animation:spin .75s linear infinite;
-      margin:0 auto 20px;
-    }
+.spinner{
+  width:48px;
+  height:48px;
+  border:3px solid #e8f4fb;
+  border-top-color:#E8612A;
+  border-radius:50%;
+  animation:spin .75s linear infinite;
+  margin:0 auto 20px;
+}
 
-    @keyframes spin{
-      to{transform:rotate(360deg)}
-    }
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
 
-    .tick{
-      width:64px;
-      height:64px;
-      background:#1B8A4A;
-      color:#fff;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:28px;
-      margin:0 auto 20px;
-      animation:pop .4s cubic-bezier(.34,1.56,.64,1);
-    }
+.tick{
+  width:64px;
+  height:64px;
+  background:#1B8A4A;
+  color:#fff;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  margin:0 auto 20px;
+  animation:pop .4s cubic-bezier(.34,1.56,.64,1);
+}
 
-    @keyframes pop{
-      from{transform:scale(0);opacity:0}
-      to{transform:scale(1);opacity:1}
-    }
+@keyframes pop{
+  from{transform:scale(0);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
 
-    .error-icon{
-      width:64px;
-      height:64px;
-      background:#e74c3c;
-      color:#fff;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:28px;
-      margin:0 auto 20px;
-    }
+.error-icon{
+  width:64px;
+  height:64px;
+  background:#e74c3c;
+  color:#fff;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  margin:0 auto 20px;
+}
 
-    h1{
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:28px;
-      line-height:1.1;
-      color:#1a2e4a;
-      margin-bottom:10px;
-    }
+.notice-icon{
+  width:64px;
+  height:64px;
+  background:#f0a500;
+  color:#fff;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  margin:0 auto 20px;
+}
 
-    p{
-      font-size:14px;
-      color:#7a8fa8;
-      line-height:1.6;
-      margin-bottom:8px;
-    }
+h1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;
+  font-size:28px;
+  line-height:1.1;
+  color:#1a2e4a;
+  margin-bottom:10px;
+}
 
-    .tier-badge{
-      display:inline-block;
-      padding:8px 22px;
-      border-radius:20px;
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:700;
-      font-size:16px;
-      letter-spacing:.5px;
-      margin-bottom:16px;
-    }
+p{
+  font-size:14px;
+  color:#7a8fa8;
+  line-height:1.6;
+  margin-bottom:8px;
+}
 
-    .essential{
-      background:#E8F5E9;
-      color:#1B5E20;
-    }
+.tier-badge{
+  display:inline-block;
+  padding:8px 22px;
+  border-radius:20px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  font-size:16px;
+  letter-spacing:.5px;
+  margin-bottom:16px;
+}
 
-    .comfort{
-      background:#FFF8E1;
-      color:#BF6000;
-    }
+.essential{
+  background:#E8F5E9;
+  color:#1B5E20;
+}
 
-    .premium{
-      background:#E3F2FD;
-      color:#0D47A1;
-    }
+.comfort{
+  background:#FFF8E1;
+  color:#BF6000;
+}
 
-    .ref{
-      font-size:12px;
-      color:#a0aab6;
-      margin-top:12px;
-      word-break:break-word;
-    }
+.premium{
+  background:#E3F2FD;
+  color:#0D47A1;
+}
 
-    .ftr{
-      background:#f8fafc;
-      border-top:1px solid #eee;
-      padding:16px;
-      text-align:center;
-      font-size:11px;
-      color:#9aa7b5;
-      line-height:1.5;
-    }
+.ref{
+  font-size:12px;
+  color:#a0aab6;
+  margin-top:12px;
+  word-break:break-word;
+}
 
-    .ftr a{
-      color:#2e7fbf;
-      text-decoration:none;
-    }
+.ftr{
+  background:#f8fafc;
+  border-top:1px solid #eee;
+  padding:16px;
+  text-align:center;
+  font-size:11px;
+  color:#9aa7b5;
+  line-height:1.5;
+}
 
-    .btn-confirm{
-      display:block;
-      width:100%;
-      padding:16px;
-      margin-top:20px;
-      background:#E8612A;
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      font-family:'Barlow Condensed',sans-serif;
-      font-weight:800;
-      font-size:20px;
-      letter-spacing:.5px;
-      cursor:pointer;
-      transition:background .2s ease, transform .1s ease;
-    }
+.ftr a{
+  color:#2e7fbf;
+  text-decoration:none;
+}
 
-    .btn-confirm:hover{
-      background:#c94d1f;
-    }
+.summary{
+  background:#f8fafc;
+  border:1px solid #eef1f5;
+  border-radius:12px;
+  padding:16px 18px;
+  margin:18px 0;
+  text-align:left;
+}
 
-    .btn-confirm:active{
-      transform:translateY(1px);
-    }
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding:6px 0;
+  font-size:14px;
+  color:#3d5470;
+}
 
-    .btn-confirm:disabled{
-      background:#c8d0d8;
-      cursor:not-allowed;
-    }
+.summary-row + .summary-row{
+  border-top:1px solid #eef1f5;
+}
 
-    .btn-back{
-      display:block;
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      background:transparent;
-      color:#7a8fa8;
-      border:1.5px solid #dde3ea;
-      border-radius:10px;
-      font-family:'Barlow',sans-serif;
-      font-weight:500;
-      font-size:14px;
-      cursor:pointer;
-      transition:border-color .2s ease,color .2s ease;
-    }
+.summary-row span:first-child{
+  color:#7a8fa8;
+}
 
-    .btn-back:hover{
-      border-color:#1a2e4a;
-      color:#1a2e4a;
-    }
+.summary-row span:last-child{
+  font-weight:600;
+  color:#1a2e4a;
+}
 
-    #state-confirm{display:block}
-    #state-processing{display:none}
-    #state-success{display:none}
-    #state-error{display:none}
+.summary-row.total span:last-child{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;
+  font-weight:800;
+  color:#E8612A;
+}
 
-    @media (max-width:480px){
-      body{
-        padding:14px;
-      }
+.checks{
+  text-align:left;
+  margin:18px 0 6px;
+}
 
-      .hdr{
-        padding:20px 16px;
-      }
+.check-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:14px;
+}
 
-      .hdr img{
-        max-width:180px;
-      }
+.check-row input[type="checkbox"]{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  margin-top:2px;
+  accent-color:#E8612A;
+}
 
-      .body{
-        padding:24px 18px;
-      }
+.check-row label{
+  font-size:13px;
+  color:#3d5470;
+  line-height:1.5;
+}
 
-      h1{
-        font-size:24px;
-      }
+.btn-confirm{
+  display:block;
+  width:100%;
+  padding:16px;
+  margin-top:8px;
+  background:#E8612A;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;
+  font-size:19px;
+  letter-spacing:.5px;
+  cursor:pointer;
+  transition:background .2s ease, transform .1s ease;
+}
 
-      p{
-        font-size:14px;
-      }
+.btn-confirm:hover:not(:disabled){
+  background:#c94d1f;
+}
 
-      .btn-confirm{
-        font-size:18px;
-        padding:15px;
-      }
+.btn-confirm:active:not(:disabled){
+  transform:translateY(1px);
+}
 
-      .btn-back{
-        font-size:14px;
-      }
+.btn-confirm:disabled{
+  background:#c8d0d8;
+  cursor:not-allowed;
+}
 
-      .tier-badge{
-        font-size:15px;
-        padding:8px 18px;
-      }
-    }
-  </style>
+.btn-back{
+  display:block;
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:transparent;
+  color:#7a8fa8;
+  border:1.5px solid #dde3ea;
+  border-radius:10px;
+  font-family:'Barlow',sans-serif;
+  font-weight:500;
+  font-size:14px;
+  cursor:pointer;
+  transition:border-color .2s ease,color .2s ease;
+}
+
+.btn-back:hover{
+  border-color:#1a2e4a;
+  color:#1a2e4a;
+}
+
+#state-loading{display:block}
+#state-confirm{display:none}
+#state-processing{display:none}
+#state-success{display:none}
+#state-notice{display:none}
+#state-error{display:none}
+
+@media (max-width:480px){
+  body{
+    padding:14px;
+  }
+
+  .hdr{
+    padding:20px 16px;
+  }
+
+  .hdr img{
+    max-width:180px;
+  }
+
+  .body{
+    padding:24px 18px;
+  }
+
+  h1{
+    font-size:24px;
+  }
+
+  p{
+    font-size:14px;
+  }
+
+  .btn-confirm{
+    font-size:18px;
+    padding:15px;
+  }
+
+  .btn-back{
+    font-size:14px;
+  }
+
+  .tier-badge{
+    font-size:15px;
+    padding:8px 18px;
+  }
+}
+</style>
 </head>
 <body>
 
 <div class="card">
-  <div class="hdr">
-    <img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Akita%20White.png" alt="Akita Air Conditioning & Refrigeration">
-  </div>
+<div class="hdr">
+<img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Akita%20White.png" alt="Akita Air Conditioning & Refrigeration">
+</div>
 
-  <div class="body">
+<div class="body">
 
-    <!-- Step 1: Confirmation prompt -->
-    <div id="state-confirm">
-      <div class="tier-badge" id="tier-label-confirm">Essential</div>
-      <h1>Confirm your package</h1>
-      <p>You’ve selected the <strong id="tier-name-confirm"></strong> package for your quote.</p>
-      <p style="margin-top:4px;">Please confirm this is the option you’d like to proceed with.</p>
+<!-- Loading: fetching real quote data from the server -->
+<div id="state-loading">
+<div class="spinner"></div>
+<h1>Loading your quote</h1>
+<p>Just a moment while we retrieve your details...</p>
+</div>
 
-      <button class="btn-confirm" id="confirmBtn" onclick="proceed()">Yes, confirm my selection</button>
-      <button class="btn-back" onclick="goBack()">← Go back and review</button>
+<!-- Step 1: Confirmation prompt, populated only from server-verified data -->
+<div id="state-confirm">
+<div class="tier-badge" id="tier-label-confirm">Package</div>
+<h1>Confirm your package</h1>
+<p>Hi <strong id="customer-name-confirm"></strong> — here's a summary of the package you selected.</p>
 
-      <p class="ref" id="quote-ref-confirm"></p>
-    </div>
+<div class="summary">
+<div class="summary-row"><span>Package</span><span id="sum-tier"></span></div>
+<div class="summary-row total"><span>Total price</span><span id="sum-total"></span></div>
+<div class="summary-row"><span>Deposit due now</span><span id="sum-deposit"></span></div>
+<div class="summary-row"><span>Remaining balance</span><span id="sum-remaining"></span></div>
+</div>
 
-    <!-- Step 2: Processing -->
-    <div id="state-processing">
-      <div class="spinner"></div>
-      <h1>Confirming your choice</h1>
-      <p>Just a moment while we process your selection...</p>
-    </div>
+<div class="checks">
+<div class="check-row">
+<input type="checkbox" id="cb-proceed">
+<label for="cb-proceed">I'd like to proceed with the package shown above at the price shown above.</label>
+</div>
+<div class="check-row">
+<input type="checkbox" id="cb-balance">
+<label for="cb-balance">I understand the remaining balance is due on completion of the installation.</label>
+</div>
+</div>
 
-    <!-- Step 3: Success -->
-    <div id="state-success">
-      <div class="tick">✓</div>
-      <h1>You’re all set</h1>
-      <div class="tier-badge" id="tier-label-success">Essential</div>
-      <p>Thanks <strong id="customer-name"></strong> — we’ve received your selection and will be in touch shortly to confirm your installation date.</p>
-      <p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
-      <p class="ref" id="quote-ref-success"></p>
-    </div>
+<button class="btn-confirm" id="confirmBtn" disabled onclick="proceed()">Accept Quote &amp; Pay Deposit</button>
+<button class="btn-back" onclick="goBack()">← Go back and review</button>
 
-    <!-- Error -->
-    <div id="state-error">
-      <div class="error-icon">✕</div>
-      <h1>Something went wrong</h1>
-      <p>We couldn’t process your selection. Please call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> and we’ll sort it straight away.</p>
-      <p class="ref" id="quote-ref-error"></p>
-    </div>
+<p class="ref" id="quote-ref-confirm"></p>
+</div>
 
-  </div>
+<!-- Step 2: Processing -->
+<div id="state-processing">
+<div class="spinner"></div>
+<h1>Confirming your choice</h1>
+<p>Just a moment while we process your acceptance...</p>
+</div>
 
-  <div class="ftr">
-    Akita Air Conditioning &amp; Refrigeration · <a href="https://akita.ac">akita.ac</a> · F-Gas Certified · REFCOM REF1023379
-  </div>
+<!-- Step 3: Success, populated only from the server's response -->
+<div id="state-success">
+<div class="tick">✓</div>
+<h1>You're all set</h1>
+<div class="tier-badge" id="tier-label-success">Package</div>
+<p id="success-msg">Thanks — we've received your acceptance and will be in touch shortly.</p>
+
+<div class="summary">
+<div class="summary-row total"><span>Total price</span><span id="succ-total"></span></div>
+<div class="summary-row"><span>Deposit due now</span><span id="succ-deposit"></span></div>
+<div class="summary-row"><span>Remaining balance</span><span id="succ-remaining"></span></div>
+</div>
+
+<p style="margin-top:12px;">A deposit invoice will be sent to you shortly. Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+<p class="ref" id="quote-ref-success"></p>
+</div>
+
+<!-- Notice: expired / cancelled / already accepted quotes -->
+<div id="state-notice">
+<div class="notice-icon">!</div>
+<h1 id="notice-title">Please note</h1>
+<p id="notice-msg"></p>
+<p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+<p class="ref" id="quote-ref-notice"></p>
+</div>
+
+<!-- Error -->
+<div id="state-error">
+<div class="error-icon">✕</div>
+<h1>Something went wrong</h1>
+<p id="error-msg">We couldn't process your selection. Please call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> and we'll sort it straight away.</p>
+<p class="ref" id="quote-ref-error"></p>
+</div>
+
+</div>
+
+<div class="ftr">
+Akita Air Conditioning &amp; Refrigeration · <a href="https://akita.ac">akita.ac</a> · F-Gas Certified · REFCOM REF1023379
+</div>
 </div>
 
 <script>
-  const WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr/';
+// Server-side integration endpoint (Google Apps Script Web App). This backend holds
+// the GoHighLevel credentials — nothing sensitive is ever stored in this page.
+const API = 'https://script.google.com/macros/s/AKfycbxdeymyE_1pQhBOyg5_u7V0TjtSV9xSdMca2GL98RSjL-mSG26AzoJ1wlMZ_qeJK9TQIQ/exec';
 
-  function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || '';
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name) || '';
+}
+
+// The URL only identifies WHICH quote/package to look up — it is never treated as the
+// price source. The actual total/deposit/balance always come from the server response.
+const ref = getParam('ref');
+const tier = getParam('tier');
+
+const tierClassByLabel = { Essential: 'essential', Comfort: 'comfort', Premium: 'premium' };
+
+const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
+
+function showState(id) {
+  ['state-loading','state-confirm','state-processing','state-success','state-notice','state-error']
+    .forEach(function(s){ document.getElementById(s).style.display = (s === id) ? 'block' : 'none'; });
+}
+
+function setRefText(elId) {
+  document.getElementById(elId).textContent = ref ? 'Ref: ' + ref : '';
+}
+
+let quote = null; // the server-verified quote data, once loaded
+
+async function loadQuote() {
+  if (!ref || !tier) {
+    document.getElementById('error-msg').textContent = 'This link is missing some information. Please use the link from your quote email, or call us to proceed.';
+    setRefText('quote-ref-error');
+    showState('state-error');
+    return;
   }
 
-  const ref = getParam('ref');
-  const tier = getParam('tier');
-  const rawName = getParam('name');
-  const safeName = rawName ? decodeURIComponent(rawName) : 'there';
+  try {
+    const res = await fetch(API + '?action=quoteSelection&ref=' + encodeURIComponent(ref) + '&tier=' + encodeURIComponent(tier));
+    const data = await res.json();
 
-  const tierMap = {
-    Basic: 'Essential',
-    Mid: 'Comfort',
-    Premium: 'Premium'
-  };
+    if (!data.ok) {
+      document.getElementById('error-msg').textContent = data.error || 'We could not find this quote.';
+      setRefText('quote-ref-error');
+      showState('state-error');
+      return;
+    }
 
-  const tierClass = {
-    Basic: 'essential',
-    Mid: 'comfort',
-    Premium: 'premium'
-  };
+    quote = data;
 
-  const tierLabel = tierMap[tier] || 'Selected';
-  const tierCls = tierClass[tier] || 'essential';
+    if (data.cancelled) {
+      document.getElementById('notice-title').textContent = 'This quote has been cancelled';
+      document.getElementById('notice-msg').textContent = 'This quotation is no longer active. Please get in touch and we\'ll help sort out a new one.';
+      setRefText('quote-ref-notice');
+      showState('state-notice');
+      return;
+    }
 
-  let sent = false;
+    if (data.expired) {
+      document.getElementById('notice-title').textContent = 'This quote has expired';
+      document.getElementById('notice-msg').textContent = 'This quotation is more than 30 days old. Please get in touch and we\'ll be happy to arrange an updated price.';
+      setRefText('quote-ref-notice');
+      showState('state-notice');
+      return;
+    }
 
-  // Populate confirm screen
-  document.getElementById('tier-label-confirm').textContent = tierLabel;
-  document.getElementById('tier-label-confirm').className = 'tier-badge ' + tierCls;
-  document.getElementById('tier-name-confirm').textContent = tierLabel;
-  document.getElementById('quote-ref-confirm').textContent = ref ? 'Ref: ' + ref : '';
+    if (data.alreadyAccepted) {
+      document.getElementById('notice-title').textContent = 'You\'ve already accepted this quote';
+      document.getElementById('notice-msg').textContent = 'Thanks ' + (data.customerName || '') + ' — you\'ve already confirmed the ' + data.tierLabel + ' package for this quote. We\'ll be in touch about your installation. No further action is needed.';
+      setRefText('quote-ref-notice');
+      showState('state-notice');
+      return;
+    }
 
-  // Populate success screen
-  document.getElementById('tier-label-success').textContent = tierLabel;
-  document.getElementById('tier-label-success').className = 'tier-badge ' + tierCls;
-  document.getElementById('customer-name').textContent = safeName;
-  document.getElementById('quote-ref-success').textContent = ref ? 'Ref: ' + ref : '';
-  document.getElementById('quote-ref-error').textContent = ref ? 'Ref: ' + ref : '';
+    // Populate the confirm screen from server-verified data only
+    const cls = tierClassByLabel[data.tierLabel] || 'essential';
+    document.getElementById('tier-label-confirm').textContent = data.tierLabel;
+    document.getElementById('tier-label-confirm').className = 'tier-badge ' + cls;
+    document.getElementById('customer-name-confirm').textContent = data.customerName || 'there';
+    document.getElementById('sum-tier').textContent = data.tierLabel;
+    document.getElementById('sum-total').textContent = gbp.format(data.total);
+    document.getElementById('sum-deposit').textContent = gbp.format(data.depositAmount) + ' (' + data.depositPercentage + '%)';
+    document.getElementById('sum-remaining').textContent = gbp.format(data.remainingBalance);
+    setRefText('quote-ref-confirm');
 
-  function goBack() {
-    document.getElementById('state-confirm').innerHTML = `
-      <h1 style="margin-bottom:12px;">No problem</h1>
-      <p>Go back to your quote email and tap a different package option.</p>
-      <p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
-      <p class="ref">${ref ? 'Ref: ' + ref : ''}</p>
-    `;
+    showState('state-confirm');
+  } catch (e) {
+    document.getElementById('error-msg').textContent = 'We couldn\'t reach our systems just now. Please try again in a moment or call us.';
+    setRefText('quote-ref-error');
+    showState('state-error');
   }
+}
 
-  async function proceed() {
-    if (sent) return;
-    sent = true;
+function goBack() {
+  document.getElementById('state-confirm').innerHTML = `
+    <h1 style="margin-bottom:12px;">No problem</h1>
+    <p>Go back to your quote email and tap a different package option.</p>
+    <p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+    <p class="ref">${ref ? 'Ref: ' + ref : ''}</p>
+  `;
+}
 
-    const confirmBtn = document.getElementById('confirmBtn');
-    if (confirmBtn) confirmBtn.disabled = true;
+document.getElementById('cb-proceed').addEventListener('change', updateButtonState);
+document.getElementById('cb-balance').addEventListener('change', updateButtonState);
 
-    document.getElementById('state-confirm').style.display = 'none';
-    document.getElementById('state-processing').style.display = 'block';
+function updateButtonState() {
+  const proceedChecked = document.getElementById('cb-proceed').checked;
+  const balanceChecked = document.getElementById('cb-balance').checked;
+  document.getElementById('confirmBtn').disabled = !(proceedChecked && balanceChecked);
+}
 
-    try {
-      const response = await fetch(WEBHOOK, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-          ref: ref,
-          tier: tier,
-          customer_name: safeName,
-          timestamp: new Date().toISOString()
-        })
-      });
+let sent = false;
 
-      if (!response.ok) {
-        throw new Error('Webhook request failed');
-      }
+async function proceed() {
+  if (sent || !quote) return;
+  sent = true;
 
-      document.getElementById('state-processing').style.display = 'none';
-      document.getElementById('state-success').style.display = 'block';
-    } catch (e) {
-      document.getElementById('state-processing').style.display = 'none';
-      document.getElementById('state-error').style.display = 'block';
+  const confirmBtn = document.getElementById('confirmBtn');
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  showState('state-processing');
+
+  try {
+    // Note: no shared secret is sent from this page by design — a secret shipped to a
+    // public browser page would not be a real secret. The backend instead verifies the
+    // ref/tier against the real stored quote, recomputes price/deposit itself, and uses
+    // idempotency checks so this can never be processed twice.
+    const response = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'acceptQuote',
+        quoteRef: ref,
+        tier: tier,
+        accept: true,
+        ackBalance: true
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      document.getElementById('error-msg').textContent = data.error || 'We couldn\'t process your selection.';
+      setRefText('quote-ref-error');
+      showState('state-error');
       sent = false;
       if (confirmBtn) confirmBtn.disabled = false;
+      return;
     }
+
+    const cls = tierClassByLabel[data.tierLabel] || 'essential';
+    document.getElementById('tier-label-success').textContent = data.tierLabel;
+    document.getElementById('tier-label-success').className = 'tier-badge ' + cls;
+
+    if (data.alreadyAccepted) {
+      document.getElementById('success-msg').textContent = 'This quote was already confirmed — you\'re all set, no further action is needed.';
+    } else {
+      document.getElementById('success-msg').textContent = 'Thanks — we\'ve received your acceptance and will be in touch shortly to arrange your installation.';
+    }
+
+    document.getElementById('succ-total').textContent = quote.total !== undefined ? gbp.format(data.total !== undefined ? data.total : quote.total) : '';
+    document.getElementById('succ-deposit').textContent = gbp.format(data.depositAmount);
+    document.getElementById('succ-remaining').textContent = gbp.format(data.remainingBalance);
+    setRefText('quote-ref-success');
+
+    showState('state-success');
+  } catch (e) {
+    document.getElementById('error-msg').textContent = 'We couldn\'t reach our systems just now. Please try again in a moment or call us.';
+    setRefText('quote-ref-error');
+    showState('state-error');
+    sent = false;
+    if (confirmBtn) confirmBtn.disabled = false;
   }
+}
+
+loadQuote();
 </script>
 
 </body>
