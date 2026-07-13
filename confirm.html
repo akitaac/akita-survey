@@ -405,7 +405,9 @@ p{
 <div class="summary-row"><span>Remaining balance</span><span id="succ-remaining"></span></div>
 </div>
 
-<p style="margin-top:12px;">A deposit invoice will be sent to you shortly. Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+<a id="pay-now-btn" class="btn-confirm" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none;">Pay Deposit Now</a>
+
+<p style="margin-top:12px;">Prefer to pay later? No problem — we'll also send a deposit invoice to your email so you can pay whenever suits you. Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
 <p class="ref" id="quote-ref-success"></p>
 </div>
 
@@ -597,6 +599,15 @@ async function proceed() {
     document.getElementById('succ-deposit').textContent = gbp.format(data.depositAmount);
     document.getElementById('succ-remaining').textContent = gbp.format(data.remainingBalance);
     setRefText('quote-ref-success');
+
+    const payBtn = document.getElementById('pay-now-btn');
+    if (data.depositPaymentUrl) {
+      payBtn.href = data.depositPaymentUrl;
+      payBtn.textContent = 'Pay Deposit Now – ' + gbp.format(data.depositAmount);
+      payBtn.style.display = 'block';
+    } else {
+      payBtn.style.display = 'none';
+    }
 
     showState('state-success');
   } catch (e) {
