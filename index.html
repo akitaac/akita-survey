@@ -1885,6 +1885,12 @@ async function sendQuote(){
       indoor_pos:r.pos, floor:r.floor, outdoor:r.outdoor,
       mount:r.mount, route:r.route, access:r.access,
     }))),
+    trunking_colour: (survey.trunkingColour||'Black'),
+    system_type: jobTypeLabel,
+    room_summary: activeRooms.map(function(r,i){ return 'Room '+(i+1)+': '+r.type+' ('+r.kwRec+'kW, '+(r.splitType==='multi'?'Multi-split':'Single split')+')'; }).join(' | '),
+    essential_price_gbp: Number(gB.toFixed(2)),
+    comfort_price_gbp: Number(gM.toFixed(2)),
+    premium_price_gbp: Number(gP.toFixed(2)),
     };
   } catch(e) {
     document.getElementById('send-status').innerHTML='<div class="card" style="border:2px solid #e74c3c;padding:18px;text-align:center"><p style="color:#e74c3c;font-weight:600">Error building quote: '+e.message+'</p></div>';
