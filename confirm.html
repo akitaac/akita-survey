@@ -8,287 +8,312 @@
 
 <style>
 *{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
+box-sizing:border-box;
+margin:0;
+padding:0;
 }
 
 body{
-  font-family:'Barlow',sans-serif;
-  background:#f2f5f9;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+font-family:'Barlow',sans-serif;
+background:#f2f5f9;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
 
 .card{
-  background:#fff;
-  border-radius:16px;
-  max-width:480px;
-  width:100%;
-  overflow:hidden;
-  box-shadow:0 4px 24px rgba(26,46,74,.12);
+background:#fff;
+border-radius:16px;
+max-width:480px;
+width:100%;
+overflow:hidden;
+box-shadow:0 4px 24px rgba(26,46,74,.12);
 }
 
 .hdr{
-  background:#1a2e4a;
-  padding:24px 20px;
-  text-align:center;
+background:#1a2e4a;
+padding:24px 20px;
+text-align:center;
 }
 
 .hdr img{
-  display:block;
-  width:100%;
-  max-width:220px;
-  height:auto;
-  margin:0 auto;
-  border-radius:0;
+display:block;
+width:100%;
+max-width:220px;
+height:auto;
+margin:0 auto;
+border-radius:0;
 }
 
 .body{
-  padding:32px 28px;
-  text-align:center;
+padding:32px 28px;
+text-align:center;
 }
 
 .spinner{
-  width:48px;
-  height:48px;
-  border:3px solid #e8f4fb;
-  border-top-color:#E8612A;
-  border-radius:50%;
-  animation:spin .75s linear infinite;
-  margin:0 auto 20px;
+width:48px;
+height:48px;
+border:3px solid #e8f4fb;
+border-top-color:#E8612A;
+border-radius:50%;
+animation:spin .75s linear infinite;
+margin:0 auto 20px;
 }
 
 @keyframes spin{
-  to{transform:rotate(360deg)}
+to{transform:rotate(360deg)}
 }
 
 .tick{
-  width:64px;
-  height:64px;
-  background:#1B8A4A;
-  color:#fff;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  margin:0 auto 20px;
-  animation:pop .4s cubic-bezier(.34,1.56,.64,1);
+width:64px;
+height:64px;
+background:#1B8A4A;
+color:#fff;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+margin:0 auto 20px;
+animation:pop .4s cubic-bezier(.34,1.56,.64,1);
 }
 
 @keyframes pop{
-  from{transform:scale(0);opacity:0}
-  to{transform:scale(1);opacity:1}
+from{transform:scale(0);opacity:0}
+to{transform:scale(1);opacity:1}
 }
 
 .error-icon{
-  width:64px;
-  height:64px;
-  background:#e74c3c;
-  color:#fff;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  margin:0 auto 20px;
+width:64px;
+height:64px;
+background:#e74c3c;
+color:#fff;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+margin:0 auto 20px;
 }
 
 .notice-icon{
-  width:64px;
-  height:64px;
-  background:#f0a500;
-  color:#fff;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  margin:0 auto 20px;
+width:64px;
+height:64px;
+background:#f0a500;
+color:#fff;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+margin:0 auto 20px;
 }
 
 h1{
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:800;
-  font-size:28px;
-  line-height:1.1;
-  color:#1a2e4a;
-  margin-bottom:10px;
+font-family:'Barlow Condensed',sans-serif;
+font-weight:800;
+font-size:28px;
+line-height:1.1;
+color:#1a2e4a;
+margin-bottom:10px;
 }
 
 p{
-  font-size:14px;
-  color:#7a8fa8;
-  line-height:1.6;
-  margin-bottom:8px;
+font-size:14px;
+color:#7a8fa8;
+line-height:1.6;
+margin-bottom:8px;
 }
 
 .tier-badge{
-  display:inline-block;
-  padding:8px 22px;
-  border-radius:20px;
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:700;
-  font-size:16px;
-  letter-spacing:.5px;
-  margin-bottom:16px;
+display:inline-block;
+padding:8px 22px;
+border-radius:20px;
+font-family:'Barlow Condensed',sans-serif;
+font-weight:700;
+font-size:16px;
+letter-spacing:.5px;
+margin-bottom:16px;
 }
 
 .essential{
-  background:#E8F5E9;
-  color:#1B5E20;
+background:#E8F5E9;
+color:#1B5E20;
 }
 
 .comfort{
-  background:#FFF8E1;
-  color:#BF6000;
+background:#FFF8E1;
+color:#BF6000;
 }
 
 .premium{
-  background:#E3F2FD;
-  color:#0D47A1;
+background:#E3F2FD;
+color:#0D47A1;
 }
 
 .ref{
-  font-size:12px;
-  color:#a0aab6;
-  margin-top:12px;
-  word-break:break-word;
+font-size:12px;
+color:#a0aab6;
+margin-top:12px;
+word-break:break-word;
 }
 
 .ftr{
-  background:#f8fafc;
-  border-top:1px solid #eee;
-  padding:16px;
-  text-align:center;
-  font-size:11px;
-  color:#9aa7b5;
-  line-height:1.5;
+background:#f8fafc;
+border-top:1px solid #eee;
+padding:16px;
+text-align:center;
+font-size:11px;
+color:#9aa7b5;
+line-height:1.5;
 }
 
 .ftr a{
-  color:#2e7fbf;
-  text-decoration:none;
+color:#2e7fbf;
+text-decoration:none;
 }
 
 .summary{
-  background:#f8fafc;
-  border:1px solid #eef1f5;
-  border-radius:12px;
-  padding:16px 18px;
-  margin:18px 0;
-  text-align:left;
+background:#f8fafc;
+border:1px solid #eef1f5;
+border-radius:12px;
+padding:16px 18px;
+margin:18px 0;
+text-align:left;
 }
 
 .summary-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:baseline;
-  padding:6px 0;
-  font-size:14px;
-  color:#3d5470;
+display:flex;
+justify-content:space-between;
+align-items:baseline;
+padding:6px 0;
+font-size:14px;
+color:#3d5470;
 }
 
 .summary-row + .summary-row{
-  border-top:1px solid #eef1f5;
+border-top:1px solid #eef1f5;
 }
 
 .summary-row span:first-child{
-  color:#7a8fa8;
+color:#7a8fa8;
 }
 
 .summary-row span:last-child{
-  font-weight:600;
-  color:#1a2e4a;
+font-weight:600;
+color:#1a2e4a;
 }
 
 .summary-row.total span:last-child{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:20px;
-  font-weight:800;
-  color:#E8612A;
+font-family:'Barlow Condensed',sans-serif;
+font-size:20px;
+font-weight:800;
+color:#E8612A;
 }
 
 .checks{
-  text-align:left;
-  margin:18px 0 6px;
+text-align:left;
+margin:18px 0 6px;
 }
 
 .check-row{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  margin-bottom:14px;
+display:flex;
+align-items:flex-start;
+gap:10px;
+margin-bottom:14px;
 }
 
 .check-row input[type="checkbox"]{
-  width:20px;
-  height:20px;
-  flex-shrink:0;
-  margin-top:2px;
-  accent-color:#E8612A;
+width:20px;
+height:20px;
+flex-shrink:0;
+margin-top:2px;
+accent-color:#E8612A;
 }
 
 .check-row label{
-  font-size:13px;
-  color:#3d5470;
-  line-height:1.5;
+font-size:13px;
+color:#3d5470;
+line-height:1.5;
+}
+
+.colour-select{
+text-align:left;
+margin:6px 0 18px;
+display:none;
+}
+
+.colour-select label{
+display:block;
+font-size:13px;
+font-weight:600;
+color:#3d5470;
+margin-bottom:8px;
+}
+
+.colour-select select{
+width:100%;
+padding:12px 14px;
+border:1.5px solid #dde3ea;
+border-radius:10px;
+font-family:'Barlow',sans-serif;
+font-size:14px;
+color:#1a2e4a;
+background:#fff;
 }
 
 .btn-confirm{
-  display:block;
-  width:100%;
-  padding:16px;
-  margin-top:8px;
-  background:#E8612A;
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:800;
-  font-size:19px;
-  letter-spacing:.5px;
-  cursor:pointer;
-  transition:background .2s ease, transform .1s ease;
+display:block;
+width:100%;
+padding:16px;
+margin-top:8px;
+background:#E8612A;
+color:#fff;
+border:none;
+border-radius:10px;
+font-family:'Barlow Condensed',sans-serif;
+font-weight:800;
+font-size:19px;
+letter-spacing:.5px;
+cursor:pointer;
+transition:background .2s ease, transform .1s ease;
 }
 
 .btn-confirm:hover:not(:disabled){
-  background:#c94d1f;
+background:#c94d1f;
 }
 
 .btn-confirm:active:not(:disabled){
-  transform:translateY(1px);
+transform:translateY(1px);
 }
 
 .btn-confirm:disabled{
-  background:#c8d0d8;
-  cursor:not-allowed;
+background:#c8d0d8;
+cursor:not-allowed;
 }
 
 .btn-back{
-  display:block;
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:transparent;
-  color:#7a8fa8;
-  border:1.5px solid #dde3ea;
-  border-radius:10px;
-  font-family:'Barlow',sans-serif;
-  font-weight:500;
-  font-size:14px;
-  cursor:pointer;
-  transition:border-color .2s ease,color .2s ease;
+display:block;
+width:100%;
+padding:12px;
+margin-top:10px;
+background:transparent;
+color:#7a8fa8;
+border:1.5px solid #dde3ea;
+border-radius:10px;
+font-family:'Barlow',sans-serif;
+font-weight:500;
+font-size:14px;
+cursor:pointer;
+transition:border-color .2s ease,color .2s ease;
 }
 
 .btn-back:hover{
-  border-color:#1a2e4a;
-  color:#1a2e4a;
+border-color:#1a2e4a;
+color:#1a2e4a;
 }
 
 #state-loading{display:block}
@@ -299,43 +324,43 @@ p{
 #state-error{display:none}
 
 @media (max-width:480px){
-  body{
-    padding:14px;
-  }
+body{
+padding:14px;
+}
 
-  .hdr{
-    padding:20px 16px;
-  }
+.hdr{
+padding:20px 16px;
+}
 
-  .hdr img{
-    max-width:180px;
-  }
+.hdr img{
+max-width:180px;
+}
 
-  .body{
-    padding:24px 18px;
-  }
+.body{
+padding:24px 18px;
+}
 
-  h1{
-    font-size:24px;
-  }
+h1{
+font-size:24px;
+}
 
-  p{
-    font-size:14px;
-  }
+p{
+font-size:14px;
+}
 
-  .btn-confirm{
-    font-size:18px;
-    padding:15px;
-  }
+.btn-confirm{
+font-size:18px;
+padding:15px;
+}
 
-  .btn-back{
-    font-size:14px;
-  }
+.btn-back{
+font-size:14px;
+}
 
-  .tier-badge{
-    font-size:15px;
-    padding:8px 18px;
-  }
+.tier-badge{
+font-size:15px;
+padding:8px 18px;
+}
 }
 </style>
 </head>
@@ -366,6 +391,13 @@ p{
 <div class="summary-row total"><span>Total price</span><span id="sum-total"></span></div>
 <div class="summary-row"><span>Deposit due now</span><span id="sum-deposit"></span></div>
 <div class="summary-row"><span>Remaining balance</span><span id="sum-remaining"></span></div>
+</div>
+
+<div class="colour-select" id="colourSelectWrap">
+<label for="unitColour">Please choose your unit colour</label>
+<select id="unitColour">
+<option value="">Select a colour…</option>
+</select>
 </div>
 
 <div class="checks">
@@ -441,7 +473,7 @@ Akita Air Conditioning &amp; Refrigeration · <a href="https://akita.ac">akita.a
 const API = 'https://script.google.com/macros/s/AKfycbxdeymyE_1pQhBOyg5_u7V0TjtSV9xSdMca2GL98RSjL-mSG26AzoJ1wlMZ_qeJK9TQIQ/exec';
 
 function getParam(name) {
-  return new URLSearchParams(window.location.search).get(name) || '';
+return new URLSearchParams(window.location.search).get(name) || '';
 }
 
 // The URL only identifies WHICH quote/package to look up — it is never treated as the
@@ -451,172 +483,207 @@ const tier = getParam('tier');
 
 const tierClassByLabel = { Essential: 'essential', Comfort: 'comfort', Premium: 'premium' };
 
+// Comfort and Premium units come in different colour finishes; the customer chooses at
+// acceptance time. Values (right-hand side) are the machine values written to GHL.
+const colourOptionsByTier = {
+Mid: [
+{ v: 'gloss_black', l: 'Gloss Black' },
+{ v: 'gloss_white', l: 'Gloss White' },
+{ v: 'silver', l: 'Silver' }
+],
+Premium: [
+{ v: 'onyx_black', l: 'Onyx Black' },
+{ v: 'pearl_white', l: 'Pearl White' },
+{ v: 'natural_white', l: 'Natural White' },
+{ v: 'ruby_red', l: 'Ruby Red' }
+]
+};
+
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
 function showState(id) {
-  ['state-loading','state-confirm','state-processing','state-success','state-notice','state-error']
-    .forEach(function(s){ document.getElementById(s).style.display = (s === id) ? 'block' : 'none'; });
+['state-loading','state-confirm','state-processing','state-success','state-notice','state-error']
+.forEach(function(s){ document.getElementById(s).style.display = (s === id) ? 'block' : 'none'; });
 }
 
 function setRefText(elId) {
-  document.getElementById(elId).textContent = ref ? 'Ref: ' + ref : '';
+document.getElementById(elId).textContent = ref ? 'Ref: ' + ref : '';
 }
 
 let quote = null; // the server-verified quote data, once loaded
 
+function colourRequired() {
+return document.getElementById('colourSelectWrap').style.display !== 'none';
+}
+
 async function loadQuote() {
-  if (!ref || !tier) {
-    document.getElementById('error-msg').textContent = 'This link is missing some information. Please use the link from your quote email, or call us to proceed.';
-    setRefText('quote-ref-error');
-    showState('state-error');
-    return;
-  }
+if (!ref || !tier) {
+document.getElementById('error-msg').textContent = 'This link is missing some information. Please use the link from your quote email, or call us to proceed.';
+setRefText('quote-ref-error');
+showState('state-error');
+return;
+}
 
-  try {
-    const res = await fetch(API + '?action=quoteSelection&ref=' + encodeURIComponent(ref) + '&tier=' + encodeURIComponent(tier));
-    const data = await res.json();
+try {
+const res = await fetch(API + '?action=quoteSelection&ref=' + encodeURIComponent(ref) + '&tier=' + encodeURIComponent(tier));
+const data = await res.json();
 
-    if (!data.ok) {
-      document.getElementById('error-msg').textContent = data.error || 'We could not find this quote.';
-      setRefText('quote-ref-error');
-      showState('state-error');
-      return;
-    }
+if (!data.ok) {
+document.getElementById('error-msg').textContent = data.error || 'We could not find this quote.';
+setRefText('quote-ref-error');
+showState('state-error');
+return;
+}
 
-    quote = data;
+quote = data;
 
-    if (data.cancelled) {
-      document.getElementById('notice-title').textContent = 'This quote has been cancelled';
-      document.getElementById('notice-msg').textContent = 'This quotation is no longer active. Please get in touch and we\'ll help sort out a new one.';
-      setRefText('quote-ref-notice');
-      showState('state-notice');
-      return;
-    }
+if (data.cancelled) {
+document.getElementById('notice-title').textContent = 'This quote has been cancelled';
+document.getElementById('notice-msg').textContent = 'This quotation is no longer active. Please get in touch and we\'ll help sort out a new one.';
+setRefText('quote-ref-notice');
+showState('state-notice');
+return;
+}
 
-    if (data.expired) {
-      document.getElementById('notice-title').textContent = 'This quote has expired';
-      document.getElementById('notice-msg').textContent = 'This quotation is more than 30 days old. Please get in touch and we\'ll be happy to arrange an updated price.';
-      setRefText('quote-ref-notice');
-      showState('state-notice');
-      return;
-    }
+if (data.expired) {
+document.getElementById('notice-title').textContent = 'This quote has expired';
+document.getElementById('notice-msg').textContent = 'This quotation is more than 30 days old. Please get in touch and we\'ll be happy to arrange an updated price.';
+setRefText('quote-ref-notice');
+showState('state-notice');
+return;
+}
 
-    if (data.alreadyAccepted) {
-      document.getElementById('notice-title').textContent = 'You\'ve already accepted this quote';
-      document.getElementById('notice-msg').textContent = 'Thanks ' + (data.customerName || '') + ' — you\'ve already confirmed the ' + data.tierLabel + ' package for this quote. We\'ll be in touch about your installation. No further action is needed.';
-      setRefText('quote-ref-notice');
-      showState('state-notice');
-      return;
-    }
+if (data.alreadyAccepted) {
+document.getElementById('notice-title').textContent = 'You\'ve already accepted this quote';
+document.getElementById('notice-msg').textContent = 'Thanks ' + (data.customerName || '') + ' — you\'ve already confirmed the ' + data.tierLabel + ' package for this quote. We\'ll be in touch about your installation. No further action is needed.';
+setRefText('quote-ref-notice');
+showState('state-notice');
+return;
+}
 
-    // Populate the confirm screen from server-verified data only
-    const cls = tierClassByLabel[data.tierLabel] || 'essential';
-    document.getElementById('tier-label-confirm').textContent = data.tierLabel;
-    document.getElementById('tier-label-confirm').className = 'tier-badge ' + cls;
-    document.getElementById('customer-name-confirm').textContent = data.customerName || 'there';
-    document.getElementById('sum-tier').textContent = data.tierLabel;
-    document.getElementById('sum-total').textContent = gbp.format(data.total);
-    document.getElementById('sum-deposit').textContent = gbp.format(data.depositAmount) + ' (' + data.depositPercentage + '%)';
-    document.getElementById('sum-remaining').textContent = gbp.format(data.remainingBalance);
-    setRefText('quote-ref-confirm');
+// Populate the confirm screen from server-verified data only
+const cls = tierClassByLabel[data.tierLabel] || 'essential';
+document.getElementById('tier-label-confirm').textContent = data.tierLabel;
+document.getElementById('tier-label-confirm').className = 'tier-badge ' + cls;
+document.getElementById('customer-name-confirm').textContent = data.customerName || 'there';
+document.getElementById('sum-tier').textContent = data.tierLabel;
+document.getElementById('sum-total').textContent = gbp.format(data.total);
+document.getElementById('sum-deposit').textContent = gbp.format(data.depositAmount) + ' (' + data.depositPercentage + '%)';
+document.getElementById('sum-remaining').textContent = gbp.format(data.remainingBalance);
+setRefText('quote-ref-confirm');
 
-    showState('state-confirm');
-  } catch (e) {
-    document.getElementById('error-msg').textContent = 'We couldn\'t reach our systems just now. Please try again in a moment or call us.';
-    setRefText('quote-ref-error');
-    showState('state-error');
-  }
+// Comfort/Premium: show the colour picker with the right options for this tier
+const colourWrap = document.getElementById('colourSelectWrap');
+const colourSelectEl = document.getElementById('unitColour');
+const opts = colourOptionsByTier[tier];
+if (opts) {
+colourSelectEl.innerHTML = '<option value="">Select a colour…</option>' + opts.map(function(o){ return '<option value="' + o.v + '">' + o.l + '</option>'; }).join('');
+colourWrap.style.display = 'block';
+} else {
+colourWrap.style.display = 'none';
+}
+updateButtonState();
+
+showState('state-confirm');
+} catch (e) {
+document.getElementById('error-msg').textContent = 'We couldn\'t reach our systems just now. Please try again in a moment or call us.';
+setRefText('quote-ref-error');
+showState('state-error');
+}
 }
 
 function goBack() {
-  document.getElementById('state-confirm').innerHTML = `
-    <h1 style="margin-bottom:12px;">No problem</h1>
-    <p>Go back to your quote email and tap a different package option.</p>
-    <p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
-    <p class="ref">${ref ? 'Ref: ' + ref : ''}</p>
-  `;
+document.getElementById('state-confirm').innerHTML = `
+<h1 style="margin-bottom:12px;">No problem</h1>
+<p>Go back to your quote email and tap a different package option.</p>
+<p style="margin-top:12px;">Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+<p class="ref">${ref ? 'Ref: ' + ref : ''}</p>
+`;
 }
 
 document.getElementById('cb-proceed').addEventListener('change', updateButtonState);
 document.getElementById('cb-balance').addEventListener('change', updateButtonState);
+document.getElementById('unitColour').addEventListener('change', updateButtonState);
 
 function updateButtonState() {
-  const proceedChecked = document.getElementById('cb-proceed').checked;
-  const balanceChecked = document.getElementById('cb-balance').checked;
-  document.getElementById('confirmBtn').disabled = !(proceedChecked && balanceChecked);
+const proceedChecked = document.getElementById('cb-proceed').checked;
+const balanceChecked = document.getElementById('cb-balance').checked;
+const colourOk = !colourRequired() || document.getElementById('unitColour').value !== '';
+document.getElementById('confirmBtn').disabled = !(proceedChecked && balanceChecked && colourOk);
 }
 
 let sent = false;
 
 async function proceed() {
-  if (sent || !quote) return;
-  sent = true;
+if (sent || !quote) return;
+sent = true;
 
-  const confirmBtn = document.getElementById('confirmBtn');
-  if (confirmBtn) confirmBtn.disabled = true;
+const confirmBtn = document.getElementById('confirmBtn');
+if (confirmBtn) confirmBtn.disabled = true;
 
-  showState('state-processing');
+showState('state-processing');
 
-  try {
-    // Note: no shared secret is sent from this page by design — a secret shipped to a
-    // public browser page would not be a real secret. The backend instead verifies the
-    // ref/tier against the real stored quote, recomputes price/deposit itself, and uses
-    // idempotency checks so this can never be processed twice.
-    const response = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: 'acceptQuote',
-        quoteRef: ref,
-        tier: tier,
-        accept: true,
-        ackBalance: true
-      })
-    });
+try {
+// Note: no shared secret is sent from this page by design — a secret shipped to a
+// public browser page would not be a real secret. The backend instead verifies the
+// ref/tier against the real stored quote, recomputes price/deposit itself, and uses
+// idempotency checks so this can never be processed twice.
+const response = await fetch(API, {
+method: 'POST',
+headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+body: JSON.stringify({
+action: 'acceptQuote',
+quoteRef: ref,
+tier: tier,
+accept: true,
+ackBalance: true,
+unit_colour: colourRequired() ? document.getElementById('unitColour').value : ''
+})
+});
 
-    const data = await response.json();
+const data = await response.json();
 
-    if (!data.ok) {
-      document.getElementById('error-msg').textContent = data.error || 'We couldn\'t process your selection.';
-      setRefText('quote-ref-error');
-      showState('state-error');
-      sent = false;
-      if (confirmBtn) confirmBtn.disabled = false;
-      return;
-    }
+if (!data.ok) {
+document.getElementById('error-msg').textContent = data.error || 'We couldn\'t process your selection.';
+setRefText('quote-ref-error');
+showState('state-error');
+sent = false;
+if (confirmBtn) confirmBtn.disabled = false;
+return;
+}
 
-    const cls = tierClassByLabel[data.tierLabel] || 'essential';
-    document.getElementById('tier-label-success').textContent = data.tierLabel;
-    document.getElementById('tier-label-success').className = 'tier-badge ' + cls;
+const cls = tierClassByLabel[data.tierLabel] || 'essential';
+document.getElementById('tier-label-success').textContent = data.tierLabel;
+document.getElementById('tier-label-success').className = 'tier-badge ' + cls;
 
-    if (data.alreadyAccepted) {
-      document.getElementById('success-msg').textContent = 'This quote was already confirmed — you\'re all set, no further action is needed.';
-    } else {
-      document.getElementById('success-msg').textContent = 'Thanks — we\'ve received your acceptance and will be in touch shortly to arrange your installation.';
-    }
+if (data.alreadyAccepted) {
+document.getElementById('success-msg').textContent = 'This quote was already confirmed — you\'re all set, no further action is needed.';
+} else {
+document.getElementById('success-msg').textContent = 'Thanks — we\'ve received your acceptance and will be in touch shortly to arrange your installation.';
+}
 
-    document.getElementById('succ-total').textContent = quote.total !== undefined ? gbp.format(data.total !== undefined ? data.total : quote.total) : '';
-    document.getElementById('succ-deposit').textContent = gbp.format(data.depositAmount);
-    document.getElementById('succ-remaining').textContent = gbp.format(data.remainingBalance);
-    setRefText('quote-ref-success');
+document.getElementById('succ-total').textContent = quote.total !== undefined ? gbp.format(data.total !== undefined ? data.total : quote.total) : '';
+document.getElementById('succ-deposit').textContent = gbp.format(data.depositAmount);
+document.getElementById('succ-remaining').textContent = gbp.format(data.remainingBalance);
+setRefText('quote-ref-success');
 
-    const payBtn = document.getElementById('pay-now-btn');
-    if (data.depositPaymentUrl) {
-      payBtn.href = data.depositPaymentUrl;
-      payBtn.textContent = 'Pay Deposit Now – ' + gbp.format(data.depositAmount);
-      payBtn.style.display = 'block';
-    } else {
-      payBtn.style.display = 'none';
-    }
+const payBtn = document.getElementById('pay-now-btn');
+if (data.depositPaymentUrl) {
+payBtn.href = data.depositPaymentUrl;
+payBtn.textContent = 'Pay Deposit Now – ' + gbp.format(data.depositAmount);
+payBtn.style.display = 'block';
+} else {
+payBtn.style.display = 'none';
+}
 
-    showState('state-success');
-  } catch (e) {
-    document.getElementById('error-msg').textContent = 'We couldn\'t reach our systems just now. Please try again in a moment or call us.';
-    setRefText('quote-ref-error');
-    showState('state-error');
-    sent = false;
-    if (confirmBtn) confirmBtn.disabled = false;
-  }
+showState('state-success');
+} catch (e) {
+document.getElementById('error-msg').textContent = 'We couldn\'t reach our systems just now. Please try again in a moment or call us.';
+setRefText('quote-ref-error');
+showState('state-error');
+sent = false;
+if (confirmBtn) confirmBtn.disabled = false;
+}
 }
 
 loadQuote();
