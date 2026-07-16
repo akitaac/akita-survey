@@ -410,6 +410,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div id="rv-rooms"></div>
     <div id="rv-addons"></div>
     <div class="divider"></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 14px;padding:11px 13px;background:#fff8f0;border:1px solid #f0dcc0;border-radius:9px">
+      <strong style="font-size:13px;color:#9a5a1a">Discount (all packages):</strong>
+      <select id="disc-mode" onchange="onDiscountChange()" style="padding:7px 9px;border:1px solid #ddcbae;border-radius:7px;font:inherit">
+        <option value="£">£ off</option>
+        <option value="%">% off</option>
+      </select>
+      <input id="disc-val" type="number" min="0" step="1" value="0" oninput="onDiscountChange()" style="width:100px;padding:7px 9px;border:1px solid #ddcbae;border-radius:7px;font:inherit" placeholder="0">
+      <span id="disc-note" style="font-size:12px;color:#8a9bb0"></span>
+    </div>
     <div class="grand-total" id="rv-totals"></div>
     <p class="hint" style="margin-top:10px">Prices include supply & installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
   </div>
@@ -663,6 +672,7 @@ function extrasTotal(){ return addons.reduce((s,a)=>s+(parseFloat(a.price)||0),0
 let rooms=[], addons=[], rIdx=0, aIdx=0;
 let generalPhotos=[];
 let fin={apr:'',term:'',sub:0};
+let discount={mode:'£', value:0};
 let survey={power:'Yes — existing spur',existing:'No',installType:'single',trunkingColour:'Black'};
 function setTrunkingColour(v){ survey.trunkingColour=v; }
 
@@ -1003,6 +1013,23 @@ function toggleVat(){
 }
 
 function vatMult(){ return vatOn ? 1.2 : 1; }
+function applyDiscount(total){
+  if(!discount.value||discount.value<=0) return total;
+  var d = discount.mode==='%' ? total*(discount.value/100) : discount.value;
+  return Math.max(0, total-d);
+}
+function discountLabel(){
+  if(!discount.value||discount.value<=0) return '';
+  return discount.mode==='%' ? (discount.value+'% off') : ('£'+Number(discount.value).toFixed(2)+' off');
+}
+function onDiscountChange(){
+  var m=document.getElementById('disc-mode'), v=document.getElementById('disc-val');
+  discount.mode = m ? m.value : '£';
+  discount.value = Math.max(0, parseFloat(v && v.value)||0);
+  var note=document.getElementById('disc-note');
+  if(note) note.textContent = discount.value>0 ? ('\u2212 '+discountLabel()+' on every package') : '';
+  try { buildReview(); } catch(e){}
+}
 
 function refreshTierPrices(){
   rooms.forEach(function(r){
@@ -1250,9 +1277,9 @@ function updateTotals(){
   }
 
   // Grand totals — single by tier + multi by tier + extras
-  const gB = (st.Basic   + mt.Essential + ext) * (1+sub) * vm;
-  const gM = (st.Mid     + mt.Comfort   + ext) * (1+sub) * vm;
-  const gP = (st.Premium + mt.Premium   + ext) * (1+sub) * vm;
+  const gB = applyDiscount((st.Basic   + mt.Essential + ext) * (1+sub) * vm);
+  const gM = applyDiscount((st.Mid     + mt.Comfort   + ext) * (1+sub) * vm);
+  const gP = applyDiscount((st.Premium + mt.Premium   + ext) * (1+sub) * vm);
 
   const f = n => '£'+n.toFixed(2);
   document.getElementById('tb-b').textContent = f(gB);
@@ -1466,9 +1493,9 @@ function updateReviewTotals(){
     const vm3=vatMult();const ext3=extrasTotal();const sub3=fin.sub;
     const stRev={Basic:0,Mid:0,Premium:0};
     ['Basic','Mid','Premium'].forEach(tier=>{sSel.forEach(r=>{if(r.kwRec){if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); }}});});
-    const gBR=(stRev.Basic+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3;
-    const gMR=(stRev.Mid+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3;
-    const gPR=(stRev.Premium+mst.Premium.total/vm3+ext3)*(1+sub3)*vm3;
+    const gBR= applyDiscount((stRev.Basic+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3);
+    const gMR= applyDiscount((stRev.Mid+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3);
+    const gPR= applyDiscount((stRev.Premium+mst.Premium.total/vm3+ext3)*(1+sub3)*vm3);
     document.getElementById('rv-totals').innerHTML=
       [['Essential',gBR],['Comfort',gMR],['Premium',gPR]].map(([t,total])=>{
         const p = calcProfit(t, sel, total);
@@ -1479,7 +1506,7 @@ function updateReviewTotals(){
     ['Basic','Mid','Premium'].forEach(tier=>{
       sSel.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
-    const gB=(t.Basic+ext)*(1+sub)*vm, gM=(t.Mid+ext)*(1+sub)*vm, gP=(t.Premium+ext)*(1+sub)*vm;
+    const gB=applyDiscount((t.Basic+ext)*(1+sub)*vm), gM=applyDiscount((t.Mid+ext)*(1+sub)*vm), gP=applyDiscount((t.Premium+ext)*(1+sub)*vm);
     const tierLabel = {Basic:'Essential', Mid:'Comfort', Premium:'Premium'};
     const pB=calcProfit('Essential',sel,gB), pM=calcProfit('Comfort',sel,gM), pP=calcProfit('Premium',sel,gP);
     document.getElementById('rv-totals').innerHTML=`
@@ -1551,9 +1578,9 @@ function buildReview(){
       sRoomsRev.forEach(r=>{ if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } });
     });
     const ext=extrasTotal(); const sub=fin.sub;
-    const gBR=(stRev.Basic+mst.Essential.total/vm+ext)*(1+sub)*vm;
-    const gMR=(stRev.Mid+mst.Comfort.total/vm+ext)*(1+sub)*vm;
-    const gPR=(stRev.Premium+mst.Premium.total/vm+ext)*(1+sub)*vm;
+    const gBR= applyDiscount((stRev.Basic+mst.Essential.total/vm+ext)*(1+sub)*vm);
+    const gMR= applyDiscount((stRev.Mid+mst.Comfort.total/vm+ext)*(1+sub)*vm);
+    const gPR= applyDiscount((stRev.Premium+mst.Premium.total/vm+ext)*(1+sub)*vm);
     // Outdoor unit lines per tier
     const ouLines = ['Essential','Comfort','Premium'].map(tier=>{
       const t = mst[tier];
@@ -1644,13 +1671,13 @@ function buildReview(){
     let gB, gM, gP;
     if(mRoomsRv.length > 0){
       const mst = msTotalPrice(mRoomsRv);
-      gB = (st.Basic   + mst.Essential.total/vm + ext) * (1+sub) * vm;
-      gM = (st.Mid     + mst.Comfort.total/vm   + ext) * (1+sub) * vm;
-      gP = (st.Premium + mst.Premium.total/vm   + ext) * (1+sub) * vm;
+      gB = applyDiscount((st.Basic   + mst.Essential.total/vm + ext) * (1+sub) * vm);
+      gM = applyDiscount((st.Mid     + mst.Comfort.total/vm   + ext) * (1+sub) * vm);
+      gP = applyDiscount((st.Premium + mst.Premium.total/vm   + ext) * (1+sub) * vm);
     } else {
-      gB=(st.Basic+ext)*(1+sub)*vm;
-      gM=(st.Mid+ext)*(1+sub)*vm;
-      gP=(st.Premium+ext)*(1+sub)*vm;
+      gB= applyDiscount((st.Basic+ext)*(1+sub)*vm);
+      gM= applyDiscount((st.Mid+ext)*(1+sub)*vm);
+      gP= applyDiscount((st.Premium+ext)*(1+sub)*vm);
     }
     const pB=calcProfit('Essential',rooms,gB), pM=calcProfit('Comfort',rooms,gM), pP=calcProfit('Premium',rooms,gP);
     document.getElementById('rv-totals').innerHTML=`
@@ -1796,17 +1823,17 @@ async function sendQuote(){
     ['Basic','Mid','Premium'].forEach(function(tier){
       sActive.forEach(function(r){ if(r.kwRec){ if(r.kwRec){ stLocal[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } } });
     });
-    gB = (stLocal.Basic   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2;
-    gM = (stLocal.Mid     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2;
-    gP = (stLocal.Premium + mst.Premium.total/vm2   + ext2) * (1+sub2) * vm2;
+    gB = applyDiscount((stLocal.Basic   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2);
+    gM = applyDiscount((stLocal.Mid     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2);
+    gP = applyDiscount((stLocal.Premium + mst.Premium.total/vm2   + ext2) * (1+sub2) * vm2);
   } else {
     const t={Basic:0,Mid:0,Premium:0};
     ['Basic','Mid','Premium'].forEach(tier=>{
       activeRooms.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
-    gB=(t.Basic+ext)*(1+sub)*vm;
-    gM=(t.Mid+ext)*(1+sub)*vm;
-    gP=(t.Premium+ext)*(1+sub)*vm;
+    gB= applyDiscount((t.Basic+ext)*(1+sub)*vm);
+    gM= applyDiscount((t.Mid+ext)*(1+sub)*vm);
+    gP= applyDiscount((t.Premium+ext)*(1+sub)*vm);
   }
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
   const jobTypeLabel = isMixed ? 'MIXED INSTALL' : mActive.length>0 && !treatAsSingle ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
