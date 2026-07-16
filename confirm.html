@@ -668,13 +668,21 @@ document.getElementById('succ-remaining').textContent = gbp.format(data.remainin
 setRefText('quote-ref-success');
 
 const payBtn = document.getElementById('pay-now-btn');
-if (data.depositPaymentUrl) {
-payBtn.href = data.depositPaymentUrl;
+// Get a Stripe Checkout (deposit + saves card) and point the pay button at it.
+try {
+const _coRes = await fetch(API, {
+method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+body: JSON.stringify({ action: 'depositCheckout', quoteRef: ref, tier: tier })
+});
+const _co = await _coRes.json();
+if (_co.ok && _co.checkoutUrl) {
+payBtn.href = _co.checkoutUrl;
 payBtn.textContent = 'Pay Deposit Now – ' + gbp.format(data.depositAmount);
 payBtn.style.display = 'block';
 } else {
 payBtn.style.display = 'none';
 }
+} catch (_e) { payBtn.style.display = 'none'; }
 
 showState('state-success');
 } catch (e) {
