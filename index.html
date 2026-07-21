@@ -1150,12 +1150,14 @@ function buildRoomCard(r, idx, type){
           const tLabel={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
           const u=getUnit(tier,r.kwRec||2.5);
           const undersized=unitUndersized(tier,r.kwRec||0);
+          const sizedUp=!undersized && r.kwRec>0 && u.kw>r.kwRec;
           const fullCost = u.price + pipeCost(r, tier);
           return `<div class="tier-card ${tc}${undersized?' tier-card-warn':''}">
             <div class="tier-badge ${tb}">${tLabel}</div>
             <div class="tier-price" id="tp-${r.id}-${tier}">£${Math.round(fullCost*vm).toLocaleString('en-GB')}</div>
             <div class="tier-sub">${u.make}<br>${u.series}<br>${u.kw}kW
               ${undersized?`<br><span style="color:#e67e22;font-size:9px;font-weight:700">⚠ Undersized (${r.kwRec}kW needed)</span>`:''}
+              ${sizedUp?`<br><span style="color:#2e7fbf;font-size:9px;font-weight:700">↑ nearest size (${r.kwRec}kW load)</span>`:''}
             </div>
           </div>`;
         }).join('')}
