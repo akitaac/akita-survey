@@ -290,7 +290,7 @@ const colourWrap = document.getElementById('colourSelectWrap');
 const colourSelectEl = document.getElementById('unitColour');
 const opts = colourOptionsByTier[tier];
 if (opts) {
-colourSelectEl.innerHTML = '<option value="">Select a colour…</option>' + opts.map(function(o){ return '<option value="' + o.v + '">' + o.l + '</option>'; }).join('');
+colourSelectEl.innerHTML = '<option value="">Select a colour…</option>' + opts.map(function(o){ return '<option value="' + o.l + '">' + o.l + '</option>'; }).join('');
 colourWrap.style.display = 'block';
 } else {
 colourWrap.style.display = 'none';
