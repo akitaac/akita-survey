@@ -308,6 +308,7 @@ function renderJob(j, d){
       (mapsUrl? '<a href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">📍 Directions</a>' : '<button disabled>📍 Directions</button>')+
     '</div>'+
     '<button class="btn" onclick="openOnMyWay()">🚐 Tell customer I\'m on my way</button>'+
+    (d.surveyFormUrl ? '<a class="btn sec" href="'+esc(d.surveyFormUrl)+'" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-top:10px">📝 Open pre-filled survey form</a>' : '')+
 
     specBlock +
 
