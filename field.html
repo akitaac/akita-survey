@@ -259,7 +259,8 @@ function renderJob(j, d){
     '<button class="btn sec" style="margin-top:8px" onclick="addNote()">＋ Add note</button>'+
 
     '<div class="sect-h">Complete job</div>'+
-    '<div class="card soon" style="text-align:center;font-weight:700;color:var(--navy)">Commissioning report · Close job &amp; take payment<br><span class="muted" style="font-weight:600;font-size:13px">Coming next</span></div>';
+    (isSurvey ? '' : '<button class="btn" onclick="openClose()">✅ Close job &amp; take payment</button>')+
+    '<div class="card soon" style="text-align:center;font-weight:700;color:var(--navy);margin-top:'+(isSurvey?'0':'10px')+'">Commissioning report<br><span class="muted" style="font-weight:600;font-size:13px">Coming in P3</span></div>';
 }
 
 // ---- On My Way sheet ------------------------------------------------------
@@ -305,6 +306,69 @@ async function addNote(){
     toast('✓ Note saved');
   } else {
     toast((res&&res.error)||'Could not save note');
+  }
+}
+
+// ---- Close job + take payment --------------------------------------------
+function openClose(){
+  var d = CURRENT.detail || {};
+  var b = d.balance;
+  var hasRef = !!CURRENT.ref;
+  var out = b ? b.outstanding : null;
+
+  var inner;
+  if(!hasRef){
+    inner = '<p class="muted" style="font-size:14px">This job has no linked quote, so there is no balance to take here. Add any notes above, then just close.</p>'+
+      '<button class="btn ghost" id="clCancel">Close</button>';
+  } else if(out!=null && out<=0){
+    inner = '<div class="kv"><span class="k">Outstanding</span><span class="v" style="color:var(--ok)">£0.00 — paid in full</span></div>'+
+      '<button class="btn" id="clDone">Mark job complete</button>'+
+      '<button class="btn ghost" id="clCancel">Cancel</button>';
+  } else {
+    inner =
+      '<div class="kv" style="border:none"><span class="k">Balance to collect</span><span class="v" style="font-size:20px">'+gbp.format(out||0)+'</span></div>'+
+      '<label style="margin-top:8px">Completion note (optional)</label>'+
+      '<textarea id="clNote" rows="2" placeholder="e.g. 2 units installed & commissioned, customer happy"></textarea>'+
+      '<div class="sect-h" style="margin:16px 2px 8px">How is the balance being paid?</div>'+
+      '<button class="btn" id="payCard">💳 Card — charge saved card now</button>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">'+
+        '<button class="btn sec" id="payCash">💷 Cash</button>'+
+        '<button class="btn sec" id="payFin">📄 Finance</button>'+
+      '</div>'+
+      '<div id="clErr" style="color:var(--warn);font-size:13.5px;margin-top:12px"></div>'+
+      '<button class="btn ghost" id="clCancel" style="margin-top:6px">Cancel</button>';
+  }
+
+  var bg = document.createElement('div'); bg.className='sheet-bg';
+  bg.innerHTML = '<div class="sheet"><h3>Close job — '+esc(CURRENT.ref||'')+'</h3>'+inner+'</div>';
+  document.body.appendChild(bg);
+  var close = function(){ bg.remove(); };
+  bg.addEventListener('click', function(e){ if(e.target===bg) close(); });
+  var cc = bg.querySelector('#clCancel'); if(cc) cc.addEventListener('click', close);
+  var cd = bg.querySelector('#clDone'); if(cd) cd.addEventListener('click', function(){ doCollect('card', bg, this); });
+  var pc = bg.querySelector('#payCard'); if(pc) pc.addEventListener('click', function(){
+    if(!confirm('Charge '+gbp.format(out||0)+' to the customer’s saved card now?')) return;
+    doCollect('card', bg, this);
+  });
+  var pk = bg.querySelector('#payCash'); if(pk) pk.addEventListener('click', function(){ doCollect('cash', bg, this); });
+  var pf = bg.querySelector('#payFin'); if(pf) pf.addEventListener('click', function(){ doCollect('finance', bg, this); });
+}
+
+async function doCollect(method, bg, btnEl){
+  var note = (bg.querySelector('#clNote')||{}).value || '';
+  var errEl = bg.querySelector('#clErr'); if(errEl) errEl.textContent='';
+  var label = btnEl.textContent; btnEl.disabled=true; btnEl.innerHTML='<span class="spin"></span>';
+  bg.querySelectorAll('button').forEach(function(b){ b.disabled=true; });
+  var res = await api('fieldCollect', { ref:CURRENT.ref, title:CURRENT.title, method:method, jobNotes:note });
+  if(res && res.ok){
+    bg.remove();
+    toast(res.message || '✓ Done');
+    openJob(CURRENT);   // refresh detail so balance/status update
+  } else {
+    bg.querySelectorAll('button').forEach(function(b){ b.disabled=false; });
+    btnEl.textContent = label;
+    if(errEl) errEl.textContent = (res && res.error) || 'Something went wrong';
+    else toast((res&&res.error)||'Something went wrong');
   }
 }
 
