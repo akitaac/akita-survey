@@ -336,8 +336,16 @@ function openClose(){
       '<button class="btn ghost" id="clCancel">Cancel</button>';
   } else {
     inner =
-      '<div class="kv" style="border:none"><span class="k">Balance to collect</span><span class="v" style="font-size:20px">'+gbp.format(out||0)+'</span></div>'+
-      '<label style="margin-top:8px">Completion note (optional)</label>'+
+      '<div class="kv" style="border:none"><span class="k">Balance to collect</span><span class="v" id="clAmt" style="font-size:22px">'+gbp.format(out||0)+'</span></div>'+
+      '<details style="margin-top:4px"><summary style="font-weight:700;color:var(--blue);font-size:14px;padding:8px 0;cursor:pointer">Adjust balance — discount / extra</summary>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">'+
+          '<div><label>Discount £</label><input id="clDisc" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>'+
+          '<div><label>Extra £</label><input id="clExtra" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>'+
+        '</div>'+
+        '<label style="margin-top:8px">Reason (optional)</label>'+
+        '<input id="clReason" type="text" placeholder="e.g. goodwill discount / extra bracket fitted">'+
+      '</details>'+
+      '<label style="margin-top:12px">Completion note (optional)</label>'+
       '<textarea id="clNote" rows="2" placeholder="e.g. 2 units installed & commissioned, customer happy"></textarea>'+
       '<div class="sect-h" style="margin:16px 2px 8px">How is the balance being paid?</div>'+
       '<button class="btn" id="payCard">💳 Card — charge saved card now</button>'+
@@ -354,10 +362,22 @@ function openClose(){
   document.body.appendChild(bg);
   var close = function(){ bg.remove(); };
   bg.addEventListener('click', function(e){ if(e.target===bg) close(); });
+  var baseOut = out || 0;
+  function recompute(){
+    var disc = parseFloat((bg.querySelector('#clDisc')||{}).value) || 0;
+    var ext  = parseFloat((bg.querySelector('#clExtra')||{}).value) || 0;
+    var t = Math.max(0, Math.round((baseOut - disc + ext)*100)/100);
+    var amtEl = bg.querySelector('#clAmt'); if(amtEl){ amtEl.textContent = gbp.format(t); amtEl.style.color = (disc||ext)?'var(--blue)':''; }
+    var pcb = bg.querySelector('#payCard'); if(pcb) pcb.textContent = '💳 Card — charge '+gbp.format(t)+' now';
+    return t;
+  }
+  ['#clDisc','#clExtra'].forEach(function(sel){ var el=bg.querySelector(sel); if(el) el.addEventListener('input', recompute); });
+
   var cc = bg.querySelector('#clCancel'); if(cc) cc.addEventListener('click', close);
   var cd = bg.querySelector('#clDone'); if(cd) cd.addEventListener('click', function(){ doCollect('card', bg, this); });
   var pc = bg.querySelector('#payCard'); if(pc) pc.addEventListener('click', function(){
-    if(!confirm('Charge '+gbp.format(out||0)+' to the customer’s saved card now?')) return;
+    var amt = recompute();
+    if(!confirm('Charge '+gbp.format(amt)+' to the customer’s saved card now?')) return;
     doCollect('card', bg, this);
   });
   var pk = bg.querySelector('#payCash'); if(pk) pk.addEventListener('click', function(){ doCollect('cash', bg, this); });
@@ -366,10 +386,13 @@ function openClose(){
 
 async function doCollect(method, bg, btnEl){
   var note = (bg.querySelector('#clNote')||{}).value || '';
+  var discount = (bg.querySelector('#clDisc')||{}).value || '';
+  var extra = (bg.querySelector('#clExtra')||{}).value || '';
+  var adjustReason = (bg.querySelector('#clReason')||{}).value || '';
   var errEl = bg.querySelector('#clErr'); if(errEl) errEl.textContent='';
   var label = btnEl.textContent; btnEl.disabled=true; btnEl.innerHTML='<span class="spin"></span>';
   bg.querySelectorAll('button').forEach(function(b){ b.disabled=true; });
-  var res = await api('fieldCollect', { ref:CURRENT.ref, title:CURRENT.title, method:method, jobNotes:note });
+  var res = await api('fieldCollect', { ref:CURRENT.ref, title:CURRENT.title, method:method, jobNotes:note, discount:discount, extra:extra, adjustReason:adjustReason });
   if(res && res.ok){
     bg.remove();
     toast(res.message || '✓ Done');
