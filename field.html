@@ -60,10 +60,12 @@
   .actions a,.actions button{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-radius:12px;
     background:#fff;border:1.5px solid var(--line);color:var(--navy);font-weight:700;font-size:14px;text-decoration:none}
   .sect-h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:22px 2px 10px}
-  .note{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 40px 11px 13px;margin-bottom:9px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+  .note{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 74px 11px 13px;margin-bottom:9px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
   .note .meta{font-size:11px;color:var(--mut);margin-top:6px}
-  .noteDel{position:absolute;top:7px;right:7px;background:transparent;border:none;font-size:16px;opacity:.45;padding:4px;line-height:1;border-radius:8px}
-  .noteDel:active{opacity:1;background:#f4f6fa}
+  .noteDel,.noteEdit{position:absolute;top:7px;background:transparent;border:none;font-size:16px;opacity:.45;padding:4px;line-height:1;border-radius:8px}
+  .noteDel{right:7px} .noteEdit{right:40px}
+  .noteDel:active,.noteEdit:active{opacity:1;background:#f4f6fa}
+  .note textarea{white-space:normal}
   .soon{opacity:.55;background:repeating-linear-gradient(45deg,#fff,#fff 10px,#fafbfd 10px,#fafbfd 20px)}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
   .chip{padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:14px}
@@ -236,6 +238,22 @@ function swatch(name){
 }
 function specRow(k,v,extra){ return v ? '<div class="kv"><span class="k">'+k+'</span><span class="v">'+(extra||'')+esc(v)+'</span></div>' : ''; }
 
+// ---- shared note rendering ----
+function noteButtons(id){
+  if(!id) return '';
+  return '<button class="noteDel" onclick="delNote(this,\''+id+'\')" title="Delete note">🗑</button>'+
+         '<button class="noteEdit" onclick="editNote(this,\''+id+'\')" title="Edit note">✏️</button>';
+}
+function noteInner(id, bodyText, metaText){
+  return noteButtons(id) + esc(bodyText) + (metaText ? '<div class="meta">'+esc(metaText)+'</div>' : '');
+}
+function noteDiv(id, bodyText, metaText){
+  var el = document.createElement('div'); el.className='note';
+  el.setAttribute('data-id', id||''); el.setAttribute('data-body', bodyText||'');
+  el.innerHTML = noteInner(id, bodyText, metaText);
+  return el;
+}
+
 function renderJob(j, d){
   var c = d.contact || {};
   var b = d.balance;
@@ -272,8 +290,8 @@ function renderJob(j, d){
   }
 
   var notesHtml = (d.notes||[]).slice().reverse().map(function(n){
-    var del = n.id ? '<button class="noteDel" onclick="delNote(this,\''+esc(n.id)+'\')" title="Delete note">🗑</button>' : '';
-    return '<div class="note" data-id="'+esc(n.id||'')+'">'+del+esc(n.body)+ (n.at? '<div class="meta">'+esc(new Date(n.at).toLocaleString('en-GB'))+'</div>':'') +'</div>';
+    var meta = n.at ? new Date(n.at).toLocaleString('en-GB') : '';
+    return '<div class="note" data-id="'+esc(n.id||'')+'" data-body="'+esc(n.body||'')+'">'+noteInner(n.id, n.body||'', meta)+'</div>';
   }).join('') || '<div class="muted" style="font-size:13.5px">No notes yet.</div>';
 
   $('jobBody').innerHTML =
@@ -342,23 +360,50 @@ async function addNote(){
     el.value='';
     var list = $('notesList');
     if(list.querySelector('.muted')) list.innerHTML='';
-    var div = document.createElement('div'); div.className='note'; div.setAttribute('data-id', res.note.id||'');
-    var del = res.note.id ? '<button class="noteDel" onclick="delNote(this,\''+res.note.id+'\')" title="Delete note">🗑</button>' : '';
-    div.innerHTML = del + esc(res.note.body) + '<div class="meta">just now</div>';
-    list.insertBefore(div, list.firstChild);
+    list.insertBefore(noteDiv(res.note.id, res.note.body, 'just now'), list.firstChild);
     toast('Note saved');
   } else {
     toast((res&&res.error)||'Could not save note');
   }
 }
 
+function noteCid(){ return (CURRENT && CURRENT.contactId) || (CURRENT && CURRENT.detail && CURRENT.detail.contactId); }
+
 async function delNote(btn, noteId){
   if(!confirm('Delete this note?')) return;
-  var cid = (CURRENT && CURRENT.contactId) || (CURRENT && CURRENT.detail && CURRENT.detail.contactId);
   btn.textContent='…'; btn.disabled=true;
-  var res = await api('fieldNoteDelete', { contactId:cid, noteId:noteId, ref:CURRENT.ref });
+  var res = await api('fieldNoteDelete', { contactId:noteCid(), noteId:noteId, ref:CURRENT.ref });
   if(res && res.ok){ var el=btn.closest('.note'); if(el) el.remove(); toast('Note deleted'); }
   else { btn.textContent='🗑'; btn.disabled=false; toast((res&&res.error)||'Could not delete note'); }
+}
+
+function editNote(btn, noteId){
+  var el = btn.closest('.note');
+  var raw = el.getAttribute('data-body') || '';
+  el.innerHTML = '<textarea class="noteEditTa" rows="3">'+esc(raw)+'</textarea>'+
+    '<div style="display:flex;gap:8px;margin-top:8px">'+
+      '<button class="btn sec" style="padding:9px 12px" onclick="saveNoteEdit(this,\''+noteId+'\')">Save</button>'+
+      '<button class="btn ghost" style="padding:9px 12px" onclick="cancelNoteEdit(this)">Cancel</button>'+
+    '</div>';
+  var ta = el.querySelector('textarea'); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+}
+function cancelNoteEdit(btn){
+  var el = btn.closest('.note');
+  el.innerHTML = noteInner(el.getAttribute('data-id'), el.getAttribute('data-body')||'', '');
+}
+async function saveNoteEdit(btn, noteId){
+  var el = btn.closest('.note');
+  var text = (el.querySelector('textarea')||{}).value.trim();
+  if(!text){ return; }
+  btn.disabled=true; btn.textContent='…';
+  var res = await api('fieldNoteEdit', { contactId:noteCid(), noteId:noteId, note:text, ref:CURRENT.ref });
+  if(res && res.ok){
+    el.setAttribute('data-body', res.note.body);
+    el.innerHTML = noteInner(noteId, res.note.body, 'edited just now');
+    toast('Note updated');
+  } else {
+    btn.disabled=false; btn.textContent='Save'; toast((res&&res.error)||'Could not update note');
+  }
 }
 
 // ---- Close job + take payment --------------------------------------------
