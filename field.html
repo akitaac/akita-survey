@@ -135,8 +135,18 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){retur
 
 async function api(action, extra){
   var body = Object.assign({ action:action, pin:PIN, engineerName:ENG }, extra||{});
-  var r = await fetch(API, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
-  return r.json();
+  var ctrl = new AbortController();
+  var to = setTimeout(function(){ ctrl.abort(); }, 30000);
+  try {
+    var r = await fetch(API, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body), signal: ctrl.signal });
+    clearTimeout(to);
+    var txt = await r.text();
+    try { return JSON.parse(txt); }
+    catch(e){ return { ok:false, error:'Unexpected reply (HTTP '+r.status+'): '+String(txt).slice(0,140) }; }
+  } catch(e){
+    clearTimeout(to);
+    return { ok:false, error: (e && e.name==='AbortError') ? 'Timed out — server took over 30s.' : ('Network error: '+(e&&e.message||e)) };
+  }
 }
 
 function fmtWhen(iso){
