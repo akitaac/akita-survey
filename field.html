@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a2e4a">
+<title>Akita Field</title>
+<style>
+  :root{
+    --navy:#1a2e4a; --navy2:#223c60; --orange:#f28c1f; --blue:#2e7fbf;
+    --ink:#1a2e4a; --mut:#6b7787; --line:#e5e9f0; --bg:#f4f6fa; --ok:#1a9d63; --warn:#c0392b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);
+    padding-bottom:env(safe-area-inset-bottom)}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg)}
+  header{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;
+    padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;display:flex;align-items:center;gap:10px}
+  header .brand{font-weight:800;letter-spacing:.3px;font-size:18px}
+  header .brand span{color:var(--orange)}
+  header .sub{font-size:11px;color:#9db2cf;margin-left:auto}
+  .wrap{padding:16px}
+  button{font-family:inherit;cursor:pointer;border:none}
+  .btn{width:100%;padding:15px;border-radius:12px;font-size:16px;font-weight:700;background:var(--orange);color:#fff}
+  .btn:active{transform:translateY(1px)}
+  .btn.sec{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+  .btn.ghost{background:transparent;color:var(--blue);font-weight:600;padding:10px}
+  .btn[disabled]{opacity:.5}
+  input,textarea{width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:0 0 6px 2px;text-transform:uppercase;letter-spacing:.4px}
+  .hide{display:none!important}
+  .muted{color:var(--mut)}
+  /* PIN */
+  .pin{min-height:70vh;display:flex;flex-direction:column;justify-content:center;gap:18px;text-align:center}
+  .pin .lock{font-size:40px}
+  .pin h1{margin:0;font-size:22px}
+  .pin #pinInput{text-align:center;letter-spacing:8px;font-size:26px;font-weight:700}
+  .pin #engInput{text-align:center}
+  /* cards */
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;
+    box-shadow:0 1px 2px rgba(20,40,70,.04)}
+  .job{display:block;text-align:left;width:100%;background:#fff}
+  .job .row1{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:999px}
+  .badge.install{background:#eaf3ff;color:var(--blue)}
+  .badge.survey{background:#fff1e2;color:#b5670a}
+  .job .when{font-weight:800;font-size:14px}
+  .job .who{font-weight:700;font-size:16px;margin:2px 0}
+  .job .addr{font-size:13px;color:var(--mut);line-height:1.4}
+  .job .bal{margin-top:8px;font-size:13px;font-weight:700}
+  .bal.owed{color:var(--warn)} .bal.paid{color:var(--ok)}
+  .chev{margin-left:auto;color:#c3ccda;font-size:20px}
+  /* detail */
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--mut)} .kv .v{font-weight:700;text-align:right}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .actions a,.actions button{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-radius:12px;
+    background:#fff;border:1.5px solid var(--line);color:var(--navy);font-weight:700;font-size:14px;text-decoration:none}
+  .sect-h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:22px 2px 10px}
+  .note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+  .note .meta{font-size:11px;color:var(--mut);margin-top:6px}
+  .soon{opacity:.55;background:repeating-linear-gradient(45deg,#fff,#fff 10px,#fafbfd 10px,#fafbfd 20px)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .chip{padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:14px}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  /* toast + sheet */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;
+    padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .25s;z-index:50;max-width:90%;text-align:center}
+  #toast.show{opacity:1}
+  .sheet-bg{position:fixed;inset:0;background:rgba(15,25,45,.45);display:flex;align-items:flex-end;z-index:40}
+  .sheet{background:#fff;width:100%;max-width:520px;margin:0 auto;border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}
+  .sheet h3{margin:0 0 14px}
+  .spin{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .center-pad{padding:50px 16px;text-align:center;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">AKITA<span> FIELD</span></div>
+    <div class="sub" id="hdrSub"></div>
+  </header>
+
+  <!-- ============ PIN ============ -->
+  <div class="wrap" id="viewPin">
+    <div class="pin">
+      <div class="lock">🔒</div>
+      <h1>Enter your PIN</h1>
+      <input id="pinInput" type="tel" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off">
+      <input id="engInput" type="text" placeholder="Your name (engineer)" autocomplete="name">
+      <button class="btn" id="pinBtn">Unlock</button>
+      <div class="muted" id="pinErr" style="font-size:13px;color:var(--warn)"></div>
+    </div>
+  </div>
+
+  <!-- ============ JOBS ============ -->
+  <div class="wrap hide" id="viewJobs">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="font-size:20px;font-weight:800">Jobs</div>
+      <button class="chip" id="toggleSurveys" style="margin-left:auto">+ Surveys</button>
+      <button class="chip" id="refreshBtn">↻</button>
+    </div>
+    <div id="jobsList"></div>
+  </div>
+
+  <!-- ============ DETAIL ============ -->
+  <div class="wrap hide" id="viewJob">
+    <button class="btn ghost" id="backBtn" style="padding-left:0">‹ Back to jobs</button>
+    <div id="jobBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ---- config ---------------------------------------------------------------
+var API = 'https://script.google.com/macros/s/AKfycbxdeymyE_1pQhBOyg5_u7V0TjtSV9xSdMca2GL98RSjL-mSG26AzoJ1wlMZ_qeJK9TQIQ/exec';
+var gbp = new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'});
+
+// ---- state ----------------------------------------------------------------
+var PIN = sessionStorage.getItem('akfield_pin') || '';
+var ENG = localStorage.getItem('akfield_eng') || '';
+var INCLUDE_SURVEYS = false;
+var CURRENT = null;   // current job in detail view
+
+// ---- helpers --------------------------------------------------------------
+function $(id){ return document.getElementById(id); }
+function show(view){ ['viewPin','viewJobs','viewJob'].forEach(function(v){ $(v).classList.toggle('hide', v!==view); }); window.scrollTo(0,0); }
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2600); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+async function api(action, extra){
+  var body = Object.assign({ action:action, pin:PIN, engineerName:ENG }, extra||{});
+  var r = await fetch(API, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
+  return r.json();
+}
+
+function fmtWhen(iso){
+  if(!iso) return '';
+  var d = new Date(iso);
+  var day = d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  var tm = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  return day + ' · ' + tm;
+}
+
+// ---- PIN ------------------------------------------------------------------
+$('engInput').value = ENG;
+$('pinBtn').addEventListener('click', doLogin);
+$('pinInput').addEventListener('keyup', function(e){ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  var pin = $('pinInput').value.trim();
+  var eng = $('engInput').value.trim();
+  if(!pin){ $('pinErr').textContent='Enter your PIN'; return; }
+  if(!eng){ $('pinErr').textContent='Enter your name'; return; }
+  $('pinErr').textContent=''; $('pinBtn').innerHTML='<span class="spin"></span>';
+  PIN = pin; ENG = eng;
+  var res = await api('fieldAuth');
+  $('pinBtn').textContent='Unlock';
+  if(res && res.ok){
+    sessionStorage.setItem('akfield_pin', PIN);
+    localStorage.setItem('akfield_eng', ENG);
+    $('hdrSub').textContent = ENG;
+    loadJobs();
+  } else {
+    PIN=''; $('pinErr').textContent = (res && res.error) || 'Login failed';
+  }
+}
+
+// ---- JOBS -----------------------------------------------------------------
+$('refreshBtn').addEventListener('click', loadJobs);
+$('toggleSurveys').addEventListener('click', function(){
+  INCLUDE_SURVEYS = !INCLUDE_SURVEYS;
+  this.classList.toggle('on', INCLUDE_SURVEYS);
+  loadJobs();
+});
+
+async function loadJobs(){
+  show('viewJobs');
+  $('jobsList').innerHTML = '<div class="center-pad"><span class="spin" style="border-color:#ccd;border-top-color:var(--navy)"></span><br><br>Loading jobs…</div>';
+  var res = await api('fieldJobs', { surveys: INCLUDE_SURVEYS, days: 180 });
+  if(!res || !res.ok){ $('jobsList').innerHTML = '<div class="center-pad">'+esc((res&&res.error)||'Could not load jobs')+'</div>'; if(res&&res.error==='Wrong PIN'){ logout(); } return; }
+  if(!res.jobs.length){ $('jobsList').innerHTML = '<div class="center-pad">No upcoming jobs in the next 6 months.</div>'; return; }
+
+  $('jobsList').innerHTML = res.jobs.map(function(j,i){
+    window['_job'+i] = j;
+    var isSurvey = /survey/i.test(j.type);
+    var bal = '';
+    if(j.hasQuote && j.outstanding!=null){
+      bal = j.outstanding>0
+        ? '<div class="bal owed">Balance due: '+gbp.format(j.outstanding)+'</div>'
+        : '<div class="bal paid">✓ Paid in full</div>';
+    }
+    return '<button class="card job" onclick="openJob(_job'+i+')">'+
+      '<div class="row1"><span class="badge '+(isSurvey?'survey':'install')+'">'+esc(j.type)+'</span>'+
+        '<span class="when">'+esc(fmtWhen(j.start))+'</span><span class="chev">›</span></div>'+
+      '<div class="who">'+esc(j.customerName || j.title || 'Job')+'</div>'+
+      (j.address? '<div class="addr">'+esc(j.address)+'</div>':'')+
+      bal + '</button>';
+  }).join('');
+}
+
+// ---- DETAIL ---------------------------------------------------------------
+$('backBtn').addEventListener('click', function(){ show('viewJobs'); });
+
+async function openJob(j){
+  CURRENT = j; show('viewJob');
+  $('jobBody').innerHTML = '<div class="center-pad"><span class="spin" style="border-color:#ccd;border-top-color:var(--navy)"></span><br><br>Loading…</div>';
+  var res = await api('fieldJob', { eventId:j.eventId, contactId:j.contactId, title:j.title, ref:j.ref });
+  if(!res || !res.ok){ $('jobBody').innerHTML = '<div class="center-pad">'+esc((res&&res.error)||'Could not load job')+'</div>'; return; }
+  CURRENT.detail = res;
+  renderJob(j, res);
+}
+
+function renderJob(j, d){
+  var c = d.contact || {};
+  var b = d.balance;
+  var isSurvey = /survey/i.test(j.type);
+  var mapsUrl = c.address ? 'https://maps.apple.com/?q='+encodeURIComponent(c.address) : '';
+
+  var balBlock = '';
+  if(b){
+    balBlock =
+      '<div class="card"><div class="sect-h" style="margin:0 0 8px">Payment — '+esc(b.tierLabel||'')+'</div>'+
+      '<div class="kv"><span class="k">Accepted total</span><span class="v">'+gbp.format(b.total)+'</span></div>'+
+      '<div class="kv"><span class="k">Received (deposit etc.)</span><span class="v">'+gbp.format(b.received)+'</span></div>'+
+      '<div class="kv"><span class="k">Outstanding balance</span><span class="v" style="color:'+(b.outstanding>0?'var(--warn)':'var(--ok)')+'">'+gbp.format(b.outstanding)+'</span></div>'+
+      '</div>';
+  }
+
+  var notesHtml = (d.notes||[]).slice().reverse().map(function(n){
+    return '<div class="note">'+esc(n.body)+ (n.at? '<div class="meta">'+esc(new Date(n.at).toLocaleString('en-GB'))+'</div>':'') +'</div>';
+  }).join('') || '<div class="muted" style="font-size:13.5px">No notes yet.</div>';
+
+  $('jobBody').innerHTML =
+    '<div class="card">'+
+      '<div class="row1"><span class="badge '+(isSurvey?'survey':'install')+'">'+esc(j.type)+'</span>'+
+        '<span class="when">'+esc(fmtWhen(j.start))+'</span></div>'+
+      '<div class="who" style="font-size:20px;margin:6px 0 2px">'+esc(c.name||j.customerName||'Customer')+'</div>'+
+      (c.address? '<div class="addr">'+esc(c.address)+'</div>':'')+
+      (j.ref? '<div class="muted" style="font-size:12px;margin-top:6px">Ref '+esc(j.ref)+'</div>':'')+
+    '</div>'+
+
+    '<div class="actions">'+
+      (c.phone? '<a href="tel:'+esc(c.phone)+'">📞 Call</a>' : '<button disabled>📞 Call</button>')+
+      (mapsUrl? '<a href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">📍 Directions</a>' : '<button disabled>📍 Directions</button>')+
+    '</div>'+
+    '<button class="btn" onclick="openOnMyWay()">🚐 Tell customer I\'m on my way</button>'+
+
+    balBlock +
+
+    '<div class="sect-h">Job notes</div>'+
+    '<div id="notesList">'+notesHtml+'</div>'+
+    '<textarea id="noteInput" rows="3" placeholder="Add a note about this job…" style="margin-top:8px"></textarea>'+
+    '<button class="btn sec" style="margin-top:8px" onclick="addNote()">＋ Add note</button>'+
+
+    '<div class="sect-h">Complete job</div>'+
+    '<div class="card soon" style="text-align:center;font-weight:700;color:var(--navy)">Commissioning report · Close job &amp; take payment<br><span class="muted" style="font-weight:600;font-size:13px">Coming next</span></div>';
+}
+
+// ---- On My Way sheet ------------------------------------------------------
+function openOnMyWay(){
+  var etas = ['15 mins','30 mins','45 mins','1 hour'];
+  var bg = document.createElement('div'); bg.className='sheet-bg';
+  bg.innerHTML = '<div class="sheet"><h3>On my way</h3>'+
+    '<p class="muted" style="margin-top:0;font-size:14px">Text '+esc((CURRENT.detail&&CURRENT.detail.contact&&CURRENT.detail.contact.name)||'the customer')+' an ETA.</p>'+
+    '<div class="chips" id="etaChips">'+etas.map(function(e,i){return '<button class="chip'+(i===1?' on':'')+'" data-eta="'+e+'">'+e+'</button>';}).join('')+'</div>'+
+    '<button class="btn" id="omwSend">Send text</button>'+
+    '<button class="btn ghost" id="omwCancel">Cancel</button></div>';
+  document.body.appendChild(bg);
+  var chosen = '30 mins';
+  bg.querySelectorAll('#etaChips .chip').forEach(function(ch){ ch.addEventListener('click', function(){
+    bg.querySelectorAll('#etaChips .chip').forEach(function(x){x.classList.remove('on');}); ch.classList.add('on'); chosen=ch.dataset.eta; }); });
+  bg.querySelector('#omwCancel').addEventListener('click', function(){ bg.remove(); });
+  bg.addEventListener('click', function(e){ if(e.target===bg) bg.remove(); });
+  bg.querySelector('#omwSend').addEventListener('click', async function(){
+    this.innerHTML='<span class="spin"></span>';
+    var c = (CURRENT.detail&&CURRENT.detail.contact)||{};
+    var first = (c.name||'').split(' ')[0];
+    var res = await api('fieldOnMyWay', { contactId: CURRENT.contactId || CURRENT.detail.contactId, firstName:first, eta:chosen, ref:CURRENT.ref });
+    bg.remove();
+    toast(res && res.ok ? '✓ On-my-way text sent' : ((res&&res.error)||'Could not send text'));
+  });
+}
+
+// ---- Notes ----------------------------------------------------------------
+async function addNote(){
+  var el = $('noteInput'); var txt = el.value.trim();
+  if(!txt){ return; }
+  el.disabled = true;
+  var cid = (CURRENT.contactId) || (CURRENT.detail && CURRENT.detail.contactId);
+  var res = await api('fieldNote', { contactId: cid, note: txt, ref: CURRENT.ref });
+  el.disabled = false;
+  if(res && res.ok){
+    el.value='';
+    var list = $('notesList');
+    if(list.querySelector('.muted')) list.innerHTML='';
+    var div = document.createElement('div'); div.className='note';
+    div.innerHTML = esc(res.note.body) + '<div class="meta">just now</div>';
+    list.insertBefore(div, list.firstChild);
+    toast('✓ Note saved');
+  } else {
+    toast((res&&res.error)||'Could not save note');
+  }
+}
+
+function logout(){ sessionStorage.removeItem('akfield_pin'); PIN=''; show('viewPin'); }
+
+// ---- boot -----------------------------------------------------------------
+if(PIN && ENG){ $('hdrSub').textContent = ENG; $('engInput').value = ENG; loadJobs(); }
+else { show('viewPin'); }
+</script>
+</body>
+</html>
