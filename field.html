@@ -226,11 +226,38 @@ async function openJob(j){
   renderJob(j, res);
 }
 
+var COLOUR_HEX = { black:'#222', white:'#f2f2f2', anthracite:'#3a3f44', grey:'#8a8f96', gray:'#8a8f96', silver:'#c9ccd1', brown:'#6b4a2b', cream:'#efe6d2', ivory:'#efe6d2' };
+function swatch(name){
+  if(!name) return '';
+  var hex = COLOUR_HEX[String(name).toLowerCase().trim()];
+  return hex ? '<span style="display:inline-block;width:13px;height:13px;border-radius:3px;border:1px solid #ccc;background:'+hex+';vertical-align:-1px;margin-right:6px"></span>' : '';
+}
+function specRow(k,v,extra){ return v ? '<div class="kv"><span class="k">'+k+'</span><span class="v">'+(extra||'')+esc(v)+'</span></div>' : ''; }
+
 function renderJob(j, d){
   var c = d.contact || {};
   var b = d.balance;
+  var sp = d.spec;
   var isSurvey = /survey/i.test(j.type);
   var mapsUrl = c.address ? 'https://maps.apple.com/?q='+encodeURIComponent(c.address) : '';
+
+  var specBlock = '';
+  if(sp){
+    var rows = specRow('Package', sp.pkg) + specRow('Indoor units', sp.units) +
+      specRow('System', sp.systemType) + specRow('Install type', sp.installType) +
+      specRow('Trunking', sp.trunking, swatch(sp.trunking)) +
+      specRow('Unit colour', sp.unitColour, swatch(sp.unitColour)) +
+      specRow('Install dates', sp.installDates) + specRow('Finance', sp.finance);
+    var roomsBlock = sp.rooms ? '<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Rooms &amp; systems</div><div style="white-space:pre-wrap;font-size:14.5px;line-height:1.7;font-weight:600;color:var(--navy)">'+esc(sp.rooms)+'</div></div>' : '';
+    var links = '';
+    if(sp.surveyUrl) links += '<a href="'+esc(sp.surveyUrl)+'" target="_blank" rel="noopener">📋 Survey report</a>';
+    if(sp.quoteUrl)  links += '<a href="'+esc(sp.quoteUrl)+'" target="_blank" rel="noopener">📄 Customer quote</a>';
+    if(rows || roomsBlock || links){
+      specBlock = '<div class="sect-h">Job spec</div>' +
+        ((rows||roomsBlock) ? '<div class="card">'+rows+roomsBlock+'</div>' : '') +
+        (links ? '<div class="actions">'+links+'</div>' : '');
+    }
+  }
 
   var balBlock = '';
   if(b){
@@ -260,6 +287,8 @@ function renderJob(j, d){
       (mapsUrl? '<a href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">📍 Directions</a>' : '<button disabled>📍 Directions</button>')+
     '</div>'+
     '<button class="btn" onclick="openOnMyWay()">🚐 Tell customer I\'m on my way</button>'+
+
+    specBlock +
 
     balBlock +
 
