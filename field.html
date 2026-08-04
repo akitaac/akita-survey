@@ -60,8 +60,10 @@
   .actions a,.actions button{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-radius:12px;
     background:#fff;border:1.5px solid var(--line);color:var(--navy);font-weight:700;font-size:14px;text-decoration:none}
   .sect-h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:22px 2px 10px}
-  .note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+  .note{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 40px 11px 13px;margin-bottom:9px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
   .note .meta{font-size:11px;color:var(--mut);margin-top:6px}
+  .noteDel{position:absolute;top:7px;right:7px;background:transparent;border:none;font-size:16px;opacity:.45;padding:4px;line-height:1;border-radius:8px}
+  .noteDel:active{opacity:1;background:#f4f6fa}
   .soon{opacity:.55;background:repeating-linear-gradient(45deg,#fff,#fff 10px,#fafbfd 10px,#fafbfd 20px)}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
   .chip{padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:14px}
@@ -270,7 +272,8 @@ function renderJob(j, d){
   }
 
   var notesHtml = (d.notes||[]).slice().reverse().map(function(n){
-    return '<div class="note">'+esc(n.body)+ (n.at? '<div class="meta">'+esc(new Date(n.at).toLocaleString('en-GB'))+'</div>':'') +'</div>';
+    var del = n.id ? '<button class="noteDel" onclick="delNote(this,\''+esc(n.id)+'\')" title="Delete note">🗑</button>' : '';
+    return '<div class="note" data-id="'+esc(n.id||'')+'">'+del+esc(n.body)+ (n.at? '<div class="meta">'+esc(new Date(n.at).toLocaleString('en-GB'))+'</div>':'') +'</div>';
   }).join('') || '<div class="muted" style="font-size:13.5px">No notes yet.</div>';
 
   $('jobBody').innerHTML =
@@ -339,13 +342,23 @@ async function addNote(){
     el.value='';
     var list = $('notesList');
     if(list.querySelector('.muted')) list.innerHTML='';
-    var div = document.createElement('div'); div.className='note';
-    div.innerHTML = esc(res.note.body) + '<div class="meta">just now</div>';
+    var div = document.createElement('div'); div.className='note'; div.setAttribute('data-id', res.note.id||'');
+    var del = res.note.id ? '<button class="noteDel" onclick="delNote(this,\''+res.note.id+'\')" title="Delete note">🗑</button>' : '';
+    div.innerHTML = del + esc(res.note.body) + '<div class="meta">just now</div>';
     list.insertBefore(div, list.firstChild);
-    toast('✓ Note saved');
+    toast('Note saved');
   } else {
     toast((res&&res.error)||'Could not save note');
   }
+}
+
+async function delNote(btn, noteId){
+  if(!confirm('Delete this note?')) return;
+  var cid = (CURRENT && CURRENT.contactId) || (CURRENT && CURRENT.detail && CURRENT.detail.contactId);
+  btn.textContent='…'; btn.disabled=true;
+  var res = await api('fieldNoteDelete', { contactId:cid, noteId:noteId, ref:CURRENT.ref });
+  if(res && res.ok){ var el=btn.closest('.note'); if(el) el.remove(); toast('Note deleted'); }
+  else { btn.textContent='🗑'; btn.disabled=false; toast((res&&res.error)||'Could not delete note'); }
 }
 
 // ---- Close job + take payment --------------------------------------------
