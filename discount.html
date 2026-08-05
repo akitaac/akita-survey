@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a2e4a">
+<title>Akita - Quote Discount</title>
+<style>
+  :root{ --navy:#1a2e4a; --orange:#f28c1f; --blue:#2e7fbf; --ink:#1a2e4a; --mut:#6b7787; --line:#e5e9f0; --bg:#f4f6fa; --ok:#1a9d63; --warn:#c0392b; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:env(safe-area-inset-bottom)}
+  .app{max-width:520px;margin:0 auto;min-height:100vh}
+  header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;font-weight:800;letter-spacing:.3px}
+  header span{color:var(--orange)}
+  .wrap{padding:18px}
+  label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:14px 2px 6px;text-transform:uppercase;letter-spacing:.4px}
+  input,select{width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}
+  #ref{text-transform:uppercase;font-weight:700;letter-spacing:1px}
+  button{width:100%;padding:15px;border:none;border-radius:12px;font-size:16px;font-weight:700;background:var(--orange);color:#fff;margin-top:20px;cursor:pointer}
+  button:active{transform:translateY(1px)} button[disabled]{opacity:.5}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--mut)} .kv .v{font-weight:700}
+  .was{color:var(--mut);text-decoration:line-through;margin-right:8px;font-weight:500}
+  .now{color:var(--ok)}
+  .msg{margin-top:14px;font-size:14px;font-weight:600}
+  .err{color:var(--warn)} .good{color:var(--ok)}
+  .hint{font-size:12.5px;color:var(--mut);margin-top:6px}
+  .spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>AKITA <span>DISCOUNT</span></header>
+  <div class="wrap">
+    <label>PIN</label>
+    <input id="pin" type="tel" inputmode="numeric" placeholder="PIN" autocomplete="off">
+    <label>Quote reference</label>
+    <input id="ref" type="text" placeholder="AKT-XXXXXX" autocomplete="off">
+    <label>Discount (GBP off)</label>
+    <input id="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="100">
+    <label>Package</label>
+    <select id="tier">
+      <option value="all">All packages</option>
+      <option value="essential">Essential only</option>
+      <option value="comfort">Comfort only</option>
+      <option value="premium">Premium only</option>
+    </select>
+    <div class="hint">Knocks the amount off the quote's price at source - the customer's acceptance page and their deposit + balance all update automatically.</div>
+    <button id="go" onclick="apply()">Apply discount</button>
+    <div id="out"></div>
+  </div>
+</div>
+<script>
+var API='https://script.google.com/macros/s/AKfycbxdeymyE_1pQhBOyg5_u7V0TjtSV9xSdMca2GL98RSjL-mSG26AzoJ1wlMZ_qeJK9TQIQ/exec';
+var gbp=new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'});
+function $(id){return document.getElementById(id);}
+$('pin').value=localStorage.getItem('ak_pin')||'';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+async function apply(){
+  var pin=$('pin').value.trim(), ref=$('ref').value.trim().toUpperCase(), amt=$('amt').value.trim(), tier=$('tier').value;
+  var out=$('out');
+  if(!pin||!ref||!amt){ out.innerHTML='<div class="msg err">Fill in PIN, quote ref and discount.</div>'; return; }
+  if(!confirm('Knock '+gbp.format(parseFloat(amt)||0)+' off '+ref+' ('+(tier==='all'?'all packages':tier)+')?')) return;
+  localStorage.setItem('ak_pin',pin);
+  var b=$('go'); b.disabled=true; b.innerHTML='<span class="spin"></span>'; out.innerHTML='';
+  var res;
+  try {
+    var r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'adjustQuote',pin:pin,quoteRef:ref,discount:amt,tier:tier})});
+    res=JSON.parse(await r.text());
+  } catch(e){ res={ok:false,error:'Network error'}; }
+  b.disabled=false; b.textContent='Apply discount';
+  if(res&&res.ok){
+    var rows=res.applied.map(function(a){ return '<div class="kv"><span class="k">'+esc(a.tier)+'</span><span class="v"><span class="was">'+gbp.format(a.from)+'</span><span class="now">'+gbp.format(a.to)+'</span></span></div>'; }).join('');
+    out.innerHTML='<div class="msg good">Done - '+gbp.format(res.discount)+' off '+esc(res.ref)+(res.customerName?' ('+esc(res.customerName)+')':'')+'</div><div class="card">'+rows+'</div>';
+  } else {
+    out.innerHTML='<div class="msg err">'+esc((res&&res.error)||'Something went wrong')+'</div>';
+  }
+}
+</script>
+</body>
+</html>
