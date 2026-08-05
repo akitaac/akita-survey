@@ -69,9 +69,12 @@ async function apply(){
   var b=$('go'); b.disabled=true; b.innerHTML='<span class="spin"></span>'; out.innerHTML='';
   var res;
   try {
-    var r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'adjustQuote',pin:pin,quoteRef:ref,discount:amt,tier:tier})});
-    res=JSON.parse(await r.text());
-  } catch(e){ res={ok:false,error:'Network error'}; }
+    var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},30000);
+    var r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'adjustQuote',pin:pin,quoteRef:ref,discount:amt,tier:tier}),signal:ctrl.signal});
+    clearTimeout(to);
+    var txt=await r.text();
+    try{ res=JSON.parse(txt); }catch(pe){ res={ok:false,error:'Unexpected reply (HTTP '+r.status+'): '+String(txt).slice(0,120)}; }
+  } catch(e){ res={ok:false,error:(e&&e.name==='AbortError')?'Timed out after 30s - try again.':('Network error: '+(e&&e.message||e))}; }
   b.disabled=false; b.textContent='Apply discount';
   if(res&&res.ok){
     var rows=res.applied.map(function(a){ return '<div class="kv"><span class="k">'+esc(a.tier)+'</span><span class="v"><span class="was">'+gbp.format(a.from)+'</span><span class="now">'+gbp.format(a.to)+'</span></span></div>'; }).join('');
