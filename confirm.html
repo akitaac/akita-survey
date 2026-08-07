@@ -304,10 +304,15 @@ return;
 }
 
 if (data.alreadyAccepted) {
-document.getElementById('notice-title').textContent = 'You\'ve already accepted this quote';
-document.getElementById('notice-msg').textContent = 'Thanks ' + (data.customerName || '') + ' — you\'ve already confirmed the ' + data.tierLabel + ' package for this quote. We\'ll be in touch about your installation. No further action is needed.';
+if (data.depositPaid) {
+document.getElementById('notice-title').textContent = 'You\'re all set';
+document.getElementById('notice-msg').textContent = 'Thanks ' + (data.customerName || '') + ' \u2014 you\'ve confirmed the ' + data.tierLabel + ' package and your deposit is paid. We\'ll be in touch about your installation date.';
 setRefText('quote-ref-notice');
 showState('state-notice');
+return;
+}
+// Accepted but deposit not yet paid -> take them to the deposit screen so they can pay.
+resumeAfterComfortClub(false);
 return;
 }
 
