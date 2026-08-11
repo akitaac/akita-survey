@@ -66,6 +66,14 @@ p strong{color:var(--ink);font-weight:600}
 .colour-select label{display:block;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px}
 .colour-select select{width:100%;padding:14px;border:1.5px solid #d5dde6;border-radius:12px;font-family:'Barlow',sans-serif;font-size:16px;color:var(--navy);background:#fff}
 
+.paymethod{text-align:left;margin:6px 0 18px}
+.paymethod .pm-title{display:block;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:10px}
+.pm-opt{display:flex;align-items:center;gap:11px;padding:13px;border:1.5px solid #d5dde6;border-radius:11px;margin-bottom:9px;cursor:pointer;background:#fff;transition:border-color .15s,background .15s}
+.pm-opt:has(input:checked){border-color:var(--orange);background:#fff8f4}
+.pm-opt input{width:20px;height:20px;flex-shrink:0;accent-color:var(--orange);cursor:pointer}
+.pm-opt .pm-main{font-size:14.5px;color:var(--ink);font-weight:600;line-height:1.3}
+.pm-opt .pm-sub{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+
 .btn-confirm{display:block;width:100%;padding:17px;margin-top:8px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(18px,5vw,20px);letter-spacing:.5px;text-transform:uppercase;cursor:pointer;min-height:54px;transition:background .2s,transform .1s}
 .btn-confirm:hover:not(:disabled){background:#c94d1f}
 .btn-confirm:active:not(:disabled){transform:translateY(1px)}
@@ -102,8 +110,14 @@ p strong{color:var(--ink);font-weight:600}
 <div class="summary">
 <div class="summary-row"><span>Package</span><span id="sum-tier"></span></div>
 <div class="summary-row total"><span>Total price</span><span id="sum-total"></span></div>
-<div class="summary-row"><span>Deposit due now</span><span id="sum-deposit"></span></div>
-<div class="summary-row"><span>Remaining balance</span><span id="sum-remaining"></span></div>
+<div class="summary-row" id="row-deposit"><span>Deposit due now</span><span id="sum-deposit"></span></div>
+<div class="summary-row"><span id="row-remaining-label">Remaining balance</span><span id="sum-remaining"></span></div>
+</div>
+
+<div class="paymethod" id="payMethodWrap">
+<span class="pm-title">How would you like to proceed?</span>
+<label class="pm-opt"><input type="radio" name="paymethod" value="card" checked onchange="payMethodChange()"><span class="pm-main">Pay a deposit now<span class="pm-sub">Secure your install with a card deposit</span></span></label>
+<label class="pm-opt"><input type="radio" name="paymethod" value="finance" onchange="payMethodChange()"><span class="pm-main">I'm paying by finance<span class="pm-sub">No deposit — go straight to picking your install date</span></span></label>
 </div>
 
 <div class="colour-select" id="colourSelectWrap">
@@ -120,7 +134,7 @@ p strong{color:var(--ink);font-weight:600}
 </div>
 <div class="check-row">
 <input type="checkbox" id="cb-balance">
-<label for="cb-balance">I understand the remaining balance is due on completion of the installation.</label>
+<label for="cb-balance" id="cb-balance-label">I understand the remaining balance is due on completion of the installation.</label>
 </div>
 </div>
 
@@ -146,8 +160,8 @@ p strong{color:var(--ink);font-weight:600}
 
 <div class="summary">
 <div class="summary-row total"><span>Total price</span><span id="succ-total"></span></div>
-<div class="summary-row"><span>Deposit due now</span><span id="succ-deposit"></span></div>
-<div class="summary-row"><span>Remaining balance</span><span id="succ-remaining"></span></div>
+<div class="summary-row" id="succ-deposit-row"><span>Deposit due now</span><span id="succ-deposit"></span></div>
+<div class="summary-row"><span id="succ-remaining-label">Remaining balance</span><span id="succ-remaining"></span></div>
 </div>
 
 <!-- Comfort Club upsell — shown after acceptance, before paying the deposit -->
@@ -192,8 +206,10 @@ p strong{color:var(--ink);font-weight:600}
 </div>
 
 <a id="pay-now-btn" class="btn-confirm" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none;">Pay Deposit Now</a>
+<a id="book-date-btn" class="btn-confirm" href="#" style="display:none;text-decoration:none;">Choose Your Install Date</a>
 
-<p style="margin-top:12px;">Prefer to pay later? No problem — we'll also send a deposit invoice to your email so you can pay whenever suits you. Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+<p id="pay-later-note" style="margin-top:12px;">Prefer to pay later? No problem — we'll also send a deposit invoice to your email so you can pay whenever suits you. Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
+<p id="finance-note" style="display:none;margin-top:12px;">We've emailed you this link too. Our team will be in touch to finalise your finance paperwork. Any questions? Call us on <strong style="color:#1a2e4a;">0330 043 7537</strong> or email <a href="mailto:hello@akita.ac" style="color:#2e7fbf;">hello@akita.ac</a></p>
 <p class="ref" id="quote-ref-success"></p>
 </div>
 
@@ -371,6 +387,26 @@ const colourOk = !colourRequired() || document.getElementById('unitColour').valu
 document.getElementById('confirmBtn').disabled = !(proceedChecked && balanceChecked && colourOk);
 }
 
+// Which payment route the customer picked on the confirm screen.
+function payMethod() {
+const el = document.querySelector('input[name="paymethod"]:checked');
+return el ? el.value : 'card';
+}
+
+// Reflect the chosen payment route in the confirm screen (deposit vs finance).
+function payMethodChange() {
+const fin = payMethod() === 'finance';
+document.getElementById('row-deposit').style.display = fin ? 'none' : 'flex';
+document.getElementById('row-remaining-label').textContent = fin ? 'To pay today' : 'Remaining balance';
+document.getElementById('sum-remaining').textContent = fin
+? '£0.00 (finance)'
+: (quote ? gbp.format(quote.remainingBalance) : '');
+document.getElementById('cb-balance-label').textContent = fin
+? "I confirm I'm arranging finance to cover the cost of this installation."
+: 'I understand the remaining balance is due on completion of the installation.';
+document.getElementById('confirmBtn').textContent = fin ? 'Accept & Choose Install Date' : 'Accept Quote & Pay Deposit';
+}
+
 let sent = false;
 
 async function proceed() {
@@ -396,6 +432,7 @@ quoteRef: ref,
 tier: tier,
 accept: true,
 ackBalance: true,
+payMethod: payMethod(),
 unit_colour: colourRequired() ? document.getElementById('unitColour').value : ''
 })
 });
@@ -410,6 +447,9 @@ sent = false;
 if (confirmBtn) confirmBtn.disabled = false;
 return;
 }
+
+// Finance route: no deposit — go straight to picking an install date.
+if (data.finance) { renderFinanceSuccess(data, false); return; }
 
 const cls = tierClassByLabel[data.tierLabel] || 'essential';
 document.getElementById('tier-label-success').textContent = data.tierLabel;
@@ -452,6 +492,41 @@ showState('state-error');
 sent = false;
 if (confirmBtn) confirmBtn.disabled = false;
 }
+}
+
+/* ---------------- Finance success (no deposit) ---------------- */
+function renderFinanceSuccess(data, added) {
+const cls = tierClassByLabel[data.tierLabel] || 'essential';
+const badge = document.getElementById('tier-label-success');
+badge.textContent = data.tierLabel; badge.className = 'tier-badge ' + cls;
+document.getElementById('success-msg').textContent = added
+? 'Comfort Club is set up. Now pick your installation date below and we\'ll confirm it straight away.'
+: 'Thanks — you\'re accepted! Pick your installation date below and we\'ll confirm it straight away. Our team will be in touch to finalise your finance paperwork.';
+
+document.getElementById('succ-total').textContent = (data.total !== undefined) ? gbp.format(data.total) : '';
+document.getElementById('succ-deposit-row').style.display = 'none';
+document.getElementById('succ-remaining-label').textContent = 'To pay today';
+document.getElementById('succ-remaining').textContent = '£0.00 (finance)';
+setRefText('quote-ref-success');
+
+// Finance: hide the deposit button + deposit note; show the install-date button + finance note.
+document.getElementById('pay-now-btn').style.display = 'none';
+document.getElementById('pay-later-note').style.display = 'none';
+document.getElementById('finance-note').style.display = 'block';
+const bd = document.getElementById('book-date-btn');
+if (data.financeBookingUrl) { bd.href = data.financeBookingUrl; bd.style.display = 'block'; }
+else bd.style.display = 'none';
+
+if (added) {
+document.getElementById('cc-panel').style.display = 'block';
+document.getElementById('cc-intro').style.display = 'none';
+document.getElementById('cc-opts').style.display = 'none';
+document.getElementById('cc-add-btn').style.display = 'none';
+document.getElementById('cc-added').style.display = 'block';
+} else {
+showComfortClub();
+}
+showState('state-success');
 }
 
 /* ---------------- Comfort Club upsell (before deposit) ---------------- */
@@ -523,6 +598,9 @@ body: JSON.stringify({ action: 'acceptQuote', quoteRef: ref, tier: tier, accept:
 });
 const data = await response.json();
 if (!data.ok) { document.getElementById('error-msg').textContent = data.error || 'We couldn\'t reach our systems just now.'; setRefText('quote-ref-error'); showState('state-error'); return; }
+
+// Finance route: no deposit — show the install-date picker instead of the deposit button.
+if (data.finance) { renderFinanceSuccess(data, added); return; }
 
 const cls = tierClassByLabel[data.tierLabel] || 'essential';
 document.getElementById('tier-label-success').textContent = data.tierLabel;
