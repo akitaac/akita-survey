@@ -2408,11 +2408,32 @@ async function sendQuote(){
     gs_mid_job_notes:'=== OPTION SELECTED: COMFORT PACKAGE ===\n£'+gM.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_premium_job_notes:'=== OPTION SELECTED: PREMIUM PACKAGE ===\n£'+gP.toFixed(2)+' all-in\n\n'+jobNotes,
     email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}),
+    // Generic tier list - the report prefers this and falls back to the
+    // basic_/mid_/premium_ keys below for quotes raised before it existed.
+    tiers_json:JSON.stringify(TIER_KEYS.map(function(k){
+      return { key:k, wire:tierWire(k), label:tierLabel(k),
+               total:'\u00a3'+(g[k]||0).toFixed(2),
+               order_summary:buildOrderSummary(k,(g[k]||0),ref,first+' '+last,addr,activeRooms) };
+    })),
     order_summary_essential:buildOrderSummary('Essential',gB,ref,first+' '+last,addr,activeRooms),
     order_summary_comfort:buildOrderSummary('Comfort',gM,ref,first+' '+last,addr,activeRooms),
     order_summary_premium:buildOrderSummary('Premium',gP,ref,first+' '+last,addr,activeRooms),
     rooms_json:JSON.stringify(activeRooms.map(r=>({
       type:r.type, dims:r.l+'×'+r.w+'×'+r.h+'m', kw_rec:r.kwRec,
+      // What was actually selected, per tier. The report used to re-derive
+      // these from kW with hardcoded product names, which drifts.
+      units:(function(){ const o={}; TIER_KEYS.forEach(function(k){
+        const u=getUnit(k,r.kwRec||2.5);
+        o[k]=u.make+' '+u.series+' '+u.kw+'kW'+(unitUndersized(k,r.kwRec||0)?' \u26a0 Undersized':'');
+      }); return o; })(),
+      head_units:(function(){ const o={}; TIER_KEYS.forEach(function(k){
+        if(!MS_HEADS[k]) return;
+        const h=msPickHead(k,r.kwRec||2.0);
+        o[k]=h.label||h.model||'';
+      }); return o; })(),
+      tier_prices:(function(){ const o={}; TIER_KEYS.forEach(function(k){
+        o[k]=(getUnit(k,r.kwRec||2.5).price+pipeCost(r,k)).toFixed(2);
+      }); return o; })(),
       basic_unit:getUnit('Essential',r.kwRec||2.5).make+' '+getUnit('Essential',r.kwRec||2.5).series+' '+getUnit('Essential',r.kwRec||2.5).kw+'kW',
       mid_unit:getUnit('Comfort',r.kwRec||2.5).make+' '+getUnit('Comfort',r.kwRec||2.5).series+' '+getUnit('Comfort',r.kwRec||2.5).kw+'kW',
       premium_unit:getUnit('Premium',r.kwRec||2.5).make+' '+getUnit('Premium',r.kwRec||2.5).series+' '+getUnit('Premium',r.kwRec||2.5).kw+'kW',
