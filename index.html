@@ -599,6 +599,11 @@ var AkitaPrices = (function () {
 
   var state = { version: 0, source: 'none', published_at: '', loadedAt: null, raw: null };
 
+  // Emura is sold as separate indoor (FTXJ) + outdoor (RXJ) SKUs in three
+  // finishes. White is the base price the sell figure assumes; Black and
+  // Silver add the difference in their net cost on top.
+  var FINISH = 'White';
+
   function num(v, dflt) {
     var n = parseFloat(v);
     return isFinite(n) ? n : (dflt === undefined ? 0 : dflt);
@@ -611,6 +616,8 @@ var AkitaPrices = (function () {
     if (!p || !p.products) return false;
 
     var singles = {}, heads = {}, outdoors = {};
+    var splitOutdoors = {};   // tier -> kw -> outdoor row  (Emura RXJ)
+    var splitHeads    = {};   // tier -> kw -> [head rows]  (Emura FTXJ)
 
     p.products.forEach(function (r) {
       var tier = String(r.tier_id || '').toLowerCase();
@@ -628,6 +635,18 @@ var AkitaPrices = (function () {
         });
       } else if (r.type === 'indoor') {
         var mk = MULTI_KEY[tier]; if (!mk) return;
+        // A head with a finish is a split-system indoor (Emura); keep it aside
+        // so it can be paired with its outdoor into one quotable unit.
+        if (r.finish) {
+          var fk = SINGLE_KEY[tier];
+          if (fk) {
+            var byKwF = (splitHeads[fk] = splitHeads[fk] || {});
+            (byKwF[kw] = byKwF[kw] || []).push({
+              sku: String(r.sku || ''), finish: String(r.finish),
+              net: num(r.net_price), make: String(r.make || ''), series: String(r.series || '')
+            });
+          }
+        }
         (heads[mk] = heads[mk] || []).push({
           kw: kw,
           label: String(r.make || '') + ' ' + String(r.series || '') + ' ' + kw + 'kW',
@@ -635,6 +654,13 @@ var AkitaPrices = (function () {
           net:   num(r.net_price),
           sell:  num(r.sell_price)
         });
+      } else if (r.type === 'outdoor_single') {
+        var ok = SINGLE_KEY[tier]; if (!ok) return;
+        (splitOutdoors[ok] = splitOutdoors[ok] || {})[kw] = {
+          sku: String(r.sku || ''), net: num(r.net_price), sell: num(r.sell_price),
+          make: String(r.make || ''), series: String(r.series || ''),
+          pipe: String(r.pipe_config || '')
+        };
       } else if (r.type === 'outdoor_multi') {
         var make = String(r.make || 'Other');
         (outdoors[make] = outdoors[make] || []).push({
@@ -647,6 +673,35 @@ var AkitaPrices = (function () {
           pipeConfig: String(r.pipe_config || '3/8" & 5/8"')
         });
       }
+    });
+
+    // ---- pair indoor + outdoor into complete single-split units ----
+    Object.keys(splitOutdoors).forEach(function (k) {
+      var built = [];
+      Object.keys(splitOutdoors[k]).forEach(function (kwKey) {
+        var ou = splitOutdoors[k][kwKey];
+        var cands = (splitHeads[k] || {})[kwKey] || [];
+        if (!cands.length) return;
+        var base = null, chosen = null;
+        for (var i = 0; i < cands.length; i++) {
+          if (cands[i].finish === 'White') base = cands[i];
+          if (cands[i].finish === FINISH)  chosen = cands[i];
+        }
+        base = base || cands[0];
+        chosen = chosen || base;
+        built.push({
+          kw: parseFloat(kwKey),
+          // Sell assumes the base (White) head; a dearer finish adds its
+          // extra cost on top rather than being absorbed.
+          price:  Math.round((ou.sell + (chosen.net - base.net)) * 100) / 100,
+          net:    chosen.net + ou.net,
+          make:   ou.make,
+          series: ou.series,
+          model:  chosen.sku + ' + ' + ou.sku,
+          finish: chosen.finish
+        });
+      });
+      if (built.length) singles[k] = built;
     });
 
     Object.keys(singles).forEach(function (k) { singles[k].sort(byKw); });
@@ -793,9 +848,28 @@ var AkitaPrices = (function () {
     return out;
   }
 
+  /** Emura finish. Rebuilds the paired units at the new price. */
+  function setFinish(f) {
+    FINISH = f || 'White';
+    if (state.raw) apply(state.raw);
+    return FINISH;
+  }
+  function finish() { return FINISH; }
+  /** Finishes actually available for a tier, e.g. ['White','Black','Silver']. */
+  function finishes() {
+    var seen = {}, out = [];
+    ((state.raw && state.raw.products) || []).forEach(function (r) {
+      if (r.finish && r.type === 'indoor' && !seen[r.finish]) { seen[r.finish] = 1; out.push(r.finish); }
+    });
+    return out;
+  }
+
   return {
     load: load,
     label: label,
+    setFinish: setFinish,
+    finish: finish,
+    finishes: finishes,
     tierLabel: function (k) { return TIER_LABEL[k] || k; },
     surveyTypes: surveyTypes,
     surveyRecovery: surveyRecovery,
