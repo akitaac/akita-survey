@@ -2455,6 +2455,11 @@ async function sendQuote(){
     customer_phone:phone, customer_address:addr,
     customer_street:ad1, customer_city:ad2, customer_county:ad3, customer_postcode:ad4,
     quote_ref:ref, quote_date:date,
+    // Premium+ is sent as its own field because Zapier hand-maps each key
+    // through to storeQuote - it does not forward the whole body, so
+    // tiers_json never reaches the backend.
+    premium_plus_total:'£'+((gTier&&gTier.PremiumPlus)||0).toFixed(2),
+    premium_plus_price_gbp:((gTier&&gTier.PremiumPlus)||0).toFixed(2),
     basic_total:'£'+gB.toFixed(2), mid_total:'£'+gM.toFixed(2), premium_total:'£'+gP.toFixed(2),
     extras_total:'£'+ext.toFixed(2),
     finance_product:fin.apr?fin.apr+' '+fin.term:'None',
