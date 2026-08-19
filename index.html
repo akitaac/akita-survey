@@ -478,6 +478,10 @@ const SURVEY_REPORT_SCRIPT = 'https://script.google.com/macros/s/AKfycbwPZPZCl1e
 let TIER_KEYS = ['Essential','Comfort','Premium'];
 const TIER_LABEL  = {Essential:'Essential',Comfort:'Comfort',Premium:'Premium',PremiumPlus:'Premium+'};
 const TIER_SLUG   = {Essential:'basic',Comfort:'mid',Premium:'prem',PremiumPlus:'plus'};
+// What the BACKEND calls each tier. This is a wire contract with
+// quoteSelection/confirm.html - it must not follow the internal rename.
+const TIER_WIRE   = {Essential:'Basic',Comfort:'Mid',Premium:'Premium',PremiumPlus:'PremiumPlus'};
+function tierWire(t){ return TIER_WIRE[t] || t; }
 const TIER_SWATCH = {Essential:{bg:'#f4f6f9',fg:'#1a2e4a'},Comfort:{bg:'#fff4ef',fg:'#E8612A'},
                      Premium:{bg:'#1a2e4a',fg:'#C5E8F5'},PremiumPlus:{bg:'#2b1a3d',fg:'#E9D8FF'}};
 function tierLabel(t){ return TIER_LABEL[t] || t; }
@@ -2598,9 +2602,9 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
     })()}</p>`:'';
 
   // Selection buttons — stacked vertically for mobile
-  const btnBasic=selUrl('Essential');
-  const btnMid=selUrl('Comfort');
-  const btnPremium=selUrl('Premium');
+  const btnBasic=selUrl(tierWire('Essential'));
+  const btnMid=selUrl(tierWire('Comfort'));
+  const btnPremium=selUrl(tierWire('Premium'));
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f2f5f9;font-family:Arial,sans-serif">
