@@ -92,12 +92,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .del-btn{background:none;border:1.5px solid #e0e0e0;border-radius:6px;width:36px;height:36px;cursor:pointer;color:#bbb;font-size:16px;display:flex;align-items:center;justify-content:center}
 
 /* Tier display */
-.tier-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+/* Four tiers will not fit across a phone, so they go two-by-two instead. */
+.tier-grid.t4{grid-template-columns:repeat(2,1fr)}
+@media(min-width:560px){.tier-grid.t4{grid-template-columns:repeat(4,1fr)}}
 .tier-card{border:2px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;background:#fff}
 .tier-badge{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:6px}
 .tb-basic{background:var(--gbg);color:var(--gtc)}.tc-basic{border-color:#c8e6c9}
 .tb-mid{background:var(--abg);color:var(--atc)}.tc-mid{border-color:#ffe082}
 .tb-prem{background:var(--bbg);color:var(--btc)}.tc-prem{border-color:#90caf9}
+.tb-plus{background:#efe4fb;color:#5b2d8e}.tc-plus{border-color:#c9a8ea}
 .tier-price{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;color:var(--navy)}
 .tier-sub{font-size:10px;color:var(--mid);margin-top:3px;line-height:1.3}
 
@@ -324,7 +328,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <!-- PAGE 2 — Quote -->
 <div class="page" id="p2">
   <p class="page-title">Quote Options</p>
-  <p class="page-sub">All three options shown — add extras and finance below</p>
+  <p class="page-sub" id="quote-sub">All three options shown — add extras and finance below</p>
 
   <!-- VAT toggle -->
   <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;margin-bottom:14px">
@@ -395,11 +399,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
   </div>
 
-  <div class="total-bar">
-    <div class="tb-row"><span>Essential Package all-in</span><b id="tb-b">—</b></div>
-    <div class="tb-row"><span>Comfort Package all-in</span><b id="tb-m">—</b></div>
-    <div class="tb-row"><span>Premium Package all-in</span><b id="tb-p">—</b></div>
-  </div>
+  <div class="total-bar" id="total-bar"></div>
 
   <button class="btn btn-primary" onclick="goPage(3)">Review & Send Quote →</button>
   <button class="btn btn-ghost" onclick="goPage(1)">← Back</button>
@@ -464,9 +464,25 @@ const SELECTION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr
 // Set this to your deployed Apps Script URL after deployment:
 const SURVEY_REPORT_SCRIPT = 'https://script.google.com/macros/s/AKfycbwPZPZCl1emzTgsLeGv3ns-i1f_gt8fmOoh6JCt0D35o_v4BJVuNzHwK9dNcHfAxEaF/exec';
 
+// ── Tier vocabulary ─────────────────────────────────
+// ONE set of keys everywhere. It used to be Basic/Mid/Premium for single
+// splits and Essential/Comfort/Premium for multi, translated in four places,
+// so adding a fourth tier meant editing about 58 sites. A tier is now data:
+// push a key onto TIER_KEYS and every total, card, badge and colour follows.
+let TIER_KEYS = ['Essential','Comfort','Premium'];
+const TIER_LABEL  = {Essential:'Essential',Comfort:'Comfort',Premium:'Premium',PremiumPlus:'Premium+'};
+const TIER_SLUG   = {Essential:'basic',Comfort:'mid',Premium:'prem',PremiumPlus:'plus'};
+const TIER_SWATCH = {Essential:{bg:'#f4f6f9',fg:'#1a2e4a'},Comfort:{bg:'#fff4ef',fg:'#E8612A'},
+                     Premium:{bg:'#1a2e4a',fg:'#C5E8F5'},PremiumPlus:{bg:'#2b1a3d',fg:'#E9D8FF'}};
+function tierLabel(t){ return TIER_LABEL[t] || t; }
+function tcClass(t){ return 'tc-' + (TIER_SLUG[t] || 'basic'); }
+function tbClass(t){ return 'tb-' + (TIER_SLUG[t] || 'basic'); }
+function zeroByTier(){ const o={}; TIER_KEYS.forEach(k=>o[k]=0); return o; }
+function nullByTier(){ const o={}; TIER_KEYS.forEach(k=>o[k]=null); return o; }
+
 // ── Unit data ────────────────────────────────────────────
 let UNITS = {
-  Basic: [
+  Essential: [
     {kw:2.0,price:1175, net:380.78, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
     {kw:2.5,price:1225, net:408.43, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
     {kw:3.5,price:1275, net:473.21, make:'Daikin',     series:'Sensira',    model:'FTXF35F + RXF35F'},
@@ -475,7 +491,7 @@ let UNITS = {
     {kw:6.0,price:1550, net:727.59, make:'Daikin',     series:'Sensira',    model:'FTXF60F + RXF60D9'},
     {kw:7.1,price:1750, net:925.09, make:'Daikin',     series:'Sensira',    model:'FTXF71F + RXF71D9'},
   ],
-  Mid: [
+  Comfort: [
     {kw:2.5,price:1550, net:725.76,  make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF25VGKB + MUZ-EF25VG'},
     {kw:3.5,price:1675, net:854.55,  make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF35VGKB + MUZ-EF35VG'},
     {kw:5.0,price:1975, net:1128.33, make:'Mitsubishi', series:'EF Zen',     model:'MSZ-EF50VGK2B + MUZ-EF50VG'},
@@ -590,8 +606,9 @@ var AkitaPrices = (function () {
 
   // Transition bridge: database tier ids -> the tool's existing keys.
   // Delete once the tool speaks one tier vocabulary.
-  var SINGLE_KEY = { essential: 'Basic',     comfort: 'Mid',     premium: 'Premium', premium_plus: 'PremiumPlus' };
-  var MULTI_KEY  = { essential: 'Essential', comfort: 'Comfort', premium: 'Premium', premium_plus: 'PremiumPlus' };
+  // One vocabulary now - database tier_id maps straight to the tool's key.
+  var SINGLE_KEY = { essential: 'Essential', comfort: 'Comfort', premium: 'Premium', premium_plus: 'PremiumPlus' };
+  var MULTI_KEY  = SINGLE_KEY;
 
   // Customer-facing labels. 'PremiumPlus' is the internal key (no + in an
   // object key that gets used in CSS class names); the label is what shows.
@@ -739,6 +756,17 @@ var AkitaPrices = (function () {
       FITTINGS = p.fittings.map(function (f) {
         return [String(f.name || ''), String(f.code || ''), num(f.price_75), num(f.price_100)];
       });
+    }
+
+    // Extend the tool's tier list from the database, in sort order. A new
+    // tier is now purely data: activate it in the sheet and a column appears.
+    if (typeof TIER_KEYS !== 'undefined' && p.tiers && p.tiers.length) {
+      var keys = [];
+      p.tiers.forEach(function (t) {
+        var k = SINGLE_KEY[String(t.tier_id || '').toLowerCase()];
+        if (k && keys.indexOf(k) === -1 && (singles[k] || heads[k])) keys.push(k);
+      });
+      if (keys.length) TIER_KEYS = keys;
     }
 
     state.version      = num(p.version);
@@ -932,7 +960,7 @@ function msTierTotal(tier, rooms){
 }
 
 function msTotalPrice(rooms){
-  if(!rooms.length) return {Essential:{total:0},Comfort:{total:0},Premium:{total:0}};
+  if(!rooms.length){ const z={}; TIER_KEYS.forEach(k=>z[k]={total:0}); return z; }
   return {
     Essential: msTierTotal('Essential', rooms),
     Comfort:   msTierTotal('Comfort',   rooms),
@@ -1007,8 +1035,8 @@ function pipeCost(r,tier){
 }
 
 function tierTotals(){
-  const t={Basic:0,Mid:0,Premium:0};
-  ['Basic','Mid','Premium'].forEach(tier=>{
+  const t=zeroByTier();
+  TIER_KEYS.forEach(tier=>{
     getSingleRooms().forEach(r=>{
       if(!r.kwRec) return;
       t[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier);
@@ -1140,7 +1168,7 @@ function setSplitType(id, type){
   if(!r) return;
   r.splitType = type;
   // Reset outdoor override when multi rooms change
-  msOutdoorOverride = {Essential:null, Comfort:null, Premium:null};
+  msOutdoorOverride = nullByTier();
   renderRooms();
   // recalc prices
   rooms.forEach(r=>{ if(r.l&&r.w) liveCalc(r.id); });
@@ -1390,7 +1418,7 @@ function setFitting(id,code,val){
 let vatOn = false;
 let jobType = 'single'; // legacy — now derived from room splitTypes
 let msOutdoor = null;   // legacy
-let msOutdoorOverride = {Essential:null, Comfort:null, Premium:null}; // manual override per tier
+let msOutdoorOverride = nullByTier(); // manual override per tier
 
 function toggleVat(){
   vatOn = !vatOn;
@@ -1428,7 +1456,7 @@ function onDiscountChange(){
 
 function refreshTierPrices(){
   rooms.forEach(function(r){
-    ['Basic','Mid','Premium'].forEach(function(tier){
+    TIER_KEYS.forEach(function(tier){
       var el=document.getElementById('tp-'+r.id+'-'+tier);
       if(!el) return;
       var u=getUnit(tier,r.kwRec||2.5);
@@ -1455,13 +1483,13 @@ function buildMsOutdoorPanel(multiRooms){
   html += '<div class="card-hdr" style="color:#1a2e4a"><span class="ci">🔗</span> Multi-Split Outdoor Units</div>';
   html += '<p style="font-size:11px;color:#8a9bb0;margin-bottom:10px">Auto-selected based on '+multiRooms.length+' rooms · '+totalKw.toFixed(1)+'kW total. Override below if needed.</p>';
 
-  ['Essential','Comfort','Premium'].forEach(function(tier){
+  TIER_KEYS.forEach(function(tier){
     var t = mst[tier];
     var ou = t.outdoor;
     var ouList = tier==='Essential' ? MS_DAIKIN_OUTDOORS : MS_MITSUBISHI_OUTDOORS;
     var currentIdx = ouList.indexOf(ou);
-    var tbg = {Essential:'#f4f6f9',Comfort:'#fff4ef',Premium:'#1a2e4a'}[tier];
-    var ttc = {Essential:'#1a2e4a',Comfort:'#E8612A',Premium:'#C5E8F5'}[tier];
+    var tbg = (TIER_SWATCH[tier]||TIER_SWATCH.Essential).bg;
+    var ttc = (TIER_SWATCH[tier]||TIER_SWATCH.Essential).fg;
     var overload = ou.maxKw < totalKw;
     var portShort = ou.ports < multiRooms.length;
     var isOverride = msOutdoorOverride[tier] !== null;
@@ -1541,11 +1569,11 @@ function buildRoomCard(r, idx, type){
           · ${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW
         </span>
       </div>
-      <div class="tier-grid">
-        ${['Basic','Mid','Premium'].map(tier=>{
-          const tc={'Basic':'tc-basic','Mid':'tc-mid','Premium':'tc-prem'}[tier];
-          const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
-          const tLabel={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+      <div class="tier-grid ${TIER_KEYS.length>3?'t4':''}">
+        ${TIER_KEYS.map(tier=>{
+          const tc=tcClass(tier);
+          const tb=tbClass(tier);
+          const tLabel=tierLabel(tier);
           const u=getUnit(tier,r.kwRec||2.5);
           const undersized=unitUndersized(tier,r.kwRec||0);
           const sizedUp=!undersized && r.kwRec>0 && u.kw>r.kwRec;
@@ -1588,12 +1616,12 @@ function buildRoomCard(r, idx, type){
           · ${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW
         </span>
       </div>
-      <div class="tier-grid">
-        ${['Essential','Comfort','Premium'].map(tier=>{
+      <div class="tier-grid ${TIER_KEYS.length>3?'t4':''}">
+        ${TIER_KEYS.map(tier=>{
           const head = msPickHead(tier, r.kwRec||2.0);
           const hp = msHeadPrice(head) * vm;
-          const tc = {Essential:'tc-basic',Comfort:'tc-mid',Premium:'tc-prem'}[tier];
-          const tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+          const tc = tcClass(tier);
+          const tb = tbClass(tier);
           const undersized = msHeadUndersized(tier, r.kwRec||0);
           return `<div class="tier-card ${tc}${undersized?' tier-card-warn':''}">
             <div class="tier-badge ${tb}">${tier}</div>
@@ -1660,31 +1688,41 @@ function updateTotals(){
   const mRooms = getMultiRooms();
 
   // Single split totals
-  const st = {Basic:0, Mid:0, Premium:0};
-  ['Basic','Mid','Premium'].forEach(function(tier){
+  const st = zeroByTier();
+  TIER_KEYS.forEach(function(tier){
     sRooms.forEach(function(r){
       if(r.kwRec){ st[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); }
     });
   });
 
   // Multi-split group totals (if any)
-  var mt = {Essential:0, Comfort:0, Premium:0};
+  var mt = zeroByTier();
   if(mRooms.length > 0){
     const mst = msTotalPrice(mRooms);
-    mt.Essential = mst.Essential.total / vm; // remove VAT for now, add back below
-    mt.Comfort   = mst.Comfort.total   / vm;
-    mt.Premium   = mst.Premium.total   / vm;
+    // strip VAT here, it is added back on the grand total below
+    TIER_KEYS.forEach(function(k){ if(mst[k]) mt[k] = mst[k].total / vm; });
   }
 
   // Grand totals — single by tier + multi by tier + extras
-  const gB = applyDiscount((st.Basic   + mt.Essential + ext) * (1+sub) * vm);
-  const gM = applyDiscount((st.Mid     + mt.Comfort   + ext) * (1+sub) * vm);
-  const gP = applyDiscount((st.Premium + mt.Premium   + ext) * (1+sub) * vm);
+  const g = {};
+  TIER_KEYS.forEach(function(k){
+    g[k] = applyDiscount(((st[k]||0) + (mt[k]||0) + ext) * (1+sub) * vm);
+  });
+  const gB = g.Essential, gM = g.Comfort, gP = g.Premium;
 
   const f = n => '£'+n.toFixed(2);
-  document.getElementById('tb-b').textContent = f(gB);
-  document.getElementById('tb-m').textContent = f(gM);
-  document.getElementById('tb-p').textContent = f(gP);
+  const qs = document.getElementById('quote-sub');
+  if(qs){
+    const words = {2:'Both',3:'All three',4:'All four',5:'All five'}[TIER_KEYS.length] || 'All';
+    qs.textContent = words + ' options shown \u2014 add extras and finance below';
+  }
+  const bar = document.getElementById('total-bar');
+  if(bar){
+    bar.innerHTML = TIER_KEYS.map(function(k){
+      return '<div class="tb-row"><span>' + tierLabel(k) + ' Package all-in</span>' +
+             '<b id="tb-' + TIER_SLUG[k] + '">' + f(g[k]) + '</b></div>';
+    }).join('');
+  }
 
   if(fin.sub>0){
     document.getElementById('fin-sub-lbl').textContent = (fin.sub*100).toFixed(1)+'% added';
@@ -1705,7 +1743,7 @@ const LABOUR_PER_DAY   = 400;   // one install day per indoor unit
 const LABOUR_PER_ROOM  = 400; // £400/day per room
 
 function calcProfit(tier, selRooms, totalRevenue){
-  const tierKey = {Essential:'Basic', Comfort:'Mid', Premium:'Premium'}[tier] || tier;
+  const tierKey = tier;   // one vocabulary - no translation needed
   const mRooms  = selRooms.filter(r=>r.splitType==='multi');
   const sRooms  = selRooms.filter(r=>r.splitType!=='multi');
   const hasMulti = mRooms.length > 0;
@@ -1911,28 +1949,31 @@ function updateReviewTotals(){
   if(mSel.length>0 && !treatAsSingle){
     const mst = msTotalPrice(mSel);
     const vm3=vatMult();const ext3=extrasTotal();const sub3=fin.sub;
-    const stRev={Basic:0,Mid:0,Premium:0};
-    ['Basic','Mid','Premium'].forEach(tier=>{sSel.forEach(r=>{if(r.kwRec){if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); }}});});
-    const gBR= applyDiscount((stRev.Basic+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3);
-    const gMR= applyDiscount((stRev.Mid+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3);
+    const stRev=zeroByTier();
+    TIER_KEYS.forEach(tier=>{sSel.forEach(r=>{if(r.kwRec){if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); }}});});
+    const gBR= applyDiscount((stRev.Essential+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3);
+    const gMR= applyDiscount((stRev.Comfort+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3);
     const gPR= applyDiscount((stRev.Premium+mst.Premium.total/vm3+ext3)*(1+sub3)*vm3);
-    document.getElementById('rv-totals').innerHTML=
-      [['Essential',gBR],['Comfort',gMR],['Premium',gPR]].map(([t,total])=>{
-        const p = calcProfit(t, sel, total);
-        return `<div class="tline"><span>${t}</span><span>£${total.toFixed(2)}${profitBadge(p.profit,p.margin)}</span></div>`;
+    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+        const total = applyDiscount(((stRev[k]||0)+((mst[k]&&mst[k].total)||0)/vm3+ext3)*(1+sub3)*vm3);
+        const p = calcProfit(k, sel, total);
+        return '<div class="tline"><span>'+tierLabel(k)+'</span><span>£'+total.toFixed(2)+
+               profitBadge(p.profit,p.margin)+'</span></div>';
       }).join('');
   } else {
-    const t={Basic:0,Mid:0,Premium:0};
-    ['Basic','Mid','Premium'].forEach(tier=>{
+    const t=zeroByTier();
+    TIER_KEYS.forEach(tier=>{
       sSel.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
-    const gB=applyDiscount((t.Basic+ext)*(1+sub)*vm), gM=applyDiscount((t.Mid+ext)*(1+sub)*vm), gP=applyDiscount((t.Premium+ext)*(1+sub)*vm);
-    const tierLabel = {Basic:'Essential', Mid:'Comfort', Premium:'Premium'};
+    const gB=applyDiscount((t.Essential+ext)*(1+sub)*vm), gM=applyDiscount((t.Comfort+ext)*(1+sub)*vm), gP=applyDiscount((t.Premium+ext)*(1+sub)*vm);
     const pB=calcProfit('Essential',sel,gB), pM=calcProfit('Comfort',sel,gM), pP=calcProfit('Premium',sel,gP);
-    document.getElementById('rv-totals').innerHTML=`
-      <div class="tline"><span>Essential${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gB.toFixed(2)}${profitBadge(pB.profit,pB.margin)}</span></div>
-      <div class="tline"><span>Comfort${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gM.toFixed(2)}${profitBadge(pM.profit,pM.margin)}</span></div>
-      <div class="tline"><span>Premium${treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':''}</span><span>£${gP.toFixed(2)}${profitBadge(pP.profit,pP.margin)}</span></div>`;
+    const note = treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':'';
+    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+      const total = applyDiscount(((t[k]||0)+ext)*(1+sub)*vm);
+      const p = calcProfit(k, sel, total);
+      return '<div class="tline"><span>'+tierLabel(k)+note+'</span><span>£'+total.toFixed(2)+
+             profitBadge(p.profit,p.margin)+'</span></div>';
+    }).join('');
   }
 }
 
@@ -1993,18 +2034,18 @@ function buildReview(){
   if(mRoomsRev.length>0){
     const mst = msTotalPrice(mRoomsRev);
     // Single room totals for mixed job
-    const stRev = {Basic:0, Mid:0, Premium:0};
-    ['Basic','Mid','Premium'].forEach(tier=>{
+    const stRev = zeroByTier();
+    TIER_KEYS.forEach(tier=>{
       sRoomsRev.forEach(r=>{ if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } });
     });
     const ext=extrasTotal(); const sub=fin.sub;
-    const gBR= applyDiscount((stRev.Basic+mst.Essential.total/vm+ext)*(1+sub)*vm);
-    const gMR= applyDiscount((stRev.Mid+mst.Comfort.total/vm+ext)*(1+sub)*vm);
+    const gBR= applyDiscount((stRev.Essential+mst.Essential.total/vm+ext)*(1+sub)*vm);
+    const gMR= applyDiscount((stRev.Comfort+mst.Comfort.total/vm+ext)*(1+sub)*vm);
     const gPR= applyDiscount((stRev.Premium+mst.Premium.total/vm+ext)*(1+sub)*vm);
     // Outdoor unit lines per tier
-    const ouLines = ['Essential','Comfort','Premium'].map(tier=>{
+    const ouLines = TIER_KEYS.map(tier=>{
       const t = mst[tier];
-      const tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+      const tb = tbClass(tier);
       return `<div class="tline">
         <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tier}</span>
           ${t.outdoor.label}</span>
@@ -2020,11 +2061,11 @@ function buildReview(){
             <strong>Room ${rooms.indexOf(r)+1}: ${r.type}</strong>
             <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
           </div>
-          ${['Basic','Mid','Premium'].map(tier=>{
+          ${TIER_KEYS.map(tier=>{
             const u=getUnit(tier,r.kwRec||2.5);
             const pc=pipeCost(r,tier);
-            const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
-            const tl={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+            const tb=tbClass(tier);
+            const tl=tierLabel(tier);
             const undersized=unitUndersized(tier,r.kwRec||0);
             return `<div class="tline">
               <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tl}</span>
@@ -2043,12 +2084,12 @@ function buildReview(){
             <strong>🔗 Multi Room ${idx+1}: ${r.type}</strong>
             <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
           </div>
-          ${['Essential','Comfort','Premium'].map(tier=>{
+          ${TIER_KEYS.map(tier=>{
             const head=msPickHead(tier,r.kwRec||2.0);
             const hp=msHeadPrice(head)*vm;
-            const tierKey={Essential:'Basic',Comfort:'Mid',Premium:'Premium'}[tier];
+            const tierKey=tier;
             const pc=pipeCost(r,tierKey);
-            const tb={Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+            const tb=tbClass(tier);
             const undersized=msHeadUndersized(tier,r.kwRec||0);
             const headDesc = undersized
               ? '<span style="color:#e67e22;font-size:11px">⚠ Undersized — max '+head.kw+'kW, room needs '+r.kwRec+'kW</span>'
@@ -2073,11 +2114,11 @@ function buildReview(){
           <strong>Room ${idx+1}: ${r.type}</strong>
           <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
         </div>
-        ${['Basic','Mid','Premium'].map(tier=>{
+        ${TIER_KEYS.map(tier=>{
           const u=getUnit(tier,r.kwRec||2.5);
           const pc=pipeCost(r,tier);
-          const tb={'Basic':'tb-basic','Mid':'tb-mid','Premium':'tb-prem'}[tier];
-          const tl={'Basic':'Essential','Mid':'Comfort','Premium':'Premium'}[tier];
+          const tb=tbClass(tier);
+          const tl=tierLabel(tier);
           return `<div class="tline">
             <span><span class="tier-badge ${tb}" style="font-size:10px;padding:1px 7px">${tl}</span>
               ${u.make} ${u.series} ${u.kw}kW${pc>0?' +'+r.extraPipe+'m pipe':''}
@@ -2091,12 +2132,12 @@ function buildReview(){
     let gB, gM, gP;
     if(mRoomsRv.length > 0){
       const mst = msTotalPrice(mRoomsRv);
-      gB = applyDiscount((st.Basic   + mst.Essential.total/vm + ext) * (1+sub) * vm);
-      gM = applyDiscount((st.Mid     + mst.Comfort.total/vm   + ext) * (1+sub) * vm);
+      gB = applyDiscount((st.Essential   + mst.Essential.total/vm + ext) * (1+sub) * vm);
+      gM = applyDiscount((st.Comfort     + mst.Comfort.total/vm   + ext) * (1+sub) * vm);
       gP = applyDiscount((st.Premium + mst.Premium.total/vm   + ext) * (1+sub) * vm);
     } else {
-      gB= applyDiscount((st.Basic+ext)*(1+sub)*vm);
-      gM= applyDiscount((st.Mid+ext)*(1+sub)*vm);
+      gB= applyDiscount((st.Essential+ext)*(1+sub)*vm);
+      gM= applyDiscount((st.Comfort+ext)*(1+sub)*vm);
       gP= applyDiscount((st.Premium+ext)*(1+sub)*vm);
     }
     const pB=calcProfit('Essential',rooms,gB), pM=calcProfit('Comfort',rooms,gM), pP=calcProfit('Premium',rooms,gP);
@@ -2120,7 +2161,7 @@ function buildReview(){
 // ── Send ─────────────────────────────────────────────────
 function buildOrderSummary(tier, totalPrice, ref, customerName, addr, activeRooms){
   activeRooms = activeRooms || rooms;
-  const labels = {Basic:'ESSENTIAL', Mid:'COMFORT', Premium:'PREMIUM'};
+  const labels = {}; TIER_KEYS.forEach(k=>labels[k]=tierLabel(k).toUpperCase());
   const kitLabels = {
     'Standard (1/4 & 3/8)': 'Standard install kit (1/4" & 3/8" pipe config)',
     'Medium (1/4 & 1/2)':   'Medium install kit (1/4" & 1/2" pipe config)',
@@ -2240,20 +2281,20 @@ async function sendQuote(){
     // Mixed or pure multi — calculate separately
     const mst = msTotalPrice(mActive);
     const vm2 = vatMult(); const ext2 = extrasTotal(); const sub2 = fin.sub;
-    const stLocal = {Basic:0,Mid:0,Premium:0};
-    ['Basic','Mid','Premium'].forEach(function(tier){
+    const stLocal = zeroByTier();
+    TIER_KEYS.forEach(function(tier){
       sActive.forEach(function(r){ if(r.kwRec){ if(r.kwRec){ stLocal[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } } });
     });
-    gB = applyDiscount((stLocal.Basic   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2);
-    gM = applyDiscount((stLocal.Mid     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2);
+    gB = applyDiscount((stLocal.Essential   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2);
+    gM = applyDiscount((stLocal.Comfort     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2);
     gP = applyDiscount((stLocal.Premium + mst.Premium.total/vm2   + ext2) * (1+sub2) * vm2);
   } else {
-    const t={Basic:0,Mid:0,Premium:0};
-    ['Basic','Mid','Premium'].forEach(tier=>{
+    const t=zeroByTier();
+    TIER_KEYS.forEach(tier=>{
       activeRooms.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
-    gB= applyDiscount((t.Basic+ext)*(1+sub)*vm);
-    gM= applyDiscount((t.Mid+ext)*(1+sub)*vm);
+    gB= applyDiscount((t.Essential+ext)*(1+sub)*vm);
+    gM= applyDiscount((t.Comfort+ext)*(1+sub)*vm);
     gP= applyDiscount((t.Premium+ext)*(1+sub)*vm);
   }
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
@@ -2316,16 +2357,16 @@ async function sendQuote(){
     gs_mid_job_notes:'=== OPTION SELECTED: COMFORT PACKAGE ===\n£'+gM.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_premium_job_notes:'=== OPTION SELECTED: PREMIUM PACKAGE ===\n£'+gP.toFixed(2)+' all-in\n\n'+jobNotes,
     email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}),
-    order_summary_essential:buildOrderSummary('Basic',gB,ref,first+' '+last,addr,activeRooms),
-    order_summary_comfort:buildOrderSummary('Mid',gM,ref,first+' '+last,addr,activeRooms),
+    order_summary_essential:buildOrderSummary('Essential',gB,ref,first+' '+last,addr,activeRooms),
+    order_summary_comfort:buildOrderSummary('Comfort',gM,ref,first+' '+last,addr,activeRooms),
     order_summary_premium:buildOrderSummary('Premium',gP,ref,first+' '+last,addr,activeRooms),
     rooms_json:JSON.stringify(activeRooms.map(r=>({
       type:r.type, dims:r.l+'×'+r.w+'×'+r.h+'m', kw_rec:r.kwRec,
-      basic_unit:getUnit('Basic',r.kwRec||2.5).make+' '+getUnit('Basic',r.kwRec||2.5).series+' '+getUnit('Basic',r.kwRec||2.5).kw+'kW',
-      mid_unit:getUnit('Mid',r.kwRec||2.5).make+' '+getUnit('Mid',r.kwRec||2.5).series+' '+getUnit('Mid',r.kwRec||2.5).kw+'kW',
+      basic_unit:getUnit('Essential',r.kwRec||2.5).make+' '+getUnit('Essential',r.kwRec||2.5).series+' '+getUnit('Essential',r.kwRec||2.5).kw+'kW',
+      mid_unit:getUnit('Comfort',r.kwRec||2.5).make+' '+getUnit('Comfort',r.kwRec||2.5).series+' '+getUnit('Comfort',r.kwRec||2.5).kw+'kW',
       premium_unit:getUnit('Premium',r.kwRec||2.5).make+' '+getUnit('Premium',r.kwRec||2.5).series+' '+getUnit('Premium',r.kwRec||2.5).kw+'kW',
-      basic_price:(getUnit('Basic',r.kwRec||2.5).price+pipeCost(r,'Basic')).toFixed(2),
-      mid_price:(getUnit('Mid',r.kwRec||2.5).price+pipeCost(r,'Mid')).toFixed(2),
+      basic_price:(getUnit('Essential',r.kwRec||2.5).price+pipeCost(r,'Essential')).toFixed(2),
+      mid_price:(getUnit('Comfort',r.kwRec||2.5).price+pipeCost(r,'Comfort')).toFixed(2),
       premium_price:(getUnit('Premium',r.kwRec||2.5).price+pipeCost(r,'Premium')).toFixed(2),
       extra_pipe_m:r.extraPipe,
       loft_pipe_m:r.loftPipe||0,
@@ -2447,24 +2488,24 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
   var roomRows;
   if(effectiveJobType==='multi'){
     const mstEmail = msTotalPrice(activeRooms);
-    const ouLine = ['Essential','Comfort','Premium'].map(tier=>{
+    const ouLine = TIER_KEYS.map(tier=>{
       const ou = mstEmail[tier].outdoor;
-      const tbg = {Essential:'#f4f6f9',Comfort:'#fff4ef',Premium:'#1a2e4a'}[tier];
-      const ttc = {Essential:'#1a2e4a',Comfort:'#E8612A',Premium:'#C5E8F5'}[tier];
+      const tbg = (TIER_SWATCH[tier]||TIER_SWATCH.Essential).bg;
+      const ttc = (TIER_SWATCH[tier]||TIER_SWATCH.Essential).fg;
       return `<tr style="background:#f8fafc"><td colspan="3" style="padding:8px 14px;border-top:1px solid #eef0f3">
         <span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">${tier}</span>
         <span style="font-size:12px;color:#555;margin-left:6px">${ou.label}</span>
       </td></tr>`;
     }).join('');
     roomRows = ouLine + activeRooms.map((r,i)=>{
-      const tierBlocks=['Essential','Comfort','Premium'].map(tier=>{
+      const tierBlocks=TIER_KEYS.map(tier=>{
         const head=msPickHead(tier,r.kwRec||2.0);
-        const tierKey={'Essential':'Basic','Comfort':'Mid','Premium':'Premium'}[tier];
+        const tierKey=tier;
         const pc=pipeCost(r,tierKey);
         const hp=msHeadPrice(head)*vatMult();
         const tbg={'Essential':'#f4f6f9','Comfort':'#fff4ef','Premium':'#1a2e4a'}[tier];
         const ttc={'Essential':'#1a2e4a','Comfort':'#E8612A','Premium':'#C5E8F5'}[tier];
-        const tl={'Essential':'ESSENTIAL','Comfort':'COMFORT','Premium':'PREMIUM'}[tier];
+        const tl=tierLabel(tier).toUpperCase();
         return `<tr style="border-bottom:1px solid #eef0f3">
           <td style="padding:8px 14px;width:30%"><span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:0.5px">${tl}</span></td>
           <td style="padding:8px 8px;font-size:12px;color:#555;width:70%">${head.label}${pc>0?' +'+r.extraPipe+'m pipe':''}</td>
@@ -2478,12 +2519,12 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
   } else {
   // Per-room stacked layout — each tier on its own row inside the room block
   roomRows=activeRooms.map((r,i)=>{
-    const tierBlocks=['Basic','Mid','Premium'].map(tier=>{
+    const tierBlocks=TIER_KEYS.map(tier=>{
       const u=getUnit(tier,r.kwRec||2.5);
       const pc=pipeCost(r,tier);
-      const tbg={'Basic':'#f4f6f9','Mid':'#E8612A','Premium':'#1a2e4a'}[tier];
-      const ttc={'Basic':'#1a2e4a','Mid':'#fff','Premium':'#C5E8F5'}[tier];
-      const label={'Basic':'ESSENTIAL','Mid':'COMFORT','Premium':'PREMIUM'}[tier];
+      const tbg=(TIER_SWATCH[tier]||TIER_SWATCH.Essential).bg;
+      const ttc=(TIER_SWATCH[tier]||TIER_SWATCH.Essential).fg;
+      const label=tierLabel(tier).toUpperCase();
       return `<tr style="border-bottom:1px solid #eef0f3">
         <td style="padding:8px 14px;width:30%">
           <span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:0.5px">${label}</span>
@@ -2509,8 +2550,8 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
     })()}</p>`:'';
 
   // Selection buttons — stacked vertically for mobile
-  const btnBasic=selUrl('Basic');
-  const btnMid=selUrl('Mid');
+  const btnBasic=selUrl('Essential');
+  const btnMid=selUrl('Comfort');
   const btnPremium=selUrl('Premium');
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -2671,12 +2712,12 @@ function buildMsRooms(){
     var html = '<div class="card">';
     html += '<div class="card-hdr"><span class="ci">❄️</span> Room '+(idx+1)+': '+r.type;
     html += '<span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">· '+r.l+'×'+r.w+'×'+r.h+'m · '+r.kwRec+'kW</span></div>';
-    html += '<div class="tier-grid">';
-    ['Essential','Comfort','Premium'].forEach(function(tier){
+    html += '<div class="tier-grid ' + (TIER_KEYS.length>3?'t4':'') + '">';
+    TIER_KEYS.forEach(function(tier){
       var head = msPickHead(tier, r.kwRec);
       var hp = msHeadPrice(head) * vatMult();
-      var tc = {Essential:'tc-basic',Comfort:'tc-mid',Premium:'tc-prem'}[tier];
-      var tb = {Essential:'tb-basic',Comfort:'tb-mid',Premium:'tb-prem'}[tier];
+      var tc = tcClass(tier);
+      var tb = tbClass(tier);
       var undersized = msHeadUndersized(tier, r.kwRec||0);
       html += '<div class="tier-card '+tc+(undersized?' tier-card-warn':'')+'">';
       html += '<div class="tier-badge '+tb+'">'+tier+'</div>';
@@ -2703,7 +2744,7 @@ function updateMsTotals(){
   if(!rooms.length) return;
   var totals = msTotalPrice(rooms);
   var f = function(n){ return '£'+n.toFixed(2); };
-  ['Essential','Comfort','Premium'].forEach(function(tier){
+  TIER_KEYS.forEach(function(tier){
     var t = totals[tier];
     var ouEl = document.getElementById('ms-ou-'+tier.toLowerCase());
     var totEl = document.getElementById('ms-tb-'+tier.toLowerCase());
@@ -2714,7 +2755,7 @@ function updateMsTotals(){
 
 function refreshMsHeadPrices(){
   rooms.forEach(function(r){
-    ['Essential','Comfort','Premium'].forEach(function(tier){
+    TIER_KEYS.forEach(function(tier){
       var el = document.getElementById('ms-tp-'+r.id+'-'+tier);
       if(!el) return;
       var head = msPickHead(tier, r.kwRec||2.0);
