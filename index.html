@@ -2099,9 +2099,10 @@ function buildReview(){
       sRoomsRev.forEach(r=>{ if(r.kwRec){ stRev[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } });
     });
     const ext=extrasTotal(); const sub=fin.sub;
-    const gBR= applyDiscount((stRev.Essential+mst.Essential.total/vm+ext)*(1+sub)*vm);
-    const gMR= applyDiscount((stRev.Comfort+mst.Comfort.total/vm+ext)*(1+sub)*vm);
-    const gPR= applyDiscount((stRev.Premium+mst.Premium.total/vm+ext)*(1+sub)*vm);
+    const gR = {};
+    TIER_KEYS.forEach(function(k){
+      gR[k] = applyDiscount(((stRev[k]||0) + ((mst[k]&&mst[k].total)||0)/vm + ext) * (1+sub) * vm);
+    });
     // Outdoor unit lines per tier
     const ouLines = TIER_KEYS.map(tier=>{
       const t = mst[tier];
@@ -2163,10 +2164,11 @@ function buildReview(){
             </div>`;
           }).join('')}
         </div>`).join('');
-    document.getElementById('rv-totals').innerHTML=`
-      <div class="grand-line"><span>Essential all-in${finNote}</span><span>£${gBR.toFixed(2)}${profitBadge(calcProfit('Essential',rooms,gBR).profit,calcProfit('Essential',rooms,gBR).margin)}</span></div>
-      <div class="grand-line"><span>Comfort all-in${finNote}</span><span>£${gMR.toFixed(2)}${profitBadge(calcProfit('Comfort',rooms,gMR).profit,calcProfit('Comfort',rooms,gMR).margin)}</span></div>
-      <div class="grand-line"><span>Premium all-in${finNote}</span><span>£${gPR.toFixed(2)}${profitBadge(calcProfit('Premium',rooms,gPR).profit,calcProfit('Premium',rooms,gPR).margin)}</span></div>`;
+    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+      const p = calcProfit(k, rooms, gR[k]);
+      return '<div class="grand-line"><span>' + tierLabel(k) + ' all-in' + finNote + '</span><span>\u00a3' +
+             gR[k].toFixed(2) + profitBadge(p.profit, p.margin) + '</span></div>';
+    }).join('');
   } else {
     document.getElementById('rv-rooms').innerHTML=rooms.map((r,idx)=>`
       <div class="rv-room">
@@ -2189,22 +2191,20 @@ function buildReview(){
       </div>`).join('');
     const st=tierTotals(); const ext=extrasTotal(); const sub=fin.sub;
     const mRoomsRv = getMultiRooms();
-    let gB, gM, gP;
+    const g = {};
     if(mRoomsRv.length > 0){
       const mst = msTotalPrice(mRoomsRv);
-      gB = applyDiscount((st.Essential   + mst.Essential.total/vm + ext) * (1+sub) * vm);
-      gM = applyDiscount((st.Comfort     + mst.Comfort.total/vm   + ext) * (1+sub) * vm);
-      gP = applyDiscount((st.Premium + mst.Premium.total/vm   + ext) * (1+sub) * vm);
+      TIER_KEYS.forEach(function(k){
+        g[k] = applyDiscount(((st[k]||0) + ((mst[k]&&mst[k].total)||0)/vm + ext) * (1+sub) * vm);
+      });
     } else {
-      gB= applyDiscount((st.Essential+ext)*(1+sub)*vm);
-      gM= applyDiscount((st.Comfort+ext)*(1+sub)*vm);
-      gP= applyDiscount((st.Premium+ext)*(1+sub)*vm);
+      TIER_KEYS.forEach(function(k){ g[k] = applyDiscount(((st[k]||0)+ext)*(1+sub)*vm); });
     }
-    const pB=calcProfit('Essential',rooms,gB), pM=calcProfit('Comfort',rooms,gM), pP=calcProfit('Premium',rooms,gP);
-    document.getElementById('rv-totals').innerHTML=`
-      <div class="grand-line"><span>Essential Package all-in${finNote}</span><span>£${gB.toFixed(2)}${profitBadge(pB.profit,pB.margin)}</span></div>
-      <div class="grand-line"><span>Comfort Package all-in${finNote}</span><span>£${gM.toFixed(2)}${profitBadge(pM.profit,pM.margin)}</span></div>
-      <div class="grand-line"><span>Premium Package all-in${finNote}</span><span>£${gP.toFixed(2)}${profitBadge(pP.profit,pP.margin)}</span></div>`;
+    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+      const p = calcProfit(k, rooms, g[k]);
+      return '<div class="grand-line"><span>' + tierLabel(k) + ' Package all-in' + finNote + '</span><span>\u00a3' +
+             g[k].toFixed(2) + profitBadge(p.profit, p.margin) + '</span></div>';
+    }).join('');
   }
 
   // Add-ons folded into totals — not shown to customer
@@ -2333,6 +2333,7 @@ async function sendQuote(){
   const sub=fin.sub;
   const vm=vatMult();
   var gB, gM, gP;
+  const gTier = {};   // total per tier, keyed by TIER_KEYS
   const mActive = activeRooms.filter(r=>r.splitType==='multi');
   const sActive  = activeRooms.filter(r=>r.splitType!=='multi');
   const isMixed  = mActive.length>0 && sActive.length>0;
@@ -2345,18 +2346,19 @@ async function sendQuote(){
     TIER_KEYS.forEach(function(tier){
       sActive.forEach(function(r){ if(r.kwRec){ if(r.kwRec){ stLocal[tier]+=getUnit(tier,r.kwRec||2.5).price+pipeCost(r,tier); } } });
     });
-    gB = applyDiscount((stLocal.Essential   + mst.Essential.total/vm2 + ext2) * (1+sub2) * vm2);
-    gM = applyDiscount((stLocal.Comfort     + mst.Comfort.total/vm2   + ext2) * (1+sub2) * vm2);
-    gP = applyDiscount((stLocal.Premium + mst.Premium.total/vm2   + ext2) * (1+sub2) * vm2);
+    TIER_KEYS.forEach(function(k){
+      gTier[k] = applyDiscount(((stLocal[k]||0) + ((mst[k]&&mst[k].total)||0)/vm2 + ext2) * (1+sub2) * vm2);
+    });
   } else {
     const t=zeroByTier();
     TIER_KEYS.forEach(tier=>{
       activeRooms.forEach(r=>{ if(r.kwRec){ const u=getUnit(tier,r.kwRec||2.5); t[tier]+=u.price+pipeCost(r,tier); } });
     });
-    gB= applyDiscount((t.Essential+ext)*(1+sub)*vm);
-    gM= applyDiscount((t.Comfort+ext)*(1+sub)*vm);
-    gP= applyDiscount((t.Premium+ext)*(1+sub)*vm);
+    TIER_KEYS.forEach(function(k){ gTier[k] = applyDiscount(((t[k]||0)+ext)*(1+sub)*vm); });
   }
+  // Legacy aliases - the backend and the report's fallback still read
+  // basic_total / mid_total / premium_total.
+  gB = gTier.Essential || 0; gM = gTier.Comfort || 0; gP = gTier.Premium || 0;
   const filled=addons.filter(a=>a.desc&&parseFloat(a.price)>0);
   if(surveyCharge()>0) filled.unshift({desc:SURVEY_LABEL[survey.surveyType]+' & quotation', price:surveyCharge()});
   const jobTypeLabel = isMixed ? 'MIXED INSTALL' : mActive.length>0 && !treatAsSingle ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
@@ -2376,9 +2378,9 @@ async function sendQuote(){
     'Unit finish: '+(survey.unitFinish||'White'),
     '',
     '=== PRICING ===',
-    'Essential Package: £'+gB.toFixed(2),
-    'Comfort Package:   £'+gM.toFixed(2),
-    'Premium:           £'+gP.toFixed(2),
+    ...TIER_KEYS.map(function(k){
+      return (tierLabel(k)+':').padEnd(19) + '£' + (gTier[k]||0).toFixed(2);
+    }),
     fin.apr?'Finance: '+fin.apr+' '+fin.term:'',
     '',
     '=== ROOMS ===',
@@ -2424,8 +2426,8 @@ async function sendQuote(){
       var meta = (typeof AkitaPrices !== 'undefined') ? AkitaPrices.tierMeta(k) : {};
       return { key:k, wire:tierWire(k), label:tierLabel(k),
                range_name:meta.range_name||'', blurb:meta.blurb||'', spec_line:meta.spec_line||'',
-               total:'\u00a3'+(g[k]||0).toFixed(2),
-               order_summary:buildOrderSummary(k,(g[k]||0),ref,first+' '+last,addr,activeRooms) };
+               total:'\u00a3'+(gTier[k]||0).toFixed(2),
+               order_summary:buildOrderSummary(k,(gTier[k]||0),ref,first+' '+last,addr,activeRooms) };
     })),
     order_summary_essential:buildOrderSummary('Essential',gB,ref,first+' '+last,addr,activeRooms),
     order_summary_comfort:buildOrderSummary('Comfort',gM,ref,first+' '+last,addr,activeRooms),
