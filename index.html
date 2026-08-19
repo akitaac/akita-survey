@@ -1333,51 +1333,71 @@ function updateTotals(){
 }
 
 // ── Profit calculator ────────────────────────────────────
-const OVERHEAD_PER_JOB = 148; // £148 flat per job (annual overhead / estimated installs)
+// £21,763 of annual overheads spread over the working year.
+// PER INSTALL DAY, not per job: the constraint in a one-man business is days,
+// so a 3-day multi carries three times the overhead of a 1-day single split.
+// 21,763 / 115 install days (2-3 days a week on the tools) = 189.
+const OVERHEAD_PER_DAY = 189;
+const LABOUR_PER_DAY   = 400;   // one install day per indoor unit
 const LABOUR_PER_ROOM  = 400; // £400/day per room
 
 function calcProfit(tier, selRooms, totalRevenue){
   const tierKey = {Essential:'Basic', Comfort:'Mid', Premium:'Premium'}[tier] || tier;
-  const mRooms = selRooms.filter(r=>r.splitType==='multi');
-  const sRooms = selRooms.filter(r=>r.splitType!=='multi');
-  const isMixed = mRooms.length>0;
+  const mRooms  = selRooms.filter(r=>r.splitType==='multi');
+  const sRooms  = selRooms.filter(r=>r.splitType!=='multi');
+  const hasMulti = mRooms.length > 0;
 
-  let unitNetTotal = 0;
-  let kitAtCost = 0;
+  let equipmentNet = 0;   // what the kit costs us from the supplier
+  let materialsNet = 0;   // install materials at cost, i.e. before the 20% markup
 
-  // Single split rooms
   sRooms.forEach(r => {
     if(!r.kwRec) return;
     const u = getUnit(tierKey, r.kwRec||2.5);
-    unitNetTotal += u ? (u.net || 0) : 0;
-    const kitCharged = r.kwRec<=4.2 ? 171.456 : r.kwRec<=5.0 ? 174.984 : 181.896;
-    kitAtCost += kitCharged / 1.20;
+    equipmentNet += u ? (u.net || 0) : 0;
+    // Current kit charges (June 2026 workbook), converted back to cost.
+    const kitCharged = r.kwRec<=4.2 ? 208.42 : r.kwRec<=5.0 ? 211.94 : 218.86;
+    materialsNet += kitCharged / 1.20;
   });
 
-  // Multi split rooms
   mRooms.forEach(r => {
     if(!r.kwRec) return;
     const head = msPickHead(tier, r.kwRec);
-    unitNetTotal += head.net || 0;
-    // Multi-split indoor kit cost (3/8 & 5/8 pipe config)
-    kitAtCost += 198.96 / 1.20;
+    equipmentNet += head.net || 0;
+    materialsNet += 67.52 / 1.20;          // per indoor unit
   });
 
-  // Outdoor unit net cost for multi rooms
-  if(isMixed){
+  if(hasMulti){
     const totalKw = mRooms.reduce((s,r)=>s+(r.kwRec||0),0);
     const ou = msPickOutdoor(tier, mRooms.length, totalKw);
-    unitNetTotal += ou ? (ou.net || ou.price * 0.70) : 0;
+    equipmentNet += ou ? (ou.net || ou.price * 0.70) : 0;
+    materialsNet += 60.19 / 1.20;          // fixed outdoor kit, ONCE per job
   }
 
-  const totalCost = unitNetTotal + kitAtCost + OVERHEAD_PER_JOB;
-  const profit = totalRevenue - totalCost;
-  const margin = totalRevenue > 0 ? (profit / totalRevenue * 100) : 0;
-  return { cost: totalCost, profit, margin };
+  // Labour: one install day per indoor unit, counted as a real cost.
+  // It leaves the business either as a fitter's wage or as drawings.
+  const installDays  = sRooms.filter(r=>r.kwRec).length + mRooms.filter(r=>r.kwRec).length;
+  const labourCost   = installDays * LABOUR_PER_DAY;
+  const overheadCost = installDays * OVERHEAD_PER_DAY;
+
+  const totalCost = equipmentNet + materialsNet + labourCost + overheadCost;
+  const profit    = totalRevenue - totalCost;
+  const margin    = totalRevenue > 0 ? (profit / totalRevenue * 100) : 0;
+
+  return {
+    cost: totalCost, profit, margin,
+    breakdown: {
+      equipment: equipmentNet,
+      materials: materialsNet,
+      labour: labourCost,
+      overhead: overheadCost,
+      installDays: installDays
+    }
+  };
 }
 
 function profitBadge(profit, margin){
-  const col = margin >= 20 ? '#27ae60' : margin >= 12 ? '#e67e22' : '#e74c3c';
+  // Rebanded for labour-as-a-cost: 15%+ good, 8-15% acceptable, under 8% thin.
+  const col = margin >= 15 ? '#27ae60' : margin >= 8 ? '#e67e22' : '#e74c3c';
   return '<span style="font-size:11px;font-weight:700;color:'+col+';margin-left:8px">'+
     (profit>=0?'+':'')+' £'+Math.round(profit)+' ('+margin.toFixed(1)+'%)</span>';
 }
