@@ -484,6 +484,14 @@ const TIER_WIRE   = {Essential:'Basic',Comfort:'Mid',Premium:'Premium',PremiumPl
 function tierWire(t){ return TIER_WIRE[t] || t; }
 const TIER_SWATCH = {Essential:{bg:'#f4f6f9',fg:'#1a2e4a'},Comfort:{bg:'#fff4ef',fg:'#E8612A'},
                      Premium:{bg:'#1a2e4a',fg:'#C5E8F5'},PremiumPlus:{bg:'#2b1a3d',fg:'#E9D8FF'}};
+const TIER_LOGO = {Essential:'Sensira.png',Comfort:'Zen.png',Premium:'LN.png',PremiumPlus:'Emura.png'};
+// Email card styling. Dark tiers need light text, so price colour is explicit.
+const TIER_CARD = {
+  Essential:  {bg:'#f4f6f9', label:'#888',    price:'#1a2e4a', border:'none'},
+  Comfort:    {bg:'#fff4ef', label:'#E8612A', price:'#1a2e4a', border:'1px solid #f0d5c8'},
+  Premium:    {bg:'#1a2e4a', label:'#C5E8F5', price:'#fff',    border:'none'},
+  PremiumPlus:{bg:'#2b1a3d', label:'#E9D8FF', price:'#fff',    border:'none'}
+};
 function tierLabel(t){ return TIER_LABEL[t] || t; }
 function tcClass(t){ return 'tc-' + (TIER_SLUG[t] || 'basic'); }
 function tbClass(t){ return 'tb-' + (TIER_SLUG[t] || 'basic'); }
@@ -2455,7 +2463,7 @@ async function sendQuote(){
     gs_basic_job_notes:'=== OPTION SELECTED: ESSENTIAL PACKAGE ===\n£'+gB.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_mid_job_notes:'=== OPTION SELECTED: COMFORT PACKAGE ===\n£'+gM.toFixed(2)+' all-in\n\n'+jobNotes,
     gs_premium_job_notes:'=== OPTION SELECTED: PREMIUM PACKAGE ===\n£'+gP.toFixed(2)+' all-in\n\n'+jobNotes,
-    email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}),
+    email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,gTier,activeRooms,treatAsSingle}),
     // Generic tier list - the report prefers this and falls back to the
     // basic_/mid_/premium_ keys below for quotes raised before it existed.
     tiers_json:JSON.stringify(quotableTierKeys(activeRooms).map(function(k){
@@ -2541,7 +2549,11 @@ async function sendQuote(){
             photos:r.photos||[]
           })),
           general_photos: generalPhotos,
-          email_html: payload.email_html
+          email_html: payload.email_html,
+          // Generic tier list + room detail. Without these the report generator
+          // falls back to basic_/mid_/premium_ and drops Premium+ entirely.
+          tiers_json: payload.tiers_json,
+          rooms_json: payload.rooms_json
         };
         const rr = await fetch(SURVEY_REPORT_SCRIPT, {
           method:'POST',
@@ -2594,7 +2606,13 @@ async function sendQuote(){
 }
 
 // ── Email builder ────────────────────────────────────────
-function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}){
+function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,gTier,activeRooms,treatAsSingle}){
+  // One source of truth for which tiers this quote offers. Multi-split jobs
+  // drop tiers with no compatible outdoor unit, so this is not always TIER_KEYS.
+  const emailTiers = (typeof quotableTierKeys === 'function')
+    ? quotableTierKeys(activeRooms) : TIER_KEYS.slice();
+  const gT = gTier || {Essential:gB, Comfort:gM, Premium:gP};
+  const colW = (100 - 2*(emailTiers.length-1)) / emailTiers.length;
   activeRooms = activeRooms || rooms;
   const mActEmail = activeRooms.filter(r=>r.splitType==='multi');
   const sActEmail  = activeRooms.filter(r=>r.splitType!=='multi');
@@ -2670,13 +2688,35 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
   const finNote=sub>0?`<p style="font-size:11px;color:#8a9bb0;margin:6px 0 0">
     Finance: ${fin.apr} over ${fin.term} — subsidy included in totals.${(()=>{
       const mo=fin.term==='Pay in 3'?3:parseInt(fin.term);
-      return ` Est. monthly: Essential £${(gB/mo).toFixed(0)} · Comfort £${(gM/mo).toFixed(0)} · Premium £${(gP/mo).toFixed(0)}/mo`;
+      return ' Est. monthly: ' + emailTiers.map(function(t){
+        return tierLabel(t) + ' \u00a3' + ((gT[t]||0)/mo).toFixed(0);
+      }).join(' \u00b7 ') + '/mo';
     })()}</p>`:'';
 
   // Selection buttons — stacked vertically for mobile
-  const btnBasic=selUrl(tierWire('Essential'));
-  const btnMid=selUrl(tierWire('Comfort'));
-  const btnPremium=selUrl(tierWire('Premium'));
+  // Price cards and accept buttons, one per offered tier.
+  const priceCards = emailTiers.map((t,i)=>{
+    const c = TIER_CARD[t] || TIER_CARD.Essential;
+    const gap = i ? '<td style="width:2%"></td>' : '';
+    return gap + '<td style="background:'+c.bg+';border-radius:6px;padding:14px;text-align:center;width:'+colW.toFixed(1)+'%;border:'+c.border+'">'
+      + '<div style="font-size:9px;font-weight:700;color:'+c.label+';margin-bottom:6px;letter-spacing:1.5px">'+tierLabel(t).toUpperCase()+'</div>'
+      + '<div style="font-size:'+(emailTiers.length>3?'20px':'24px')+';font-weight:900;color:'+c.price+'">\u00a3'+(gT[t]||0).toFixed(0)+'</div>'
+      + '<div style="margin-top:5px"><img src="https://raw.githubusercontent.com/akitaac/akita-commission/main/logos/'+(TIER_LOGO[t]||'Sensira.png')+'" height="28" style="display:block;margin:4px auto 0"></div>'
+      + '</td>';
+  }).join('');
+
+  const acceptButtons = emailTiers.map((t,i)=>{
+    const c = TIER_CARD[t] || TIER_CARD.Essential;
+    const dark = (c.price === '#fff');
+    const bg = dark ? c.bg : (t==='Comfort' ? '#E8612A' : '#fff');
+    const fg = (dark || t==='Comfort') ? '#fff' : '#1a2e4a';
+    const bd = (dark || t==='Comfort') ? 'none' : '2px solid #ddd';
+    const pad = i===0 ? '0 4px 0 0' : (i===emailTiers.length-1 ? '0 0 0 4px' : '0 4px');
+    return '<td style="padding:'+pad+'">'
+      + '<a href="'+selUrl(tierWire(t))+'" style="display:block;background:'+bg+';border:'+bd+';color:'+fg+';font-size:'+(emailTiers.length>3?'11px':'12px')+';font-weight:700;text-align:center;padding:13px 4px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">'
+      + tierLabel(t).toUpperCase()+'<br><span style="font-size:13px;font-weight:900">\u00a3'+(gT[t]||0).toFixed(0)+'</span></a></td>';
+  }).join('');
+
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f2f5f9;font-family:Arial,sans-serif">
@@ -2721,26 +2761,10 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
     ${roomRows}${addonRows}
   </table>
 
-  <!-- ALL-IN TOTALS — stacked cards for mobile -->
+  <!-- ALL-IN TOTALS — one cell per tier, width scales with tier count -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px">
     <tr>
-      <td style="background:#f4f6f9;border-radius:6px;padding:14px;text-align:center;width:32%">
-        <div style="font-size:9px;font-weight:700;color:#888;margin-bottom:6px;letter-spacing:1.5px">ESSENTIAL</div>
-        <div style="font-size:24px;font-weight:900;color:#1a2e4a">£${gB.toFixed(0)}</div>
-        <div style="margin-top:5px"><img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Sensira.png" height="28" style="display:block;margin:4px auto 0"></div>
-      </td>
-      <td style="width:2%"></td>
-      <td style="background:#fff4ef;border-radius:6px;padding:14px;text-align:center;width:32%;border:1px solid #f0d5c8">
-        <div style="font-size:9px;font-weight:700;color:#E8612A;margin-bottom:6px;letter-spacing:1.5px">COMFORT</div>
-        <div style="font-size:24px;font-weight:900;color:#1a2e4a">£${gM.toFixed(0)}</div>
-        <div style="margin-top:5px"><img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/Zen.png" height="28" style="display:block;margin:4px auto 0"></div>
-      </td>
-      <td style="width:2%"></td>
-      <td style="background:#1a2e4a;border-radius:6px;padding:14px;text-align:center;width:32%">
-        <div style="font-size:9px;font-weight:700;color:#C5E8F5;margin-bottom:6px;letter-spacing:1.5px">PREMIUM</div>
-        <div style="font-size:24px;font-weight:900;color:#fff">£${gP.toFixed(0)}</div>
-        <div style="margin-top:5px"><img src="https://raw.githubusercontent.com/akitaac/akita-jobs/main/logos/LN.png" height="28" style="display:block;margin:4px auto 0"></div>
-      </td>
+      ${priceCards}
     </tr>
   </table>
   <p style="font-size:10px;color:#aaa;margin:0 0 22px">Supply &amp; installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
@@ -2752,15 +2776,7 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
     <p style="font-size:12px;color:#888;margin:0 0 14px;text-align:center">Tap your preferred option — we'll raise your quote straight away.</p>
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
-        <td style="padding:0 4px 0 0">
-          <a href="${btnBasic}" style="display:block;background:#fff;border:2px solid #ddd;color:#1a2e4a;font-size:12px;font-weight:700;text-align:center;padding:13px 6px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">ESSENTIAL<br><span style="font-size:13px;font-weight:900">£${gB.toFixed(0)}</span></a>
-        </td>
-        <td style="padding:0 4px">
-          <a href="${btnMid}" style="display:block;background:#E8612A;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:13px 6px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">COMFORT<br><span style="font-size:13px;font-weight:900">£${gM.toFixed(0)}</span></a>
-        </td>
-        <td style="padding:0 0 0 4px">
-          <a href="${btnPremium}" style="display:block;background:#1a2e4a;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:13px 6px;border-radius:6px;text-decoration:none;letter-spacing:0.5px">PREMIUM<br><span style="font-size:13px;font-weight:900">£${gP.toFixed(0)}</span></a>
-        </td>
+        ${acceptButtons}
       </tr>
     </table>
     <p style="font-size:10px;color:#aaa;margin:10px 0 0;text-align:center">Or reply to this email if you'd prefer to chat first.</p>
