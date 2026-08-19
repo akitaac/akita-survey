@@ -274,6 +274,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
     </div>
 
+    <div class="field" id="f-finish" style="display:none">
+      <label class="lbl">Unit finish <span style="text-transform:none;font-weight:400;color:var(--mid)">(Premium+ only)</span></label>
+      <select class="inp" id="unitFinish" onchange="setUnitFinish(this.value)" style="max-width:220px"></select>
+      <p class="hint" id="finish-note"></p>
+    </div>
+
     <div class="field" id="f-trunking">
       <label class="lbl">Trunking colour</label>
       <select class="inp" id="trunkingColour" onchange="setTrunkingColour(this.value)" style="max-width:220px">
@@ -1056,8 +1062,48 @@ let rooms=[], addons=[], rIdx=0, aIdx=0;
 let generalPhotos=[];
 let fin={apr:'',term:'',sub:0};
 let discount={mode:'£', value:0};
-let survey={power:'Yes — existing spur',existing:'No',installType:'single',trunkingColour:'Black',surveyType:'site'};
+let survey={power:'Yes — existing spur',existing:'No',installType:'single',trunkingColour:'Black',surveyType:'site',unitFinish:'White'};
 function setTrunkingColour(v){ survey.trunkingColour=v; }
+
+// Unit finish. Only Emura is sold in more than one colour, and each costs a
+// different amount, so the choice has to be made before the quote is priced.
+function setUnitFinish(v){
+  survey.unitFinish = v;
+  if(typeof AkitaPrices !== 'undefined') AkitaPrices.setFinish(v);
+  renderFinishNote();
+  if(typeof refreshTierPrices === 'function') refreshTierPrices();
+  if(typeof updateTotals === 'function') updateTotals();
+}
+function renderFinishNote(){
+  const note = document.getElementById('finish-note');
+  if(!note) return;
+  const base = 'White';
+  if(!survey.unitFinish || survey.unitFinish === base){
+    note.textContent = 'White is the standard finish, included in the price.';
+    return;
+  }
+  // Show what the upgrade actually costs on the size in front of the surveyor.
+  const r = rooms.find(x=>x.kwRec);
+  if(r && typeof getUnit === 'function' && UNITS.PremiumPlus){
+    const now = getUnit('PremiumPlus', r.kwRec);
+    note.textContent = survey.unitFinish + ' finish \u2014 ' + now.model + ' at \u00a3' + Math.round(now.price);
+  } else {
+    note.textContent = survey.unitFinish + ' finish selected.';
+  }
+}
+// Populate from whatever finishes the price list actually offers.
+function refreshFinishOptions(){
+  const wrap = document.getElementById('f-finish');
+  const sel  = document.getElementById('unitFinish');
+  if(!wrap || !sel || typeof AkitaPrices === 'undefined') return;
+  const list = AkitaPrices.finishes();
+  if(list.length < 2){ wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  const current = survey.unitFinish || 'White';
+  sel.innerHTML = list.map(f => '<option value="'+f+'"'+(f===current?' selected':'')+'>'+f+'</option>').join('');
+  AkitaPrices.setFinish(current);
+  renderFinishNote();
+}
 
 // Survey recovery: charged ONCE per job, never per unit. Falls back to the
 // published rates if the price loader has not answered yet.
@@ -2313,6 +2359,7 @@ async function sendQuote(){
     'Consumer unit: '+consumer,
     'Wall type: '+wall,
     'Trunking colour: '+(survey.trunkingColour||'Black'),
+    'Unit finish: '+(survey.unitFinish||'White'),
     '',
     '=== PRICING ===',
     'Essential Package: £'+gB.toFixed(2),
@@ -2376,6 +2423,7 @@ async function sendQuote(){
       mount:r.mount, route:r.route, access:r.access,
     }))),
     trunking_colour: (survey.trunkingColour||'Black'),
+    unit_finish: (survey.unitFinish||'White'),
     system_type: jobTypeLabel,
     room_summary: activeRooms.map(function(r,i){ return 'Room '+(i+1)+': '+r.type+' ('+r.kwRec+'kW, '+(r.splitType==='multi'?'Multi-split':'Single split')+')'; }).join(' | '),
     essential_price_gbp: Number(gB.toFixed(2)),
@@ -2938,6 +2986,7 @@ renderGeneralPhotos();
 // hardcoded tables above if the endpoint is unreachable.
 AkitaPrices.load().then(function(st){
   console.log('[AkitaPrices] ' + AkitaPrices.label());
+  if(typeof refreshFinishOptions === 'function') refreshFinishOptions();
   var b = document.querySelector('.hdr-badge');
   if(b) b.title = AkitaPrices.label();
   if(rooms.length) rooms.forEach(function(r){ if(r.l&&r.w&&r.h) liveCalc(r.id); });
