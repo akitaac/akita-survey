@@ -2423,7 +2423,7 @@ async function sendQuote(){
     tiers_json:JSON.stringify(TIER_KEYS.map(function(k){
       var meta = (typeof AkitaPrices !== 'undefined') ? AkitaPrices.tierMeta(k) : {};
       return { key:k, wire:tierWire(k), label:tierLabel(k),
-               range_name:meta.range_name||'', blurb:meta.blurb||'',
+               range_name:meta.range_name||'', blurb:meta.blurb||'', spec_line:meta.spec_line||'',
                total:'\u00a3'+(g[k]||0).toFixed(2),
                order_summary:buildOrderSummary(k,(g[k]||0),ref,first+' '+last,addr,activeRooms) };
     })),
