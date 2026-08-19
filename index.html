@@ -3067,9 +3067,18 @@ function clearAllSaved(){
     set('ad4', parts[3] || '');
   }
 })();
-// Start on job type screen
-document.getElementById('pjt').classList.add('on');
-document.getElementById('p0').classList.remove('on');
+// Start on the job type screen. That screen was taken out of the markup but
+// this was left behind, and the uncaught null aborted the whole boot sequence
+// three lines above AkitaPrices.load() - which is why the tool ran on the
+// hardcoded price tables, with no Premium+, no default room and no add-ons.
+// Guarded so it still works if the screen ever comes back; #p0 is already
+// class="page on" in the HTML, so the fallback needs no extra work.
+var pjtEl = document.getElementById('pjt');
+if (pjtEl) {
+  pjtEl.classList.add('on');
+  var p0El = document.getElementById('p0');
+  if (p0El) p0El.classList.remove('on');
+}
 addRoom();
 addons=[{id:aIdx++,desc:'Condensate pump',price:''},{id:aIdx++,desc:'Electrician / sparky (day rate)',price:''}];
 renderAddons();
