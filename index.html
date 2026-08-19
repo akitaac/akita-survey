@@ -50,6 +50,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .err input,.err select{border-color:#e74c3c}
+.err .pill{border-color:#e74c3c}
 .errmsg{color:#e74c3c;font-size:11px;margin-top:4px;display:none}
 .err .errmsg{display:block}
 .hint{font-size:11px;color:var(--mid);margin-top:5px;line-height:1.4}
@@ -551,9 +552,7 @@ const MS_MARKUP       = 1.20;
 function msPickHead(tier, kwRec){
   var heads = MS_HEADS[tier];
   var match = heads.find(function(h){ return h.kw >= (kwRec||2.0); });
-  var head = match || heads[heads.length-1];
-  head._undersized = !match && kwRec > heads[heads.length-1].kw;
-  return head;
+  return match || heads[heads.length-1];
 }
 
 function msHeadUndersized(tier, kwRec){
@@ -565,7 +564,14 @@ function msPickOutdoor(tier, numRooms, totalKw){
   var outdoors = MS_OUTDOOR_BY_TIER[tier];
   // Sort by ports then maxKw, pick smallest that fits
   var sorted = outdoors.slice().sort(function(a,b){ return a.ports-b.ports || a.maxKw-b.maxKw; });
-  return sorted.find(function(ou){ return ou.ports >= numRooms && ou.maxKw >= totalKw; }) || outdoors[outdoors.length-1];
+  var match = sorted.find(function(ou){ return ou.ports >= numRooms && ou.maxKw >= totalKw; });
+  if(match) return match;
+  // Nothing listed fits. Fall back to the biggest unit that at least has enough
+  // ports; if no listed unit has enough ports, the biggest overall (the panel
+  // flags the shortfall). Sorted asc by ports then maxKw, so last = biggest.
+  var pool = sorted.filter(function(ou){ return ou.ports >= numRooms; });
+  if(!pool.length) pool = sorted;
+  return pool[pool.length-1];
 }
 
 function msHeadPrice(head){ return head.sell || (head.net * MS_MARKUP); }
@@ -632,7 +638,13 @@ function unitUndersized(tier,kw){ const l=UNITS[tier]; return kw > l[l.length-1]
 
 // ── kW calculation ───────────────────────────────────────
 function calcKw(r){
-  let kw = r.l * r.w * r.h * 0.068;
+  // Base rate 0.050 kW/m3 = 120 W/m2 of floor at a 2.4m ceiling.
+  // Calibrated Aug 2026 against published W/m2 guidance for temperate-climate
+  // residential (60-90 W/m2 + 10-20% peak allowance), held above that band to
+  // cover winter heating duty (capacity derates at low ambient) and older UK
+  // housing stock. Rounding up to the next unit size IS the peak allowance --
+  // do not pad twice. Was 0.068 (163 W/m2).
+  let kw = r.l * r.w * r.h * 0.050;
   if(r.type==='Kitchen')       kw*=1.20;
   if(r.type==='Conservatory')  kw*=1.30;
   if(r.type==='Open Plan')     kw*=1.10;
@@ -645,7 +657,10 @@ function calcKw(r){
   if(r.conds.includes('top_floor')) kw*=1.15;
   if(r.conds.includes('high_ceil')) kw*=1.08;
   const sizes=[2.0,2.5,3.5,4.2,5.0,6.0,7.1];
-  return sizes.find(s=>s>=kw)||7.1;
+  // Past the biggest single unit we sell, return the TRUE requirement (1dp) instead
+  // of silently clamping to 7.1. The clamp pinned every large room at 7.1kW and made
+  // the "Undersized" warning unreachable on the Basic tier (7.1 > 7.1 is false).
+  return sizes.find(s=>s>=kw) || Math.round(kw*10)/10;
 }
 
 function pipeCost(r,tier){
@@ -721,6 +736,19 @@ function validateP0(){
 function validateP1(){
   if(!rooms.length){ addRoom(); return false; }
   if(rooms.find(r=>!r.l||!r.w||!r.h)){ alert('Please enter dimensions for all rooms.'); return false; }
+  // Orientation is required — it drives the kW sizing, so no silent default.
+  let missing=null;
+  rooms.forEach(r=>{
+    const f=document.getElementById('orient-f-'+r.id);
+    const bad=!r.orient;
+    if(f) f.classList.toggle('err',bad);
+    if(bad && missing===null) missing=r;
+  });
+  if(missing){
+    document.getElementById('orient-f-'+missing.id)?.scrollIntoView({behavior:'smooth',block:'center'});
+    alert('Please set the orientation for every room \u2014 it affects the kW sizing.');
+    return false;
+  }
   return true;
 }
 
@@ -735,7 +763,7 @@ function pickPill(field, val, el){
 // ── Rooms ────────────────────────────────────────────────
 function addRoom(){
   rooms.push({id:rIdx++,type:'Bedroom',l:0,w:0,h:2.4,
-              orient:'south',conds:[],kwRec:0,extraPipe:0,loftPipe:0,fittings:{},
+              orient:'',conds:[],kwRec:0,extraPipe:0,loftPipe:0,fittings:{},
               pos:'Wall mounted — high level',floor:'Ground floor',
               outdoor:'Rear garden — ground',mount:'Feet on ground',
               route:'External trunking — straight run',access:'None',
@@ -781,6 +809,7 @@ function saveRooms(){
 function setOrient(id,v){
   const r=rooms.find(r=>r.id===id); if(!r) return;
   r.orient=v;
+  document.getElementById('orient-f-'+id)?.classList.remove('err');
   document.querySelectorAll('.op-'+id).forEach(el=>{
     el.classList.toggle('on',el.dataset.v===v);
   });
@@ -800,13 +829,15 @@ function liveCalc(id){
   const l=parseFloat(document.getElementById('rl-'+id)?.value)||r.l;
   const w=parseFloat(document.getElementById('rw-'+id)?.value)||r.w;
   const h=parseFloat(document.getElementById('rh-'+id)?.value)||r.h;
+  const t=document.getElementById('rt-'+id)?.value;
+  if(t) r.type=t;
   r.l=l; r.w=w; r.h=h;
   r.kwRec=l>0&&w>0&&h>0?calcKw(r):0;
   const el=document.getElementById('kwr-'+id);
   if(!el) return;
   el.innerHTML=r.kwRec>0?
     `<div class="kw-result"><div class="kw-val">${r.kwRec}kW</div>
-     <div class="kw-info">Recommended<span>${l}×${w}×${h}m = ${(l*w*h).toFixed(1)}m³${r.conds.length?' · '+r.conds.length+' factor(s) applied':''}</span></div></div>`:
+     <div class="kw-info">Recommended<span>${l}×${w}×${h}m = ${(l*w*h).toFixed(1)}m³${r.conds.length?' · '+r.conds.length+' factor(s) applied':''}${!r.orient?' · ⚠ set orientation':''}</span></div></div>`:
     `<p class="hint" style="margin-top:8px">Enter dimensions to see recommendation</p>`;
 }
 
@@ -858,11 +889,12 @@ function renderRooms(){
           <input type="number" id="rh-${r.id}" value="${r.h||2.4}" placeholder="2.4" min="1.5" max="6" step="0.1" oninput="liveCalc(${r.id})"></div>
       </div>
 
-      <div class="field">
-        <label class="lbl">Orientation <span style="text-transform:none;font-weight:400;color:var(--mid)">(affects kW calc)</span></label>
+      <div class="field" id="orient-f-${r.id}">
+        <label class="lbl">Orientation <span style="text-transform:none;font-weight:400;color:var(--orange)">*required — affects kW calc</span></label>
         <div class="pills">
           ${ORIENTS.map(o=>`<div class="pill op-${r.id}${r.orient===o.v?' on':''}" data-v="${o.v}" onclick="setOrient(${r.id},'${o.v}')">${o.l}</div>`).join('')}
         </div>
+        <div class="errmsg">Pick the direction this room faces</div>
       </div>
 
       <div class="field">
@@ -1068,12 +1100,15 @@ function buildMsOutdoorPanel(multiRooms){
     var tbg = {Essential:'#f4f6f9',Comfort:'#fff4ef',Premium:'#1a2e4a'}[tier];
     var ttc = {Essential:'#1a2e4a',Comfort:'#E8612A',Premium:'#C5E8F5'}[tier];
     var overload = ou.maxKw < totalKw;
+    var portShort = ou.ports < multiRooms.length;
     var isOverride = msOutdoorOverride[tier] !== null;
 
-    html += '<div style="padding:10px;margin-bottom:8px;background:#fff;border-radius:8px;border:1px solid '+(overload?'#e74c3c':isOverride?'#e67e22':'#dde3ea')+'">';
+    html += '<div style="padding:10px;margin-bottom:8px;background:#fff;border-radius:8px;border:1px solid '+((portShort||overload)?'#e74c3c':isOverride?'#e67e22':'#dde3ea')+'">';
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
     html += '<span style="background:'+tbg+';color:'+ttc+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">'+tier+'</span>';
-    if(overload){
+    if(portShort){
+      html += '<span style="color:#e74c3c;font-size:11px;font-weight:700">⚠ Only '+ou.ports+' ports for '+multiRooms.length+' rooms</span>';
+    } else if(overload){
       html += '<span style="color:#e74c3c;font-size:11px;font-weight:700">⚠ Overload — '+totalKw.toFixed(1)+'kW > '+ou.maxKw+'kW max</span>';
     } else if(isOverride){
       html += '<span style="color:#e67e22;font-size:11px;font-weight:600">✏ Overridden</span>';
@@ -2388,7 +2423,7 @@ function loadSnapshot(snap){
   // Rooms
   if(snap.rooms && snap.rooms.length){
     rooms = snap.rooms.map(r => Object.assign({
-      id:0,type:'Bedroom',l:0,w:0,h:2.4,orient:'south',conds:[],kwRec:0,
+      id:0,type:'Bedroom',l:0,w:0,h:2.4,orient:'',conds:[],kwRec:0,
       extraPipe:0,loftPipe:0,fittings:{},pos:'Wall mounted — high level',
       floor:'Ground floor',outdoor:'Rear garden — ground',mount:'Feet on ground',
       route:'External trunking — straight run',access:'None'
