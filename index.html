@@ -886,6 +886,15 @@ var AkitaPrices = (function () {
     return out;
   }
 
+  /** Row from the tiers table for a tool tier key, e.g. range_name and blurb. */
+  function tierMeta(key){
+    var list = (state.raw && state.raw.tiers) || [];
+    for (var i = 0; i < list.length; i++) {
+      if (SINGLE_KEY[String(list[i].tier_id || '').toLowerCase()] === key) return list[i];
+    }
+    return {};
+  }
+
   /** Emura finish. Rebuilds the paired units at the new price. */
   function setFinish(f) {
     FINISH = f || 'White';
@@ -905,6 +914,7 @@ var AkitaPrices = (function () {
   return {
     load: load,
     label: label,
+    tierMeta: tierMeta,
     setFinish: setFinish,
     finish: finish,
     finishes: finishes,
@@ -2411,7 +2421,9 @@ async function sendQuote(){
     // Generic tier list - the report prefers this and falls back to the
     // basic_/mid_/premium_ keys below for quotes raised before it existed.
     tiers_json:JSON.stringify(TIER_KEYS.map(function(k){
+      var meta = (typeof AkitaPrices !== 'undefined') ? AkitaPrices.tierMeta(k) : {};
       return { key:k, wire:tierWire(k), label:tierLabel(k),
+               range_name:meta.range_name||'', blurb:meta.blurb||'',
                total:'\u00a3'+(g[k]||0).toFixed(2),
                order_summary:buildOrderSummary(k,(g[k]||0),ref,first+' '+last,addr,activeRooms) };
     })),
