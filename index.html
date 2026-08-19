@@ -1661,8 +1661,8 @@ function buildRoomCard(r, idx, type){
           · ${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW
         </span>
       </div>
-      <div class="tier-grid ${TIER_KEYS.length>3?'t4':''}">
-        ${TIER_KEYS.map(tier=>{
+      <div class="tier-grid ${quotableTierKeys().length>3?'t4':''}">
+        ${quotableTierKeys().map(tier=>{
           const tc=tcClass(tier);
           const tb=tbClass(tier);
           const tLabel=tierLabel(tier);
