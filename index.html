@@ -732,6 +732,11 @@ var AkitaPrices = (function () {
     });
 
     Object.keys(singles).forEach(function (k) { singles[k].sort(byKw); });
+    // A tier that has its own single-split outdoors (Emura: FTXJ + RXJ) sells
+    // those heads as complete single splits, not as multi-split heads. Drop
+    // them from the multi list or the tool offers a head with no outdoor.
+    Object.keys(splitOutdoors).forEach(function (k) { delete heads[k]; });
+
     Object.keys(heads).forEach(function (k) { heads[k].sort(byKw); });
     Object.keys(outdoors).forEach(function (k) {
       outdoors[k].sort(function (a, b) { return a.ports - b.ports || a.maxKw - b.maxKw; });
@@ -934,16 +939,37 @@ var AkitaPrices = (function () {
 
 function msPickHead(tier, kwRec){
   var heads = MS_HEADS[tier];
+  if(!heads || !heads.length) return null;   // tier has no multi-split range
   var match = heads.find(function(h){ return h.kw >= (kwRec||2.0); });
   return match || heads[heads.length-1];
 }
 
 function msHeadUndersized(tier, kwRec){
   var heads = MS_HEADS[tier];
+  if(!heads || !heads.length) return false;
   return kwRec > heads[heads.length-1].kw;
 }
 
+// A tier can only be quoted as a multi-split if it has both indoor heads and
+// outdoor units loaded. Emura/Premium+ has heads but no multi outdoors yet, so
+// it is single-split only until the MXM range is switched on.
+function tierSupportsMulti(tier){
+  var ou = (typeof MS_OUTDOOR_BY_TIER !== 'undefined') && MS_OUTDOOR_BY_TIER[tier];
+  var hd = (typeof MS_HEADS !== 'undefined') && MS_HEADS[tier];
+  return !!(ou && ou.length && hd && hd.length);
+}
+function multiTierKeys(){ return TIER_KEYS.filter(tierSupportsMulti); }
+// Tiers that can actually be quoted for the current job. A tier without a
+// multi-split range cannot cover a job that contains a multi room, so it is
+// dropped rather than shown at zero.
+function quotableTierKeys(rs){
+  var list = rs || rooms || [];
+  var hasMulti = list.some(function(r){ return r.splitType === 'multi'; });
+  return hasMulti ? multiTierKeys() : TIER_KEYS.slice();
+}
+
 function msPickOutdoor(tier, numRooms, totalKw){
+  if(!tierSupportsMulti(tier)) return null;
   var outdoors = MS_OUTDOOR_BY_TIER[tier];
   // Sort by ports then maxKw, pick smallest that fits
   var sorted = outdoors.slice().sort(function(a,b){ return a.ports-b.ports || a.maxKw-b.maxKw; });
@@ -963,6 +989,7 @@ function msTierTotal(tier, rooms){
   var heads = rooms.map(function(r){ return msPickHead(tier, r.kwRec||2.0); });
   var totalHeadKw = heads.reduce(function(s,h){ return s+h.kw; }, 0);
   var ou = msOutdoorOverride[tier] || msPickOutdoor(tier, rooms.length, totalHeadKw);
+  if(!ou) return { tier:tier, total:0, heads:heads, outdoor:null, unavailable:true };
   var indoorCost = heads.reduce(function(s,h,i){
     // Both Daikin MXF and Mitsubishi MXZ outdoor units = 3/8" & 5/8" (confirmed from Akita_Price_Reference spreadsheet)
     var msCfg = '3/8" & 5/8"';
@@ -980,12 +1007,17 @@ function msTierTotal(tier, rooms){
 }
 
 function msTotalPrice(rooms){
-  if(!rooms.length){ const z={}; TIER_KEYS.forEach(k=>z[k]={total:0}); return z; }
-  return {
-    Essential: msTierTotal('Essential', rooms),
-    Comfort:   msTierTotal('Comfort',   rooms),
-    Premium:   msTierTotal('Premium',   rooms),
-  };
+  const out = {};
+  TIER_KEYS.forEach(function(k){
+    if(!rooms.length || !tierSupportsMulti(k)){
+      // Always return an entry for every tier so callers never hit undefined.
+      out[k] = { tier:k, total:0, heads:[], outdoor:null,
+                 unavailable: rooms.length ? true : false };
+    } else {
+      out[k] = msTierTotal(k, rooms);
+    }
+  });
+  return out;
 }
 
 
@@ -1543,7 +1575,7 @@ function buildMsOutdoorPanel(multiRooms){
   html += '<div class="card-hdr" style="color:#1a2e4a"><span class="ci">🔗</span> Multi-Split Outdoor Units</div>';
   html += '<p style="font-size:11px;color:#8a9bb0;margin-bottom:10px">Auto-selected based on '+multiRooms.length+' rooms · '+totalKw.toFixed(1)+'kW total. Override below if needed.</p>';
 
-  TIER_KEYS.forEach(function(tier){
+  multiTierKeys().forEach(function(tier){
     var t = mst[tier];
     var ou = t.outdoor;
     var ouList = tier==='Essential' ? MS_DAIKIN_OUTDOORS : MS_MITSUBISHI_OUTDOORS;
@@ -1676,8 +1708,8 @@ function buildRoomCard(r, idx, type){
           · ${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW
         </span>
       </div>
-      <div class="tier-grid ${TIER_KEYS.length>3?'t4':''}">
-        ${TIER_KEYS.map(tier=>{
+      <div class="tier-grid ${multiTierKeys().length>3?'t4':''}">
+        ${multiTierKeys().map(tier=>{
           const head = msPickHead(tier, r.kwRec||2.0);
           const hp = msHeadPrice(head) * vm;
           const tc = tcClass(tier);
@@ -1765,7 +1797,7 @@ function updateTotals(){
 
   // Grand totals — single by tier + multi by tier + extras
   const g = {};
-  TIER_KEYS.forEach(function(k){
+  quotableTierKeys().forEach(function(k){
     g[k] = applyDiscount(((st[k]||0) + (mt[k]||0) + ext) * (1+sub) * vm);
   });
   const gB = g.Essential, gM = g.Comfort, gP = g.Premium;
@@ -1778,7 +1810,7 @@ function updateTotals(){
   }
   const bar = document.getElementById('total-bar');
   if(bar){
-    bar.innerHTML = TIER_KEYS.map(function(k){
+    bar.innerHTML = quotableTierKeys().map(function(k){
       return '<div class="tb-row"><span>' + tierLabel(k) + ' Package all-in</span>' +
              '<b id="tb-' + TIER_SLUG[k] + '">' + f(g[k]) + '</b></div>';
     }).join('');
@@ -1823,6 +1855,7 @@ function calcProfit(tier, selRooms, totalRevenue){
   mRooms.forEach(r => {
     if(!r.kwRec) return;
     const head = msPickHead(tier, r.kwRec);
+    if(!head) return;                      // tier has no multi-split range
     equipmentNet += head.net || 0;
     materialsNet += 67.52 / 1.20;          // per indoor unit
   });
@@ -2014,7 +2047,7 @@ function updateReviewTotals(){
     const gBR= applyDiscount((stRev.Essential+mst.Essential.total/vm3+ext3)*(1+sub3)*vm3);
     const gMR= applyDiscount((stRev.Comfort+mst.Comfort.total/vm3+ext3)*(1+sub3)*vm3);
     const gPR= applyDiscount((stRev.Premium+mst.Premium.total/vm3+ext3)*(1+sub3)*vm3);
-    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+    document.getElementById('rv-totals').innerHTML = quotableTierKeys(sel).map(function(k){
         const total = applyDiscount(((stRev[k]||0)+((mst[k]&&mst[k].total)||0)/vm3+ext3)*(1+sub3)*vm3);
         const p = calcProfit(k, sel, total);
         return '<div class="tline"><span>'+tierLabel(k)+'</span><span>£'+total.toFixed(2)+
@@ -2028,7 +2061,7 @@ function updateReviewTotals(){
     const gB=applyDiscount((t.Essential+ext)*(1+sub)*vm), gM=applyDiscount((t.Comfort+ext)*(1+sub)*vm), gP=applyDiscount((t.Premium+ext)*(1+sub)*vm);
     const pB=calcProfit('Essential',sel,gB), pM=calcProfit('Comfort',sel,gM), pP=calcProfit('Premium',sel,gP);
     const note = treatAsSingle?' <span style="font-size:10px;color:#8a9bb0">(single split)</span>':'';
-    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+    document.getElementById('rv-totals').innerHTML = quotableTierKeys(sel).map(function(k){
       const total = applyDiscount(((t[k]||0)+ext)*(1+sub)*vm);
       const p = calcProfit(k, sel, total);
       return '<div class="tline"><span>'+tierLabel(k)+note+'</span><span>£'+total.toFixed(2)+
@@ -2104,7 +2137,7 @@ function buildReview(){
       gR[k] = applyDiscount(((stRev[k]||0) + ((mst[k]&&mst[k].total)||0)/vm + ext) * (1+sub) * vm);
     });
     // Outdoor unit lines per tier
-    const ouLines = TIER_KEYS.map(tier=>{
+    const ouLines = multiTierKeys().map(tier=>{
       const t = mst[tier];
       const tb = tbClass(tier);
       return `<div class="tline">
@@ -2145,8 +2178,8 @@ function buildReview(){
             <strong>🔗 Multi Room ${idx+1}: ${r.type}</strong>
             <span>${r.l}×${r.w}×${r.h}m · ${r.kwRec}kW</span>
           </div>
-          ${TIER_KEYS.map(tier=>{
-            const head=msPickHead(tier,r.kwRec||2.0);
+          ${multiTierKeys().map(tier=>{
+            const head = msPickHead(tier,r.kwRec||2.0);
             const hp=msHeadPrice(head)*vm;
             const tierKey=tier;
             const pc=pipeCost(r,tierKey);
@@ -2164,7 +2197,7 @@ function buildReview(){
             </div>`;
           }).join('')}
         </div>`).join('');
-    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+    document.getElementById('rv-totals').innerHTML = quotableTierKeys().map(function(k){
       const p = calcProfit(k, rooms, gR[k]);
       return '<div class="grand-line"><span>' + tierLabel(k) + ' all-in' + finNote + '</span><span>\u00a3' +
              gR[k].toFixed(2) + profitBadge(p.profit, p.margin) + '</span></div>';
@@ -2200,7 +2233,7 @@ function buildReview(){
     } else {
       TIER_KEYS.forEach(function(k){ g[k] = applyDiscount(((st[k]||0)+ext)*(1+sub)*vm); });
     }
-    document.getElementById('rv-totals').innerHTML = TIER_KEYS.map(function(k){
+    document.getElementById('rv-totals').innerHTML = quotableTierKeys().map(function(k){
       const p = calcProfit(k, rooms, g[k]);
       return '<div class="grand-line"><span>' + tierLabel(k) + ' Package all-in' + finNote + '</span><span>\u00a3' +
              g[k].toFixed(2) + profitBadge(p.profit, p.margin) + '</span></div>';
@@ -2364,7 +2397,10 @@ async function sendQuote(){
   const jobTypeLabel = isMixed ? 'MIXED INSTALL' : mActive.length>0 && !treatAsSingle ? 'MULTI-SPLIT' : 'SINGLE SPLIT';
   const ouLabel = (mActive.length>0 && !treatAsSingle) ? (function(){
     var t=msTotalPrice(mActive);
-    return 'Essential: '+t.Essential.outdoor.label+' | Comfort/Premium: '+t.Comfort.outdoor.label;
+    return multiTierKeys().map(function(k){
+      var ou = t[k] && t[k].outdoor;
+      return ou ? tierLabel(k)+': '+ou.label : '';
+    }).filter(Boolean).join(' | ');
   })() : '';
   const jobNotes = [
     '=== '+jobTypeLabel+' JOB ===',
@@ -2422,7 +2458,7 @@ async function sendQuote(){
     email_html:buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,activeRooms,treatAsSingle}),
     // Generic tier list - the report prefers this and falls back to the
     // basic_/mid_/premium_ keys below for quotes raised before it existed.
-    tiers_json:JSON.stringify(TIER_KEYS.map(function(k){
+    tiers_json:JSON.stringify(quotableTierKeys(activeRooms).map(function(k){
       var meta = (typeof AkitaPrices !== 'undefined') ? AkitaPrices.tierMeta(k) : {};
       return { key:k, wire:tierWire(k), label:tierLabel(k),
                range_name:meta.range_name||'', blurb:meta.blurb||'', spec_line:meta.spec_line||'',
@@ -2441,8 +2477,8 @@ async function sendQuote(){
         o[k]=u.make+' '+u.series+' '+u.kw+'kW'+(unitUndersized(k,r.kwRec||0)?' \u26a0 Undersized':'');
       }); return o; })(),
       head_units:(function(){ const o={}; TIER_KEYS.forEach(function(k){
-        if(!MS_HEADS[k]) return;
         const h=msPickHead(k,r.kwRec||2.0);
+        if(!h) return;                       // tier has no multi-split range
         o[k]=h.label||h.model||'';
       }); return o; })(),
       tier_prices:(function(){ const o={}; TIER_KEYS.forEach(function(k){
@@ -2575,8 +2611,9 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
   var roomRows;
   if(effectiveJobType==='multi'){
     const mstEmail = msTotalPrice(activeRooms);
-    const ouLine = TIER_KEYS.map(tier=>{
-      const ou = mstEmail[tier].outdoor;
+    const ouLine = multiTierKeys().map(tier=>{
+      const ou = mstEmail[tier] && mstEmail[tier].outdoor;
+      if(!ou) return '';
       const tbg = (TIER_SWATCH[tier]||TIER_SWATCH.Essential).bg;
       const ttc = (TIER_SWATCH[tier]||TIER_SWATCH.Essential).fg;
       return `<tr style="background:#f8fafc"><td colspan="3" style="padding:8px 14px;border-top:1px solid #eef0f3">
@@ -2585,13 +2622,13 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
       </td></tr>`;
     }).join('');
     roomRows = ouLine + activeRooms.map((r,i)=>{
-      const tierBlocks=TIER_KEYS.map(tier=>{
+      const tierBlocks=multiTierKeys().map(tier=>{
         const head=msPickHead(tier,r.kwRec||2.0);
         const tierKey=tier;
         const pc=pipeCost(r,tierKey);
         const hp=msHeadPrice(head)*vatMult();
-        const tbg={'Essential':'#f4f6f9','Comfort':'#fff4ef','Premium':'#1a2e4a'}[tier];
-        const ttc={'Essential':'#1a2e4a','Comfort':'#E8612A','Premium':'#C5E8F5'}[tier];
+        const tbg=(TIER_SWATCH[tier]||TIER_SWATCH.Essential).bg;
+        const ttc=(TIER_SWATCH[tier]||TIER_SWATCH.Essential).fg;
         const tl=tierLabel(tier).toUpperCase();
         return `<tr style="border-bottom:1px solid #eef0f3">
           <td style="padding:8px 14px;width:30%"><span style="background:${tbg};color:${ttc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:0.5px">${tl}</span></td>
@@ -2799,8 +2836,8 @@ function buildMsRooms(){
     var html = '<div class="card">';
     html += '<div class="card-hdr"><span class="ci">❄️</span> Room '+(idx+1)+': '+r.type;
     html += '<span style="color:var(--mid);font-weight:400;font-size:12px;margin-left:4px">· '+r.l+'×'+r.w+'×'+r.h+'m · '+r.kwRec+'kW</span></div>';
-    html += '<div class="tier-grid ' + (TIER_KEYS.length>3?'t4':'') + '">';
-    TIER_KEYS.forEach(function(tier){
+    html += '<div class="tier-grid ' + (multiTierKeys().length>3?'t4':'') + '">';
+    multiTierKeys().forEach(function(tier){
       var head = msPickHead(tier, r.kwRec);
       var hp = msHeadPrice(head) * vatMult();
       var tc = tcClass(tier);
@@ -2831,8 +2868,9 @@ function updateMsTotals(){
   if(!rooms.length) return;
   var totals = msTotalPrice(rooms);
   var f = function(n){ return '£'+n.toFixed(2); };
-  TIER_KEYS.forEach(function(tier){
+  multiTierKeys().forEach(function(tier){
     var t = totals[tier];
+    if(!t || !t.outdoor) return;
     var ouEl = document.getElementById('ms-ou-'+tier.toLowerCase());
     var totEl = document.getElementById('ms-tb-'+tier.toLowerCase());
     if(ouEl) ouEl.textContent = t.outdoor.label+' · £'+Math.round(t.outdoor.price*vatMult());
@@ -2842,7 +2880,7 @@ function updateMsTotals(){
 
 function refreshMsHeadPrices(){
   rooms.forEach(function(r){
-    TIER_KEYS.forEach(function(tier){
+    multiTierKeys().forEach(function(tier){
       var el = document.getElementById('ms-tp-'+r.id+'-'+tier);
       if(!el) return;
       var head = msPickHead(tier, r.kwRec||2.0);
