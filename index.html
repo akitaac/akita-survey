@@ -455,7 +455,7 @@ const SELECTION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/23936589/ujsmbyr
 const SURVEY_REPORT_SCRIPT = 'https://script.google.com/macros/s/AKfycbwPZPZCl1emzTgsLeGv3ns-i1f_gt8fmOoh6JCt0D35o_v4BJVuNzHwK9dNcHfAxEaF/exec';
 
 // ── Unit data ────────────────────────────────────────────
-const UNITS = {
+let UNITS = {
   Basic: [
     {kw:2.0,price:1175, net:380.78, make:'Daikin',     series:'Sensira',    model:'FTXF20F + RXF20F'},
     {kw:2.5,price:1225, net:408.43, make:'Daikin',     series:'Sensira',    model:'FTXF25F + RXF25F'},
@@ -479,13 +479,13 @@ const UNITS = {
 };
 
 // Pipe cost per extra metre (inc 20% markup) — pipe + drain + CY cable + trunking + clips
-const PIPE_PM = {'1/4" & 3/8"':15.89,'1/4" & 1/2"':17.07,'1/4" & 5/8"':19.37,'3/8" & 5/8"':21.50};
+let PIPE_PM = {'1/4" & 3/8"':15.89,'1/4" & 1/2"':17.07,'1/4" & 5/8"':19.37,'3/8" & 5/8"':21.50};
 // Loft pipe rates — pipe + lagging only, no trunking/clips/cable (inc 20% markup)
-const LOFT_PIPE_PM = {'1/4" & 3/8"':7.54,'1/4" & 1/2"':8.71,'1/4" & 5/8"':11.02,'3/8" & 5/8"':12.53};
+let LOFT_PIPE_PM = {'1/4" & 3/8"':7.54,'1/4" & 1/2"':8.71,'1/4" & 5/8"':11.02,'3/8" & 5/8"':12.53};
 
 // Inaba Denko trunking fittings (ex VAT, Kooltech prices)
 // [description, code, p75, p100]
-const FITTINGS = [
+let FITTINGS = [
   ['Straight Joint',     'SJ',   3.97,  5.49],
   ['Flat 90° Bend',      'SK',  10.05, 13.01],
   ['Flat 45° Bend',      'SKF', 10.73, 22.59],  // 100mm price est. from retail — verify vs Kooltech trade
@@ -499,14 +499,14 @@ const FITTINGS = [
 
 // ── Multi-split data ─────────────────────────────────────────
 // Outdoor units by brand
-const MS_DAIKIN_OUTDOORS = [
+let MS_DAIKIN_OUTDOORS = [
   {label:'Daikin 2MXF40A 2-port 4.0kW',  model:'2MXF40A',  ports:2, maxKw:4.0, price:950,  net:657.28, pipeConfig:'3/8" & 5/8"'},
   {label:'Daikin 2MXF50A 2-port 5.0kW',  model:'2MXF50A',  ports:2, maxKw:5.0, price:1000, net:697.57, pipeConfig:'3/8" & 5/8"'},
   {label:'Daikin 3MXF52A 3-port 5.2kW',  model:'3MXF52A9', ports:3, maxKw:5.2, price:1350, net:960.64, pipeConfig:'3/8" & 5/8"'},
   {label:'Daikin 3MXF68A 3-port 6.8kW',  model:'3MXF68A9', ports:3, maxKw:6.8, price:1475, net:1062.55,pipeConfig:'3/8" & 5/8"'},
 ];
 
-const MS_MITSUBISHI_OUTDOORS = [
+let MS_MITSUBISHI_OUTDOORS = [
   {label:'Mitsubishi MXZ-2F33 2-port 3.3kW', model:'MXZ-2F33VF4', ports:2, maxKw:3.3, price:975,  net:676.00, pipeConfig:'3/8" & 5/8"'},
   {label:'Mitsubishi MXZ-2F42 2-port 4.2kW', model:'MXZ-2F42VF4', ports:2, maxKw:4.2, price:1100, net:799.00, pipeConfig:'3/8" & 5/8"'},
   {label:'Mitsubishi MXZ-2F53 2-port 5.3kW', model:'MXZ-2F53VF4', ports:2, maxKw:5.3, price:1275, net:956.00, pipeConfig:'3/8" & 5/8"'},
@@ -517,7 +517,7 @@ const MS_MITSUBISHI_OUTDOORS = [
 
 // Indoor heads — sell price per head (inc labour, kit, margin)
 // Each head = 1 full day install so £400 labour + overhead + margin built in
-const MS_HEADS = {
+let MS_HEADS = {
   Essential: [
     {kw:2.0, label:'Daikin CTXF 2.0kW', model:'CTXF20F',  net:117.71, sell:800},
     {kw:2.5, label:'Daikin CTXF 2.5kW', model:'CTXF25F',  net:133.51, sell:850},
@@ -539,7 +539,7 @@ const MS_HEADS = {
   ],
 };
 
-const MS_OUTDOOR_BY_TIER = {
+let MS_OUTDOOR_BY_TIER = {
   Essential: MS_DAIKIN_OUTDOORS,
   Comfort:   MS_MITSUBISHI_OUTDOORS,
   Premium:   MS_MITSUBISHI_OUTDOORS,
@@ -548,6 +548,257 @@ const MS_OUTDOOR_BY_TIER = {
 const MS_INDOOR_KIT   = 67.52;
 const MS_EXTRA_LABOUR = 400.00;
 const MS_MARKUP       = 1.20;
+
+/* ===== live price loader (see Akita/Price-DB/price-loader.js) ===== */
+/* ==================================================================
+   Akita price loader
+   ------------------------------------------------------------------
+   Pulls the live price list and rebuilds the tool's data structures.
+   Survives a dead signal: live -> localStorage -> baked-in fallback.
+
+   INSTALL (survey tool index.html):
+     1. Change these to `let` so the loader can replace them:
+          let UNITS, MS_HEADS, MS_DAIKIN_OUTDOORS, MS_MITSUBISHI_OUTDOORS,
+              MS_OUTDOOR_BY_TIER, PIPE_PM, LOFT_PIPE_PM, FITTINGS;
+        (they are currently `const`)
+     2. Paste this file in a <script> AFTER those declarations.
+     3. Set PRICE_API below to the deployed /exec URL.
+     4. Call  AkitaPrices.load()  on page load. It never throws.
+     5. Stamp every saved quote with  AkitaPrices.version.
+     6. Add AkitaPrices.jobLevelCosts(hasMulti(), survey.surveyType).total
+        ONCE to the job total. It carries the survey recovery for the type
+        actually done (site GBP 75 / virtual GBP 40 / none GBP 0) and, on
+        multi jobs, the fixed outdoor kit (GBP 60.19). Neither is per unit.
+   ================================================================== */
+
+var AkitaPrices = (function () {
+
+  var PRICE_API   = 'https://script.google.com/macros/s/AKfycbys9A5uBUryKW3-3JyHqJkTMZpPRO441SsgGs33GOGoe-xDYmPo7LVdJFKFU6SLrt396w/exec';
+  var CACHE_KEY   = 'akita_prices_v1';
+  var MAX_AGE_MS  = 1000 * 60 * 60 * 12;   // refetch if cache older than 12h
+  var TIMEOUT_MS  = 8000;
+
+  // Transition bridge: database tier ids -> the tool's existing keys.
+  // Delete once the tool speaks one tier vocabulary.
+  var SINGLE_KEY = { essential: 'Basic',     comfort: 'Mid',     premium: 'Premium', premium_plus: 'PremiumPlus' };
+  var MULTI_KEY  = { essential: 'Essential', comfort: 'Comfort', premium: 'Premium', premium_plus: 'PremiumPlus' };
+
+  // Customer-facing labels. 'PremiumPlus' is the internal key (no + in an
+  // object key that gets used in CSS class names); the label is what shows.
+  var TIER_LABEL = { Basic: 'Essential', Mid: 'Comfort', Premium: 'Premium', PremiumPlus: 'Premium+' };
+
+  var state = { version: 0, source: 'none', published_at: '', loadedAt: null, raw: null };
+
+  function num(v, dflt) {
+    var n = parseFloat(v);
+    return isFinite(n) ? n : (dflt === undefined ? 0 : dflt);
+  }
+
+  function byKw(a, b) { return a.kw - b.kw; }
+
+  /* ---- turn the API payload into the shapes the tool already uses ---- */
+  function apply(p) {
+    if (!p || !p.products) return false;
+
+    var singles = {}, heads = {}, outdoors = {};
+
+    p.products.forEach(function (r) {
+      var tier = String(r.tier_id || '').toLowerCase();
+      var kw   = num(r.kw);
+
+      if (r.type === 'single') {
+        var k = SINGLE_KEY[tier]; if (!k) return;
+        (singles[k] = singles[k] || []).push({
+          kw: kw,
+          price:  num(r.sell_price),
+          net:    num(r.net_price),
+          make:   String(r.make || ''),
+          series: String(r.series || ''),
+          model:  String(r.sku || '')
+        });
+      } else if (r.type === 'indoor') {
+        var mk = MULTI_KEY[tier]; if (!mk) return;
+        (heads[mk] = heads[mk] || []).push({
+          kw: kw,
+          label: String(r.make || '') + ' ' + String(r.series || '') + ' ' + kw + 'kW',
+          model: String(r.sku || ''),
+          net:   num(r.net_price),
+          sell:  num(r.sell_price)
+        });
+      } else if (r.type === 'outdoor_multi') {
+        var make = String(r.make || 'Other');
+        (outdoors[make] = outdoors[make] || []).push({
+          label: make + ' ' + String(r.sku || '') + ' ' + num(r.ports) + '-port ' + kw + 'kW',
+          model: String(r.sku || ''),
+          ports: num(r.ports),
+          maxKw: kw,
+          price: num(r.sell_price) || Math.round(num(r.net_price) * num(p.rates && p.rates.markup_pct, 0.2) + num(r.net_price)),
+          net:   num(r.net_price),
+          pipeConfig: String(r.pipe_config || '3/8" & 5/8"')
+        });
+      }
+    });
+
+    Object.keys(singles).forEach(function (k) { singles[k].sort(byKw); });
+    Object.keys(heads).forEach(function (k) { heads[k].sort(byKw); });
+    Object.keys(outdoors).forEach(function (k) {
+      outdoors[k].sort(function (a, b) { return a.ports - b.ports || a.maxKw - b.maxKw; });
+    });
+
+    // Only replace what actually arrived -- a partial payload must not
+    // blank out a tier and silently drop it off the quote.
+    if (Object.keys(singles).length) UNITS = singles;
+    if (Object.keys(heads).length)   MS_HEADS = heads;
+    if (outdoors['Daikin'])          MS_DAIKIN_OUTDOORS = outdoors['Daikin'];
+    if (outdoors['Mitsubishi'])      MS_MITSUBISHI_OUTDOORS = outdoors['Mitsubishi'];
+    if (typeof MS_OUTDOOR_BY_TIER !== 'undefined') {
+      MS_OUTDOOR_BY_TIER = {
+        Essential: MS_DAIKIN_OUTDOORS,
+        Comfort:   MS_MITSUBISHI_OUTDOORS,
+        Premium:   MS_MITSUBISHI_OUTDOORS
+      };
+    }
+
+    if (p.install_kits && p.install_kits.length) {
+      var pipe = {}, loft = {};
+      p.install_kits.forEach(function (k) {
+        var cfg = String(k.pipe_config || '');
+        if (!cfg) return;
+        pipe[cfg] = num(k.extra_pipe_rate_pm);
+        loft[cfg] = num(k.loft_pipe_rate_pm);
+      });
+      if (Object.keys(pipe).length) { PIPE_PM = pipe; LOFT_PIPE_PM = loft; }
+    }
+
+    if (p.fittings && p.fittings.length) {
+      FITTINGS = p.fittings.map(function (f) {
+        return [String(f.name || ''), String(f.code || ''), num(f.price_75), num(f.price_100)];
+      });
+    }
+
+    state.version      = num(p.version);
+    state.published_at = String(p.published_at || '');
+    state.raw          = p;
+    return true;
+  }
+
+  /* ---- storage ---- */
+  function readCache() {
+    try {
+      var s = localStorage.getItem(CACHE_KEY);
+      return s ? JSON.parse(s) : null;
+    } catch (e) { return null; }
+  }
+  function writeCache(payload) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), payload: payload }));
+    } catch (e) { /* quota or private mode -- not fatal */ }
+  }
+
+  /* ---- fetch with a hard timeout ---- */
+  function fetchPrices() {
+    if (!PRICE_API) return Promise.reject(new Error('PRICE_API not set'));
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, TIMEOUT_MS);
+    var opts = ctrl ? { signal: ctrl.signal } : {};
+    return fetch(PRICE_API + '?action=prices&cb=' + Date.now(), opts)
+      .then(function (r) {
+        clearTimeout(timer);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (p) {
+        if (p && p.ok === false) throw new Error(p.error || 'endpoint error');
+        return p;
+      });
+  }
+
+  /* ---- the only function the tool calls ---- */
+  function load(opts) {
+    opts = opts || {};
+    var cached = readCache();
+    var fresh  = cached && (Date.now() - cached.at) < MAX_AGE_MS;
+
+    // Paint from cache first so the tool is usable immediately.
+    if (cached && cached.payload && apply(cached.payload)) {
+      state.source = 'cache';
+      state.loadedAt = cached.at;
+    }
+
+    if (fresh && !opts.force) {
+      return Promise.resolve(state);
+    }
+
+    return fetchPrices()
+      .then(function (p) {
+        if (apply(p)) {
+          writeCache(p);
+          state.source = 'live';
+          state.loadedAt = Date.now();
+        }
+        return state;
+      })
+      .catch(function (err) {
+        // Live failed. Cache already applied above if we had one;
+        // otherwise the hardcoded constants in index.html stand.
+        state.lastError = String(err && err.message || err);
+        if (state.source === 'none') state.source = 'builtin';
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('[AkitaPrices] live fetch failed, using ' + state.source + ':', state.lastError);
+        }
+        return state;
+      });
+  }
+
+  /** Human-readable badge for the survey header, e.g. "prices v3 (live)". */
+  function label() {
+    if (state.source === 'builtin') return 'prices: built-in (offline)';
+    return 'prices v' + state.version + ' (' + state.source + ')';
+  }
+
+  /** Survey types offered, e.g. site / virtual / none. */
+  function surveyTypes() {
+    return (state.raw && state.raw.survey_types) || [];
+  }
+
+  /** What one survey of this type recovers. ONCE per job, not per unit.
+      Flat -- the 20% is a MATERIALS markup and this is time. */
+  function surveyRecovery(surveyType) {
+    var list = surveyTypes();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].survey_type) === String(surveyType)) return num(list[i].recovery_charge, 0);
+    }
+    return 0;
+  }
+
+  /** Job-level extras: survey recovery for the type actually done, plus the
+      multi fixed outdoor kit if any room is multi-split. Both ONCE PER JOB. */
+  function jobLevelCosts(hasMultiSplit, surveyType) {
+    var st = surveyType || 'site';
+    var out = { survey_type: st, survey_recovery: surveyRecovery(st), multi_fixed_outdoor: 0 };
+    if (hasMultiSplit && state.raw && state.raw.multi_kit) {
+      out.multi_fixed_outdoor = num(state.raw.multi_kit.fixed_outdoor_cost, 0);
+    }
+    out.total = out.survey_recovery + out.multi_fixed_outdoor;
+    return out;
+  }
+
+  return {
+    load: load,
+    label: label,
+    tierLabel: function (k) { return TIER_LABEL[k] || k; },
+    surveyTypes: surveyTypes,
+    surveyRecovery: surveyRecovery,
+    jobLevelCosts: jobLevelCosts,
+    get version()   { return state.version; },
+    get source()    { return state.source; },
+    get published() { return state.published_at; },
+    get state()     { return state; },
+    setEndpoint: function (url) { PRICE_API = url; }
+  };
+})();
+
+/* ===== end price loader ===== */
 
 function msPickHead(tier, kwRec){
   var heads = MS_HEADS[tier];
@@ -2527,6 +2778,17 @@ addRoom();
 addons=[{id:aIdx++,desc:'Condensate pump',price:''},{id:aIdx++,desc:'Electrician / sparky (day rate)',price:''}];
 renderAddons();
 renderGeneralPhotos();
+
+// Live prices. Never blocks: paints from cache first, falls back to the
+// hardcoded tables above if the endpoint is unreachable.
+AkitaPrices.load().then(function(st){
+  console.log('[AkitaPrices] ' + AkitaPrices.label());
+  var b = document.querySelector('.hdr-badge');
+  if(b) b.title = AkitaPrices.label();
+  if(rooms.length) rooms.forEach(function(r){ if(r.l&&r.w&&r.h) liveCalc(r.id); });
+  if(typeof refreshTierPrices === 'function') refreshTierPrices();
+  if(typeof updateTotals === 'function') updateTotals();
+}).catch(function(e){ console.warn('[AkitaPrices] load failed', e); });
 </script>
 </body>
 </html>
