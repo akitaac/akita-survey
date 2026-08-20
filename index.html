@@ -2746,6 +2746,32 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
       + '</td>';
   }).join('');
 
+  // "What is the difference?" - the question customers ask every time.
+  // Same copy as the hosted quote, straight from the tiers tab of the price
+  // sheet, so it is Glenn's to edit in one place.
+  const diffRows = emailTiers.map(t=>{
+    const meta = (typeof AkitaPrices !== 'undefined') ? (AkitaPrices.tierMeta(t)||{}) : {};
+    if(!meta.blurb && !meta.range_name) return '';
+    const c = TIER_CARD[t] || TIER_CARD.Essential;
+    return '<tr><td style="padding:10px 0;border-top:1px solid #f4f6f9">'
+      + '<div style="margin-bottom:4px">'
+        + '<span style="background:'+c.bg+';color:'+c.label+';font-size:9px;font-weight:700;padding:3px 9px;border-radius:3px;letter-spacing:1px">'+tierLabel(t).toUpperCase()+'</span>'
+        + (meta.range_name ? '<span style="font-size:12px;font-weight:700;color:#1a2e4a;margin-left:8px">'+meta.range_name+'</span>' : '')
+      + '</div>'
+      + (meta.blurb ? '<div style="font-size:12px;color:#555;line-height:1.55">'+meta.blurb+'</div>' : '')
+      + (meta.spec_line ? '<div style="font-size:11px;color:#8a9bb0;line-height:1.5;margin-top:4px">'+meta.spec_line+'</div>' : '')
+      + '</td></tr>';
+  }).join('');
+  const diffBlock = diffRows
+    ? '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef0f3;border-radius:8px;margin-bottom:20px">'
+      + '<tr><td style="padding:16px 18px 4px">'
+        + '<p style="font-size:13px;font-weight:700;color:#1a2e4a;margin:0 0 4px">What is the difference?</p>'
+        + '<p style="font-size:11px;color:#888;margin:0;line-height:1.5">Every option is installed to the same standard by the same engineer, with the same warranty. What changes is the unit on your wall.</p>'
+      + '</td></tr>'
+      + '<tr><td style="padding:0 18px 14px"><table width="100%" cellpadding="0" cellspacing="0">'+diffRows+'</table></td></tr>'
+      + '</table>'
+    : '';
+
   const acceptButtons = emailTiers.map((t,i)=>{
     const c = TIER_CARD[t] || TIER_CARD.Essential;
     const dark = (c.price === '#fff');
@@ -2802,8 +2828,10 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
       ${priceCards}
     </tr>
   </table>
-  <p style="font-size:10px;color:#aaa;margin:0 0 22px">Supply &amp; installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
+  <p style="font-size:10px;color:#aaa;margin:0 0 18px">Supply &amp; installation · 12-month workmanship warranty · 5-year product warranty (annual service required) · No VAT on domestic installs</p>
   ${finNote}
+
+  ${diffBlock}
 
   <!-- SELECTION BUTTONS -->
   <div style="background:#f4f6f9;border-radius:8px;padding:18px 16px;margin-bottom:20px">
