@@ -651,6 +651,9 @@ var AkitaPrices = (function () {
     if (!p || !p.products) return false;
 
     var singles = {}, heads = {}, outdoors = {};
+    var outdoorsByTier = {};   // tier -> multi outdoors, so a tier with its OWN
+                               // multi range (Emura -> MXM) isn't handed another
+                               // tier's Daikin range (Sensira -> MXF).
     var splitOutdoors = {};   // tier -> kw -> outdoor row  (Emura RXJ)
     var splitHeads    = {};   // tier -> kw -> [head rows]  (Emura FTXJ)
 
@@ -682,6 +685,9 @@ var AkitaPrices = (function () {
             });
           }
         }
+        // Emura heads come in three finishes. Without this the multi picker would
+        // grab whichever colour happened to be first in the sheet.
+        if (r.finish && String(r.finish) !== FINISH) return;
         (heads[mk] = heads[mk] || []).push({
           kw: kw,
           label: String(r.make || '') + ' ' + String(r.series || '') + ' ' + kw + 'kW',
@@ -698,7 +704,8 @@ var AkitaPrices = (function () {
         };
       } else if (r.type === 'outdoor_multi') {
         var make = String(r.make || 'Other');
-        (outdoors[make] = outdoors[make] || []).push({
+        var otk = SINGLE_KEY[tier];
+        var moEntry = {
           label: make + ' ' + String(r.sku || '') + ' ' + num(r.ports) + '-port ' + kw + 'kW',
           model: String(r.sku || ''),
           ports: num(r.ports),
@@ -706,7 +713,13 @@ var AkitaPrices = (function () {
           price: num(r.sell_price) || Math.round(num(r.net_price) * num(p.rates && p.rates.markup_pct, 0.2) + num(r.net_price)),
           net:   num(r.net_price),
           pipeConfig: String(r.pipe_config || '3/8" & 5/8"')
-        });
+        };
+        // Essential/Comfort/Premium have always shared their maker's whole multi
+        // list. A tier with its OWN range (Emura -> MXM) must not leak into that,
+        // or Essential gets offered Emura outdoors at twice the cost.
+        var SHARED_MULTI = { Essential:1, Comfort:1, Premium:1 };
+        if (!otk || SHARED_MULTI[otk]) (outdoors[make] = outdoors[make] || []).push(moEntry);
+        if (otk) (outdoorsByTier[otk] = outdoorsByTier[otk] || []).push(moEntry);
       }
     });
 
@@ -743,7 +756,12 @@ var AkitaPrices = (function () {
     // A tier that has its own single-split outdoors (Emura: FTXJ + RXJ) sells
     // those heads as complete single splits, not as multi-split heads. Drop
     // them from the multi list or the tool offers a head with no outdoor.
-    Object.keys(splitOutdoors).forEach(function (k) { delete heads[k]; });
+    // Emura sells its FTXJ heads BOTH as complete single splits (with an RXJ) and
+    // as multi heads (on an MXM). Only drop a tier's multi heads when it has no
+    // multi outdoor at all, or the tool would offer a head with nothing to run it.
+    Object.keys(splitOutdoors).forEach(function (k) {
+      if (!(outdoorsByTier[k] && outdoorsByTier[k].length)) delete heads[k];
+    });
 
     Object.keys(heads).forEach(function (k) { heads[k].sort(byKw); });
     Object.keys(outdoors).forEach(function (k) {
@@ -762,6 +780,14 @@ var AkitaPrices = (function () {
         Comfort:   MS_MITSUBISHI_OUTDOORS,
         Premium:   MS_MITSUBISHI_OUTDOORS
       };
+      // Any tier the sheet gives its own multi outdoors takes those instead.
+      // Inert until the MXM rows exist, so this is safe to ship ahead of them.
+      Object.keys(outdoorsByTier).forEach(function (k) {
+        var list = outdoorsByTier[k];
+        if (!list || !list.length) return;
+        list.sort(function (a, b) { return a.ports - b.ports || a.maxKw - b.maxKw; });
+        if (k === 'PremiumPlus') MS_OUTDOOR_BY_TIER[k] = list;
+      });
     }
 
     if (p.install_kits && p.install_kits.length) {
@@ -2551,7 +2577,17 @@ async function sendQuote(){
             pos:r.pos, floor:r.floor, outdoor:r.outdoor, mount:r.mount,
             route:r.route, access:r.access,
             extraPipe:r.extraPipe||0, loftPipe:r.loftPipe||0,
-            photos:r.photos||[]
+            photos:r.photos||[],
+            // The report reads d.rooms (NOT rooms_json) and calls roomUnit(r,tier),
+            // which needs these. Without them every room row fell back to an em-dash.
+            units:(function(){ const o={}; TIER_KEYS.forEach(function(k){
+              const u=getUnit(k,r.kwRec||2.5);
+              if(u) o[k]=u.make+' '+u.series+' '+u.kw+'kW';
+            }); return o; })(),
+            head_units:(function(){ const o={}; TIER_KEYS.forEach(function(k){
+              const h=msPickHead(k,r.kwRec||2.0);
+              if(h) o[k]=h.label||h.model||'';
+            }); return o; })()
           })),
           general_photos: generalPhotos,
           email_html: payload.email_html,
@@ -2755,7 +2791,7 @@ function buildEmail({first,last,addr,ref,date,ext,sub,fin,filled,notes,gB,gM,gP,
   <p style="font-size:15px;color:#1a2e4a;margin:0 0 5px;font-weight:700">Dear ${first},</p>
   <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 20px">
     Thank you for having us visit <strong>${addr}</strong>.
-    Based on our survey we have prepared three options — tap a button below to confirm your choice and we will send your formal quote straight away.
+    Based on our survey we have prepared ${['','one option','two options','three options','four options','five options'][emailTiers.length]||(emailTiers.length+' options')} — tap a button below to confirm your choice and we will send your formal quote straight away.
   </p>
 
   <!-- ROOM BREAKDOWN TABLE -->
